@@ -1,53 +1,53 @@
-#Hardware
+#Hardware #
 ===============
 
-	##Overview
-	+++++++++++++
+	##Overview##
+
 	
-	##Speed Controller
+	##Speed Controller##
 
-	##Compass
+	##Compass##
 
-	##Ranger
+	##Ranger##
 
-	##LCD/keypad
+	##LCD/keypad##
 
-	##Accelerometer
+	##Accelerometer##
 
-	##Serial Bus
+	##Serial Bus##
 
-	##Pin Connections from Priority Table
+	##Pin Connections from Priority Table##
 
-#Software Description
+#Software Description#
 
-	##Overview
+	##Overview##
 
-	##Inititalization
+	##Inititalization##
 
-	##Use of PCA
+	##Use of PCA##
 
-	##Pulse Streams
+	##Pulse Streams##
 
-	##Setting the Crossbar
+	##Setting the Crossbar##
 
-	##I2C Read and Write
+	##I2C Read and Write##
 
-	##Use of I2C (SMB)
+	##Use of I2C (SMB)##
 
-	##Reading Analog Input, A/D results
+	##Reading Analog Input, A/D results##
 
-	##Keypad Input and LCD output
+	##Keypad Input and LCD output##
 
-	##Control loops
+	##Control loops##
 
-	##Timing
+	##Timing##
 
-#Results and Conculsions
+#Results and Conculsions#
 ============================
 	analysis of results, description of performance, what was learned,
 	problems and solutions
 
-#Code
+#Code#
 ```c
 #include <stdlib.h>
 #include <stdio.h>
