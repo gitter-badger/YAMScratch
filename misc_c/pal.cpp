@@ -11,16 +11,18 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		char pal[10];
+		char pal[181];
 		char rev[255];
-		char *foo,*foo2 = argv[1]; //pointer to the string pointer
-		char *bar = pal; //pointer to buffer
-		char *right = (rev+254);
+		char *qur = argv[1]; //pointer to the string pointer
+		char *foo = argv[1];
+		char * bar = pal; //pointer to buffer
+		char * right = (rev+254);
 		//bounds checking of input string
 		unsigned int size_input = 1; // use to track overflows of int
 		//we remeber to subtract off 1 later in the size comparison
-		while(*foo++ && size_input){size_input++;} //figure out how big the string is
-		if (size_input-1 < sizeof(pal))
+		while(*qur++ && size_input){printf("%x\n\r",(char *) qur);size_input++;} //figure out how big the string is
+		printf("size of input: %u\n\r",size_input);
+		if (--size_input < sizeof(pal))
 			{
 			//strcpy
 			*bar = *foo;
