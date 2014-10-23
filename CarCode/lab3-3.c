@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <c8051_SDCC.h>
 #include <i2c.h>
-#define GAIN 0.3
+#define GAIN 0.5
 #define TURN_LEFT(angle,source,lb)  (((source) - (int)(angle)*GAIN) < (lb)) ? (lb) : ((source) - (int)(angle)*GAIN); // turn left
 #define TURN_RIGHT(angle,source,rb)  (((source) + (int)(angle)*GAIN) > (rb)) ? (rb) : ((source) + (int)(angle)*GAIN); //turn right
 //-----------------------------------------------------------------------------
@@ -198,7 +198,7 @@ unsigned int read_compass(void){
 }
 void Compass_Steering (int actual, int desired){
     signed int angle =  actual - desired;
-    //printf("this is the angle we need to turn %d\n", angle);
+    printf("this is the angle we need to turn %d\n", angle);
     if (angle > 0)
     {
         if (angle > 1800)
@@ -224,7 +224,7 @@ void Compass_Steering (int actual, int desired){
             r = TURN_RIGHT(-angle,r,r6);
         }
     }
-    //printf("\rr: %u\n", r);
+    printf("\rr: %u\n", r);
     PCA0CP0 = 0xFFFF - r; //set the value of the pulse width we want to use
 }
 
