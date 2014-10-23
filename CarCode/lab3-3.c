@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <c8051_SDCC.h>
 #include <i2c.h>
-#define GAIN 3
-#define TURN_LEFT(angle,source,lb)  (((source) - (angle)*GAIN) < (lb)) ? (lb) : ((source) - (angle)*GAIN); // turn left
-#define TURN_RIGHT(angle,source,rb)  (((source) + (angle)*GAIN) > (rb)) ? (rb) : ((source) + (angle)*GAIN); //turn right
+#define GAIN 0.3
+#define TURN_LEFT(angle,source,lb)  (((source) - (int)(angle)*GAIN) < (lb)) ? (lb) : ((source) - (int)(angle)*GAIN); // turn left
+#define TURN_RIGHT(angle,source,rb)  (((source) + (int)(angle)*GAIN) > (rb)) ? (rb) : ((source) + (int)(angle)*GAIN); //turn right
 //-----------------------------------------------------------------------------
 // Function Prototypes
 //-----------------------------------------------------------------------------
@@ -49,9 +49,12 @@ void main(void)
         //Steering_Servo();
         if(h_counts%2){
             heading = read_compass();
+            
         }   
         if(!h_counts){
                 printf("\rThe Heading is: %u\n", heading); //print the heading
+				Compass_Steering(heading,desired_heading);
+				
             }
         
         //else{printf("\rthis is h_coutn %d\n",h_counts);}
@@ -194,8 +197,34 @@ unsigned int read_compass(void){
     return (unsigned int) d[0] << 8 | d[1]; //combine the two bytes into one value
 }
 void Compass_Steering (int actual, int desired){
-    signed int angle =  actual - desired
-    r = (angle > 0) ? ((angle > 180) ? (TURN_LEFT(angle-180,r,r1)): (TURN_RIGHT(angle,r,r6))) \
-     : ((angle < -180) ? (TURN_RIGHT(-(angle+180)),r,r6):(TURN_LEFT(-angle,r,r6))); 
+    signed int angle =  actual - desired;
+    //printf("this is the angle we need to turn %d\n", angle);
+    if (angle > 0)
+    {
+        if (angle > 1800)
+        {
+            r = TURN_RIGHT(angle-1800,r,r6);
+            
+        }
+        else
+        {
+            r = TURN_LEFT(angle,r,r1);
+        }
+
+    }
+    else
+    {
+        if (angle < -1800)
+        {
+            angle = -(angle + 1800);
+            r = TURN_LEFT(angle,r,r1);
+        }
+        else
+        {
+            r = TURN_RIGHT(-angle,r,r6);
+        }
+    }
+    //printf("\rr: %u\n", r);
+    PCA0CP0 = 0xFFFF - r; //set the value of the pulse width we want to use
 }
 
