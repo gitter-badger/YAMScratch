@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <c8051_SDCC.h>
 #include <i2c.h>
-
+#define GAIN 3
+#define TURN_LEFT(angle,source,lb)  (((source) - (angle)*GAIN) < (lb)) ? (lb) : ((source) - (angle)*GAIN); // turn left
+#define TURN_RIGHT(angle,source,rb)  (((source) + (angle)*GAIN) > (rb)) ? (rb) : ((source) + (angle)*GAIN); //turn right
 //-----------------------------------------------------------------------------
 // Function Prototypes
 //-----------------------------------------------------------------------------
@@ -193,27 +195,7 @@ unsigned int read_compass(void){
 }
 void Compass_Steering (int actual, int desired){
     signed int angle =  actual - desired
-    if (angle > 0)
-    {
-        if (angle > 180)
-         {
-            "turn left"
-        }
-        else 
-        {
-            "turn right"
-        }
-
-    }
-    else
-    {
-        if angle < -180
-        {
-            "turn right"
-        }
-        else
-        {
-            "turn left"
-        }
-    }
+    r = (angle > 0) ? ((angle > 180) ? (TURN_LEFT(angle-180,r,r1)): (TURN_RIGHT(angle,r,r6))) \
+     : ((angle < -180) ? (TURN_RIGHT(-(angle+180)),r,r6):(TURN_LEFT(-angle,r,r6))); 
 }
+
