@@ -13,6 +13,7 @@ void Steering_Servo(void);
 void PCA_ISR ( void ) __interrupt 9;
 void calibrate_steering(void);
 unsigned int read_compass(void);
+void Compass_Steering(int, int);
 //-----------------------------------------------------------------------------
 // Global Variables
 //-----------------------------------------------------------------------------
@@ -189,4 +190,30 @@ unsigned int read_compass(void){
     i2c_read_data(ad,2,d,2); //start at register 2 and read two bytes
     //printf("back");
     return (unsigned int) d[0] << 8 | d[1]; //combine the two bytes into one value
+}
+void Compass_Steering (int actual, int desired){
+    signed int angle =  actual - desired
+    if (angle > 0)
+    {
+        if (angle > 180)
+         {
+            "turn left"
+        }
+        else 
+        {
+            "turn right"
+        }
+
+    }
+    else
+    {
+        if angle < -180
+        {
+            "turn right"
+        }
+        else
+        {
+            "turn left"
+        }
+    }
 }
