@@ -19,9 +19,9 @@ void Compass_Steering(int, int);
 //-----------------------------------------------------------------------------
 // Global Variables
 //-----------------------------------------------------------------------------
-unsigned int r2;
-unsigned int r1;
-unsigned int r6;
+unsigned int r2; //center
+unsigned int r1; //left bound
+unsigned int r6; //right bound
 unsigned int r = 0;
 volatile char counts;
 volatile char h_counts = 0;
@@ -217,11 +217,11 @@ void Compass_Steering (int actual, int desired){
         if (angle < -1800)
         {
             angle = -(angle + 1800);
-            r = TURN_LEFT(angle,r,r1);
+            r = TURN_LEFT(angle,r2,r1);
         }
         else
         {
-            r = TURN_RIGHT(-angle,r,r6);
+            r = TURN_RIGHT(-angle,r2,r6);
         }
     }
     printf("\rr: %u\n", r);
