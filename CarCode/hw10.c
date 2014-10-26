@@ -12,11 +12,20 @@ void XBR0_Init();
 void Steering_Servo(void);
 void PCA_ISR ( void ) __interrupt 9;
 void calibrate_steering(void);
-unsigned int read_compass(void);
+typedef struct compass_data com_data; // typedef struct tag_name alias
+void read_compass(com_data *mydata);
+
+
+struct compass_data{
+    int heading;
+    char serial;
+    int zero;
+};
+
 //-----------------------------------------------------------------------------
 // Global Variables
 //-----------------------------------------------------------------------------
-unsigned int r2;
+unsigned int r2; 
 unsigned int r1;
 unsigned int r6;
 unsigned int r = 0;
@@ -29,6 +38,7 @@ void main(void)
 {
     int heading = 0; 
     int desired_heading = 900;
+    com_data foo;
     // initialize board
     Sys_Init();
     putchar(' '); //the quotes in this line may not format correctly
@@ -38,17 +48,20 @@ void main(void)
     SMB0CR = 0x93; // set the frequency of the i2c bus to 95.41 kHz
     ENSMB = 1; //enable the SMBus
     //print beginning message
-    printf("Embedded Control Steering Calibration\n");
-    calibrate_steering();
+    //printf("Embedded Control Steering Calibration\n");
+    //calibrate_steering();
     printf("\rCalibrated\n");
     while(1){
         
         //Steering_Servo();
         if(h_counts%2){
-            heading = read_compass();
+            read_compass(&foo);
         }   
         if(!h_counts){
-                printf("\rThe Heading is: %u\n", heading); //print the heading
+                printf("\rThe Heading is: %u\n", foo.heading); //print the heading
+                printf("\rThe Serial is: %u\n", foo.serial);
+                printf("\rShould be Zero: %u\n", foo.zero);
+                printf("\r====================================\n");
             }
         
         //else{printf("\rthis is h_coutn %d\n",h_counts);}
@@ -182,24 +195,17 @@ void calibrate_steering(void){
     }
 }
 
-typedef struct compass_data com_data; // typedef struct tag_name alias
-struct compass_data{
-    int heading;
-    char serial;
-    int zero;
-}
-unsigned int read_compass(void){
-    com_data mydata;
-    unsigned char ad = 0xC0; // address of  the compass
-    unsigned char d[4];
-    unsigned char dd[2]
-    //printf("deep");
-    i2c_read_data(ad,0,d,4); //start at register 2 and read two bytes
-    //printf("back");
-    i2c_read_data(ad,12,d,2);
-    mydata.heading = (unsigned int) d[2] << 8 | d[3];
-    mydata.serial = d[0];
-    mydata.zero = (unsigned int) dd[0] << 8 | dd[1]; 
 
-    return (unsigned int) d[2] << 8 | d[3]; //combine the two bytes into one value
+void read_compass(com_data *mydata){
+    unsigned char ad = 0xC0; // address of  the compass
+    unsigned char d[4]; //store register 0-3, we dont use register 1
+    unsigned char dd[2];
+    //printf("deep");
+    i2c_read_data(ad,0,d,4); //start at register 0 and read four bytes
+    //printf("back");
+    i2c_read_data(ad,12,dd,2);
+    mydata->heading = (unsigned int) d[2] << 8 | d[3]; //combine the two bytes into one value
+    mydata->serial = d[0];
+    mydata->zero = (unsigned int) dd[0] << 8 | dd[1];
+     
 }
