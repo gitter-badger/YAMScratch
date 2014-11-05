@@ -43,7 +43,7 @@ public class FindPalindromePhrase {
       quatz = line.replace(",","");//this is the stripped output to 
       quatz = quatz.replace(".","");
       quatz = quatz.replace(" ","");
-      quatz = quatz.replace("!","");
+      quatz = quatz.replace("!","");s
       quatz = quatz.replace("?","");
       quatz = quatz.replace(":","");
       
