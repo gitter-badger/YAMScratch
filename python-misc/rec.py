@@ -14,7 +14,7 @@ else:
 	#split the file on all characters
 	temp_line = []
 	for line in all_lines:
-		exp = re.compile(r'[\s\?,\.!]')
+		exp = re.compile(r'[\s\?,\.!\'"\(\)&\$\+%\-#]')
 		temp_line = re.split(exp, line)
 		new_list = []
 		for iii in temp_line:
