@@ -6,10 +6,15 @@
 
 #define MAX_DATA 512
 #define MAX_ROWS 100
+#define MAX_PASSENGERS 4
 
 struct Passenger_Data {
 	char *name;
 	char *next_of_kin;
+};
+
+const struct Passenger_Data PASSENGER_DEFAULT = {
+	.name = "Foo", .next_of_kin = "Uncle Bar"
 };
 
 struct Rocket {
@@ -89,21 +94,26 @@ void Database_close(struct Connection *connect)
 
 void Database_write(struct Connection *connect)
 {
-	rewind(connect->file);
+	rewind(connect->file); //go to beginning
 
 	int return_code = fwrite(connect->database, sizeof(struct Database),1, connect->file);
 	if(return_code != 1) die("Failed to write database");
 
 	return_code =  fflush(connect->file);
-	if(return_code != -1) die("Cannot flush database");
+	if(return_code == -1) die("Cannot flush database");
 }	
 
 void Database_create(struct Connection *conn)
 {
 	int i = 0;
+	int j = 0;
 	for(i = 0;i < MAX_ROWS; i++) {
 		//make a prototype to intialize it
 		struct Rocket rocket = {.id = i, .stages = 3, .cur_stage = 1};
+		//fill in the Passengers
+		for(j=0; j < MAX_PASSENGERS; j++){
+			rocket.manifest[j] = PASSENGER_DEFAULT;
+		}
 		//assign it
 		conn->database->flights[i] = rocket;
 	}
@@ -128,6 +138,11 @@ void Database_get(struct Connection *conn, int id)
 	struct Rocket *rock = &conn->database->flights[id];
 	if(rock->stages){
 		Rocket_print(rock);
+		int j = 0;
+		for(j=0; j < MAX_PASSENGERS; j++){
+			printf("Passenger: %s, Next of kin: %s",rock->manifest[j].name, rock->manifest[j].next_of_kin);
+		}
+
 	}
 	else{
 		die("Rocket ID not set");
@@ -155,6 +170,42 @@ void Database_list(struct Connection *conn)
 
 int main(int argc, char *argv[])
 {
+	if(argc < 3) die("USAGE: ex17 <dbfile> <action> [action params]");
+	char *filename = argv[1];
+	char action = argv[2][0];
+	struct Connection *conn = Database_open(filename,action);
+	int id = 0;
+
+	if(argc > 3) id = atoi(argv[3]);
+	if(id >= MAX_ROWS) die("There are not that many flights");
+
+	switch(action){
+		case 'c':
+			Database_create(conn);
+			Database_write(conn);
+			break;
+		case 'g':
+			if(argc != 4) die("Need an ID to get");
+			Database_get(conn,id);
+			break;
+		case 's':
+			if(argc != 7) die("Need ID, stages, cur_stage, alive");
+			Database_set(conn,id,atoi(argv[4]),atoi(argv[5]),atoi(argv[6]));
+			Database_write(conn);
+			break;
+		case 'd':
+			if(argc != 4) die("Need id to delete");
+			Database_delete(conn,id);
+			Database_write(conn);
+			break;
+		case 'l': 
+			Database_list(conn);
+			break;
+		default:
+			die("Invalid Action, only c=create, g=get, s=set, d=del, l=list");
+
+	}
+	Database_close(conn);
 
 	return 0;
 }
