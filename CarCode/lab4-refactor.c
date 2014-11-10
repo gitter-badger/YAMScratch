@@ -43,9 +43,9 @@ unsigned char setup_count = 25;
 
 
 // Steering
-xdata unsigned int center; //center
-xdata unsigned int left; //left bound
-xdata unsigned int right; //right bound
+unsigned int center; //center
+unsigned int left; //left bound
+unsigned int right; //right bound
 unsigned int r = 0;
 
 float glob_steer_gain = 0.2;
@@ -59,7 +59,7 @@ volatile int total_time;
 
 void main(void)
 {
-	int angle
+	int angle;
 	// initialize board
 	Sys_Init();
 	putchar(' ');
@@ -239,11 +239,11 @@ void LCD_prompts(void)
 			keypad = read_keypad();
 
 		while (read_keypad() != -1);
-		if (!(keypad - 49))
+		if ((keypad == 49))
 			desired_heading = 0;
-		else if (!(keypad - 50))
+		else if ((keypad == 50))
 			desired_heading = 900;
-		else if (!(keypad - 51))
+		else if ((keypad == 51))
 			desired_heading = 1800;
 		else 
 			desired_heading = 2700;
@@ -338,7 +338,7 @@ void LCD_calibrate_steering(void)
 	char keypad;
 	char *text;
 	char i;
-	int b[4] = {2765,2400,0,0};	//all the values to the center, we can adjust
+	int b[4] = {2765,2400,2865,3200};	//all the values to the center, we can adjust
 
 	/////////
 	setup_count = 20;
@@ -365,25 +365,25 @@ void LCD_calibrate_steering(void)
 			lcd_print("Calibrating %s \nValue: %d\n", text, b[i]);
 			
 			keypad = read_keypad();
-			while (keypad - 49 || keypad -50 || keypad - 51)
+			while (keypad == -1 || !(keypad == 49 || keypad  == 50 || keypad == 51))
 				keypad = read_keypad();
 
 			while (read_keypad() != -1);
 			
 			
-			if (!(keypad - 49))	//turning left is decrementing
+			if ((keypad == 49))	//turning left is decrementing
 			{
 				b[i] = b[i] - 20; //turning left is decrementing
 				PCA0CP0 = 0xFFFF - b[i];
 			}
             		
-			else if(!(keypad - 50))
+			else if((keypad == 50))
 			{
 				b[i] = b[i] + 20; //turn right is incrementing
 				PCA0CP0 = 0xFFFF - b[i];
 			}
             	
-			else if (!(keypad - 51))
+			else if ((keypad == 51))
 				break;          
         }
 	}
