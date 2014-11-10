@@ -1,4 +1,4 @@
-/* 	Names: Dustin Hoffman, Alex Malin, Isaiah Bell,Shenghao Lu
+/* 	Names: Dustin Hoffman, Alex Malin, Isaiah Bell, Shenghao Lu
 	Section: 1
 	Date: 10-30-2014
 	File name: Lab 4
@@ -14,74 +14,59 @@
 #define PW_MIN 2028
 #define PW_MAX 3502
 #define PW_NEUT 2765
+#define COMPASS_ADDRESS 0xC0
+#define RANGER_ADRESS 0xE0
 
 // Steering definitions
 #define TURN_LEFT(angle,source,lb,gain) (((source) - (int)(angle)*gain) < (lb)) ? (lb) : ((source) - (int)(angle)*gain); // turn left
 #define TURN_RIGHT(angle,source,rb,gain) (((source) + (int)(angle)*gain) > (rb)) ? (rb) : ((source) + (int)(angle)*gain); //turn right
 
 // Common prototypes
-void Port_Init(void);
-void PCA_Init (void);
-void XBR0_Init();
+void All_Init(void);
 void PCA_ISR ( void ) __interrupt 9;
-void I2C_Init(void);
-void ADC_Init(void);
-unsigned char ADC(void);
+
+unsigned char ADC_read(void);
 void LCD_prompts(void);
-void LCD_print(void);
+void Info_LCD_print(void);
 void LCD_calibrate_steering(void);
-
-
-// Ranging prototypes
-void ReadRanger(void);
-void Drive_Motor(void);
 
 __sbit __at 0xB6 SS;
 
 // Steering prototypes
-void Steering_Servo(void);
 unsigned int read_compass(void);
-void Compass_Steering(int, int);
 
 // Global variables
-// Ranging
-//unsigned char r_count = 0;
 unsigned char Data[2];
 unsigned int range = 0;
-unsigned char addr = 0xE0;	// I2C address of the ultrasonic sensor
-unsigned int MOTOR_PW = 0;
+unsigned int motor_pw = 0;
 unsigned char setup_count = 25;
 
 
 // Steering
-unsigned int center; //center
-unsigned int left; //left bound
-unsigned int right; //right bound
-unsigned char ad = 0xC0; // address of  the compass
+xdata unsigned int center; //center
+xdata unsigned int left; //left bound
+xdata unsigned int right; //right bound
 unsigned int r = 0;
-volatile char counts;
-volatile char h_counts = 0;
+
 float glob_steer_gain = 0.2;
 int desired_heading = 9000;
 unsigned int heading = 0;
-volatile char range_flag= 0;
 
+volatile char range_flag= 0;
+volatile char counts;
+volatile char h_counts = 0;
 volatile int total_time;
 
 void main(void)
 {
-	
+	int angle
 	// initialize board
 	Sys_Init();
 	putchar(' ');
-	Port_Init();
-	XBR0_Init();
-	PCA_Init();
-	I2C_Init();
-	ADC_Init();
+	All_Init();
 
-	MOTOR_PW = PW_NEUT;
-	PCA0CP2 = 0xFFFF - MOTOR_PW;
+	PCA0CP2 = 0xFFFF - PW_NEUT;
+
 	setup_count = 25;
 	while (setup_count);
 	
@@ -96,8 +81,41 @@ void main(void)
 	{
 		if(h_counts%2)
 		{
-			heading = read_compass();
-			Compass_Steering(heading,desired_heading);
+			//read the compass
+    		i2c_read_data(COMPASS_ADDRESS,2,Data,2); //start at register 2 and read two bytes
+    		heading = (unsigned int) Data[0] << 8 | Data[1]; //combine the two bytes into one value
+
+			{ //this is the compass steering
+			    angle =  heading - desired_heading;
+			    //printf("this is the angle we need to turn %d\n", angle);
+			    if (angle > 0)
+			    {
+			        if (angle > 1800)
+			        {
+			            r = TURN_RIGHT(3600-angle,center,right,glob_steer_gain);
+			            
+			        }
+			        else
+			        {
+			            r = TURN_LEFT(angle,center,left,glob_steer_gain);
+			        }
+
+			    }
+			    else
+			    {
+			        if (angle < -1800)
+			        {
+			            angle = (angle + 3600);
+			            r = TURN_LEFT(angle,center,left,glob_steer_gain);
+			        }
+			        else
+			        {
+			            r = TURN_RIGHT(-angle,center,right,glob_steer_gain);
+			        }
+			    }
+			    PCA0CP0 = 0xFFFF - r; //set the value of the pulse width we want to use
+			}
+
 			if(range < 55)
 			{
 				r = TURN_RIGHT(55-range,center,right,30);
@@ -108,18 +126,23 @@ void main(void)
 
 		if(!h_counts && range_flag)
 		{
-			//printf("\rThe Heading is: %u\n", heading); //print the heading
-			ReadRanger();
-			Drive_Motor();
+			{ 
+				//this is the read ranger function unrolled
+				i2c_read_data(RANGER_ADRESS, 2, Data, 2); // read two bytes, starting at reg 2
+				range = (((unsigned int)Data[0] << 8) | Data[1]);	
+				i2c_start();               	//initiate I2C transfer
+			    i2c_write(RANGER_ADRESS & ~0x01);   	//write the desired address to the bus
+			    i2c_write(0); 				//write the start register
+			    i2c_write_and_stop(0x51); 	//Stop transfer
+			}
+			PCA0CP2 = 0xFFFF - (SS ? PW_NEUT: PW_MAX);
 			printf("%d\t%d\t%d\r\n",(heading-desired_heading),r,total_time);
 			range_flag = 0;
 		}
 
 		if(!setup_count)
 		{
-			LCD_print();
-			//printf("Battery Level: %d%%\tCurrent Range: %d\tCurrent Heading: %d\r\n",(ADC()  * 100)/243, range, heading);
-			
+			Info_LCD_print();	
 		}
 
 	}
@@ -127,10 +150,9 @@ void main(void)
 
 // Port_Init -- Initialize the used pins
 
-void Port_Init(void)
+void All_Init(void)
 {
 	P0MDOUT |= 0x50; //set output pin for CEX0 in push-pull mode
-
 	// Port 1 (xx xx xx xx xx xx xx OD)
 	P1MDIN &=~0x01;		// Set P1.1 as an analog input
 	P1MDOUT &= ~0x01;	// Set P1.1 as a input port bit
@@ -139,25 +161,26 @@ void Port_Init(void)
 	P3MDOUT &= 0xBF; 	// set Port 3 input pins to open drain mode
 	P3 |= 0x40; 		// set Port 3 input pins to high impedance state
 
-}
+	// XBR0_Init -- Set up the crossbar
+	XBR0 = 0x25; 		//configure crossbar with UART, SPI, SMBus, and CEX channels as in worksheet
+	
+	// PCA_Init -- Set up Programmable Counter Array
+	PCA0MD = 0x81; 		/* Enable CF interrupt */
+	PCA0CPM2 = 0xC2; 	/* CCM2 in 16-bit compare mode */
+	PCA0CPM0 = 0xC2; 	/* CCM0 in 16-bit compare mode */
+	EIE1 |= 0x08; 		/* Enable PCA interrupt */
+	PCA0CN = 0x40; 		/* Enable PCA counter */
+	EA = 1; 			/* Enable global interrupts */
 
-// XBR0_Init -- Set up the crossbar
+	//I2C Init
+	SMB0CR = 0x93;		//Set the clock speed to 93kHZ
+	ENSMB = 1;			//enable the I2C bus
 
-void XBR0_Init(void)
-{
-	XBR0 = 0x25; //configure crossbar with UART, SPI, SMBus, and CEX channels as in worksheet
-}
-
-// PCA_Init -- Set up Programmable Counter Array
-
-void PCA_Init(void)
-{
-	PCA0MD = 0x81; /* Enable CF interrupt */
-	PCA0CPM2 = 0xC2; /* CCM2 in 16-bit compare mode */
-	PCA0CPM0 = 0xC2; /* CCM0 in 16-bit compare mode */
-	EIE1 |= 0x08; /* Enable PCA interrupt */
-	PCA0CN = 0x40; /* Enable PCA counter */
-	EA = 1; /* Enable global interrupts */
+	//ADC Init
+	REF0CN  = 0x03;		// Configure ADC1 to use VREF
+	ADC1CF |= 0x01;		// Set Gain to 1
+	ADC1CF &= ~0x02;	//
+	ADC1CN |= 0x80;		// Enables ADC1
 }
 
 // PCA_ISR -- Interrupt Service Routine for Programmable Counter Array Overflow Interrupt
@@ -179,131 +202,14 @@ void PCA_ISR ( void ) __interrupt 9
 	PCA0CN &= 0xC0; /* Handle other PCA interrupt sources */
 }
 
-// I2C_Init -- Initializes I2C
 
-void I2C_Init(void)
-{
-	SMB0CR = 0x93;
-	ENSMB = 1;
-}
-
-void ADC_Init(void)
-{
-	REF0CN  = 0x03;		// Configure ADC1 to use VREF
-	ADC1CF |= 0x01;		// Set Gain to 1
-	ADC1CF &= ~0x02;
-	ADC1CN |= 0x80;		// Enables ADC1
-}
-
-unsigned char ADC()
+unsigned char ADC_read()
 {
 	AMX1SL  = 0x01;			// Set the Port pin number Port 1.n, where n is a parameter passed to the function
 	ADC1CN &= ~0x20;		// Clear the flag from previous conversion
 	ADC1CN |= 0x10;			// Start A/D conversion
 	while ((ADC1CN & 0x20) == 0x00);		// Wait for Conversion to be complete
 	return ADC1;
-}
-
-// ReadRanger -- Read the range
-
-void ReadRanger(void)
-{
-	i2c_read_data(addr, 2, Data, 2); // read two bytes, starting at reg 2
-	range = (((unsigned int)Data[0] << 8) | Data[1]);	
-	Data[0] = 0x51;	// Write 0x51 to reg 0 of the ranger
-	i2c_write_data(addr, 0, Data, 1) ; // write one byte of data to reg 0 at addr to ping
-	//printf("\rRange: %u \n", range);
-}
-
-// Drive_Motor -- Drive the motor
-
-void Drive_Motor()
-{
-	//printf("\rPW: %u\n", MOTOR_PW);
-	/*
-	if (range <= 10)
-		MOTOR_PW = PW_MAX;	
-	else if ((range >= 40) && (range <= 50))
-		MOTOR_PW = PW_NEUT;	
-	else if (range >= 90)
-		MOTOR_PW = PW_MIN;
-	else if ((range > 10) && (range < 40)) // Map from max to neut
-		MOTOR_PW = PW_MAX - (PW_MAX - PW_NEUT) * (range - 10) / 30;
-	else
-		MOTOR_PW = PW_NEUT - (PW_NEUT - PW_MIN) * (range - 50) / 40; 
-	*/
-	MOTOR_PW = PW_MAX;
-	//printf("\rPW: %u \n", MOTOR_PW);
-
-	if (SS) 
-	{
-		MOTOR_PW = PW_NEUT;
-		//printf("turning it off\n");
-	}
-
-	PCA0CP2 = 0xFFFF - MOTOR_PW;
-}
-
-void Steering_Servo()
-{
-	char input;
-	//center the steering
-	//wait for a key to be pressed
-	input = getchar();
-
-	if(input == 'r') // single character input to increase the pulsewidth
-	{
-		r = ((r +10) > right) ? right : (r + 10); // check if less than pulsewidth minimum
-		// set SERVO_r to a minimum value
-	}
-	else if(input == 'l') // single character input to decrease the pulsewidth
-	{
-		r = ((r - 10) < left) ? left : (r - 10); // check if pulsewidth maximum exceeded
-		// set r to a maximum value
-	}
-
-	PCA0CP0 = 0xFFFF - r; //set the value of the pulse width we want to use
-}
-
-
-unsigned int read_compass(void)
-{
-    unsigned char d[2];
-    i2c_read_data(ad,2,d,2); //start at register 2 and read two bytes
-    return (unsigned int) d[0] << 8 | d[1]; //combine the two bytes into one value
-}
-
-void Compass_Steering (int actual, int desired)
-{
-    signed int angle =  actual - desired;
-    //printf("this is the angle we need to turn %d\n", angle);
-    if (angle > 0)
-    {
-        if (angle > 1800)
-        {
-            r = TURN_RIGHT(3600-angle,center,right,glob_steer_gain);
-            
-        }
-        else
-        {
-            r = TURN_LEFT(angle,center,left,glob_steer_gain);
-        }
-
-    }
-    else
-    {
-        if (angle < -1800)
-        {
-            angle = (angle + 3600);
-            r = TURN_LEFT(angle,center,left,glob_steer_gain);
-        }
-        else
-        {
-            r = TURN_RIGHT(-angle,center,right,glob_steer_gain);
-        }
-    }
-    //printf("\rr: %u\n", r);
-    PCA0CP0 = 0xFFFF - r; //set the value of the pulse width we want to use
 }
 
 void LCD_prompts(void)
@@ -333,13 +239,11 @@ void LCD_prompts(void)
 			keypad = read_keypad();
 
 		while (read_keypad() != -1);
-		if (keypad == 49)
-		//////////////////////////////
-
+		if (!(keypad - 49))
 			desired_heading = 0;
-		else if (keypad == 50)
+		else if (!(keypad - 50))
 			desired_heading = 900;
-		else if (keypad == 51)
+		else if (!(keypad - 51))
 			desired_heading = 1800;
 		else 
 			desired_heading = 2700;
@@ -421,20 +325,20 @@ void LCD_prompts(void)
 }	
 
 //////////////////
-void LCD_print(void)
+void Info_LCD_print(void)
 {
 	lcd_clear();
-	lcd_print("Battery Level: %d%%\nCurrent Range: %u\nCurrent Heading:%d",ADC()*100/243, range, heading);
+	lcd_print("Battery Level: %d%%\nCurrent Range: %u\nCurrent Heading:%d",ADC_read()*100/243, range, heading);
 	setup_count=20;
 }
 
 /////////////////
 void LCD_calibrate_steering(void)
 {
-	int keypad;
+	char keypad;
 	char *text;
 	char i;
-	int b[4] = {2765,0,0,0};	//all the values to the center, we can adjust
+	int b[4] = {2765,2400,0,0};	//all the values to the center, we can adjust
 
 	/////////
 	setup_count = 20;
@@ -452,39 +356,36 @@ void LCD_calibrate_steering(void)
 	PCA0CP0 = 0xFFFF - b[0]; // put it near the left set point
 	for (i=1; i<4;i++)
 	{
-		text = i == 1 ? "left" : (i == 2 ? "center" : "right");
-        	b[i] = b[i-1]; //start where we left off
+		text = (i-1) ? ((i-2) ? "right" : "center"): "left" ;
 
 		while(1)
 		{
+			PCA0CP0 = 0xFFFF - b[i]; // update the position
 			lcd_clear();
 			lcd_print("Calibrating %s \nValue: %d\n", text, b[i]);
 			
 			keypad = read_keypad();
-			while ((keypad == -1) || !(keypad == 49 || keypad == 50 || keypad == 51))
+			while (keypad - 49 || keypad -50 || keypad - 51)
 				keypad = read_keypad();
+
 			while (read_keypad() != -1);
 			
 			
-			if (keypad == 49)	//turning left is decrementing
+			if (!(keypad - 49))	//turning left is decrementing
 			{
 				b[i] = b[i] - 20; //turning left is decrementing
 				PCA0CP0 = 0xFFFF - b[i];
 			}
             		
-			else if(keypad == 50)
+			else if(!(keypad - 50))
 			{
 				b[i] = b[i] + 20; //turn right is incrementing
 				PCA0CP0 = 0xFFFF - b[i];
 			}
             	
-			else if (keypad == 51)
-				break;
-            
-			PCA0CP0 = 0xFFFF - b[i]; // update the position
+			else if (!(keypad - 51))
+				break;          
         }
-
-
 	}
 	 //now that we have finished up, assign the results to the globals
     left = b[1];
