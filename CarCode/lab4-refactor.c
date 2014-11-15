@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <c8051_SDCC.h>
-#include "i2c.h"
+#include <i2c.h>
 
 // Ranging definitions
 #define PW_MIN 2028
@@ -118,7 +118,7 @@ void main(void)
 
 			if(range < 55)
 			{
-				r = TURN_RIGHT(55-range,center,right,30);
+				r = TURN_RIGHT(55-range,center,right,60);
 				PCA0CP0 = 0xFFFF - r;
 			}
 			range_flag = 1;
@@ -135,8 +135,8 @@ void main(void)
 			    i2c_write(0); 				//write the start register
 			    i2c_write_and_stop(0x51); 	//Stop transfer
 			}
-			PCA0CP2 = 0xFFFF - (SS ? PW_NEUT: PW_MAX);
-			printf("%d\t%d\t%d\r\n",(heading-desired_heading),r,total_time);
+			PCA0CP2 = 0xFFFF - ((SS) ? PW_NEUT: PW_MAX);
+			printf("%d\t%d\t%d\t%d\r\n",(heading-desired_heading),r,total_time,range);
 			range_flag = 0;
 		}
 
@@ -172,15 +172,15 @@ void All_Init(void)
 	PCA0CN = 0x40; 		/* Enable PCA counter */
 	EA = 1; 			/* Enable global interrupts */
 
-	//I2C Init
-	SMB0CR = 0x93;		//Set the clock speed to 93kHZ
-	ENSMB = 1;			//enable the I2C bus
-
 	//ADC Init
 	REF0CN  = 0x03;		// Configure ADC1 to use VREF
 	ADC1CF |= 0x01;		// Set Gain to 1
 	ADC1CF &= ~0x02;	//
 	ADC1CN |= 0x80;		// Enables ADC1
+
+	//I2C Init
+	SMB0CR = 0x93;		//Set the clock speed to 93kHZ
+	ENSMB = 1;			//enable the I2C bus
 }
 
 // PCA_ISR -- Interrupt Service Routine for Programmable Counter Array Overflow Interrupt
@@ -338,7 +338,7 @@ void LCD_calibrate_steering(void)
 	char keypad;
 	char *text;
 	char i;
-	int b[4] = {2765,2400,2865,3200};	//all the values to the center, we can adjust
+	int b[4] = {2765,2020,2585,3120};	//all the values to the center, we can adjust
 
 	/////////
 	setup_count = 20;
