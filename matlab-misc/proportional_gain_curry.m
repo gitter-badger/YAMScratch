@@ -1,6 +1,5 @@
-function [pure_pro] = proportional_gain_curry()
+function [pure_pro] = proportional_gain_curry(root_dir)
     %handle the proportional gains
-    root_dir = 'Lab 4 data/';
     files = {'TrianglerefKp1_41.mat','TrianglerefKp1_91.mat',...
                 'TrianglerefKp2_41.mat','TrianglerefKp2_91.mat',...
                 'TrianglerefKp3_41.mat'};
