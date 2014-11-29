@@ -15,13 +15,11 @@ gen lag3_y = L3.ln_gdp
 gen lag4_y = L4.ln_gdp
 
 //generate an AR(1) model
-regress ln_gdp L.ln_gdp
+local ar1 = "delta_y D.lag1_y" 
+regress `ar1'
 eststo AR
-//generate pseudo out of sample for casts
-gen forecast_AR = _b[L1.]*L.ln_gdp + _b[_cons] if time > `=q(1990q1)'
 //null = unit root
-dfuller ln_gdp, regress trend
-//test
+dfuller delta_y, regress trend
 
 //test the QLR
 //create a dummy variable for the break period
@@ -35,17 +33,17 @@ forvalues test_quarter = `=q(1947q1)'/`=q(2009q4)' {
 	if `test_quarter' >= `=q(1955q1)'{
 		if `test_quarter' <= `=q(2002q4)' {
 			//group time 1
-			quietly regress ln_gdp L.ln_gdp if time < `test_quarter'
+			quietly regress `ar1' if time < `test_quarter'
 			scalar ess_1 = e(rss)
 			scalar N_1 = e(N)
 			//di scalar(N_1)
 			//group time 2 starts at test_quarter
-			quietly regress ln_gdp L.ln_gdp if time >= `test_quarter'
+			quietly regress `ar1' if time >= `test_quarter'
 			scalar ess_2 = e(rss)
 			scalar N_2 = e(N)
 			//di scalar(N_2)
 			//overall regression
-			quietly regress ln_gdp L.ln_gdp
+			quietly regress `ar1'
 			scalar ess_c = e(rss)
 			//calculate the chow statistic
 			scalar temp_chow = ((ess_c - (ess_1+ess_2))/k)/((ess_1 + ess_2)/(N_1 + N_2 - 2*k))
@@ -71,16 +69,13 @@ subtitle("Test of Break Between Q1:1955 and Q4:2002") ///
 legend(label(1 "Chow Statistic")) ///
 ytitle("") xtitle("Time") ///
 text(4.5 -40 "1% Level") text(2.8 -40 "5% Level") ///
-text(`=scalar(max_chow)+.5' `=scalar(max_f_time)+15' "Q3:1958")
-
-
-
+text(`=scalar(max_chow)+.5' `=scalar(max_f_time)+15' "Q1:2001")
 
 //ADL(1,4) model for delta Yt using lags of delta Rt
 local r_lags "D.RealGDP L.D.RealGDP L2.D.RealGDP L3.D.RealGDP"
 local adl "D.ln_gdp D.L.ln_gdp `r_lags'"
 regress `adl'
-eststo ADL
+eststo ADL_total
 
 //test the QLR
 //create a dummy variable for the break period
@@ -114,6 +109,10 @@ forvalues test_quarter = `=q(1947q1)'/`=q(2009q4)' {
 	}
 	scalar last_date = `test_quarter'
 }
+//use the right side of break version of the model for forecasting
+regress `adl' if time >= max_f_time
+eststo ADL
+
 // b_F_01 = 3.0940
 // b_F_05 = 2.2515
 gen dummy_time_ex = max_f_time
@@ -130,12 +129,35 @@ text(`=scalar(max_chow)+5' `=scalar(max_f_time)+15' "Q2:1966")
 
 
 //forecasts
+gen buff1 = .
 forecast create AR_cast, replace
-forecast estimates AR, names(_ln_GDP)
+forecast estimates AR, names(_delta_GDP)
 forecast solve, prefix(AR_) begin(tq(1990q1)) end(tq(2009q4))
 
+gen buff2 = .
+
 forecast create ADL_cast, replace
-forecast estimates ADL, names(_delta_GDP)
+forecast estimates ADL, names(_delta2_GDP)
 forecast solve, prefix(ADL_) begin(tq(1990q1)) end(tq(2009q4))
 
+gen buff3 = .
 gen naive_est = (LD.ln_gdp + L2D.ln_gdp + L3D.ln_gdp + L4D.ln_gdp)/4 if time >= tq(1990q1)
+
+gen sq_err_AR = (AR__delta_GDP - delta_y)^2 if time >= tq(1990q1)
+gen sq_err_ADL = (ADL__delta2_GDP - delta_y)^2 if time >= tq(1990q1)
+gen sq_err_NAIVE = (naive_est - delta_y)^2 if time >= tq(1990q1)
+
+scalar time_forecasted = tq(2009q4)-tq(1990q1)+1
+
+quietly summarize sq_err_AR
+local ar_RMSFE = sqrt(r(sum)/time_forecasted)
+di `ar_RMSFE'
+
+quietly summarize sq_err_ADL
+local adl_RMSFE = sqrt(r(sum)/time_forecasted)
+di `adl_RMSFE'
+
+quietly summarize sq_err_NAIVE
+local naive_RMSFE = sqrt(r(sum)/time_forecasted)
+di `naive_RMSFE'
+
