@@ -5,6 +5,10 @@ gen time = yq(Year,Quarter)
 tsset time,quarterly
 gen ln_gdp = log(RealGDP)
 gen delta_y = D.ln_gdp
+gen delta_r = D.RealGDP
+summarize
+//twoway (line delta_y time) ,name(graph3,replace)
+
 gen lag1_y = L.ln_gdp
 gen lag2_y = L2.ln_gdp
 gen lag3_y = L3.ln_gdp
@@ -13,8 +17,9 @@ gen lag4_y = L4.ln_gdp
 //generate an AR(1) model
 regress ln_gdp L.ln_gdp
 eststo AR
-
-//null = 
+//generate pseudo out of sample for casts
+gen forecast_AR = _b[L1.]*L.ln_gdp + _b[_cons] if time > `=q(1990q1)'
+//null = unit root
 dfuller ln_gdp, regress trend
 //test
 
@@ -122,3 +127,15 @@ legend(label(1 "Chow Statistic")) ///
 ytitle("") xtitle("Time") ///
 text(7 -40 "1% Level") ///
 text(`=scalar(max_chow)+5' `=scalar(max_f_time)+15' "Q2:1966")
+
+
+//forecasts
+forecast create AR_cast, replace
+forecast estimates AR, names(_ln_GDP)
+forecast solve, prefix(AR_) begin(tq(1990q1)) end(tq(2009q4))
+
+forecast create ADL_cast, replace
+forecast estimates ADL, names(_delta_GDP)
+forecast solve, prefix(ADL_) begin(tq(1990q1)) end(tq(2009q4))
+
+gen naive_est = (LD.ln_gdp + L2D.ln_gdp + L3D.ln_gdp + L4D.ln_gdp)/4 if time >= tq(1990q1)
