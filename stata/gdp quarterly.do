@@ -16,7 +16,7 @@ gen lag4_y = L4.ln_gdp
 
 //generate an AR(1) model
 local ar1 = "delta_y D.lag1_y" 
-regress `ar1'
+regress `ar1', vce(robust)
 eststo AR
 //null = unit root
 dfuller delta_y, regress trend
@@ -67,14 +67,14 @@ xline(`=scalar(max_f_time)',lp(shortdash)) ylabel(0(1)5) ///
 title("QLR Test for AR(1) Model") ///
 subtitle("Test of Break Between Q1:1955 and Q4:2002") ///
 legend(label(1 "Chow Statistic")) ///
-ytitle("") xtitle("Time") ///
+ytitle("Chow Statistic") xtitle("Time") ///
 text(4.5 -40 "1% Level") text(2.8 -40 "5% Level") ///
 text(`=scalar(max_chow)+.5' `=scalar(max_f_time)+15' "Q1:2001")
 
 //ADL(1,4) model for delta Yt using lags of delta Rt
-local r_lags "D.RealGDP L.D.RealGDP L2.D.RealGDP L3.D.RealGDP"
+local r_lags "D.TBillRate L.D.TBillRate L2.D.TBillRate L3.D.TBillRate"
 local adl "D.ln_gdp D.L.ln_gdp `r_lags'"
-regress `adl'
+regress `adl' ,vce(robust)
 eststo ADL_total
 
 //test the QLR
@@ -110,7 +110,7 @@ forvalues test_quarter = `=q(1947q1)'/`=q(2009q4)' {
 	scalar last_date = `test_quarter'
 }
 //use the right side of break version of the model for forecasting
-regress `adl' if time >= max_f_time
+regress `adl' if time >= max_f_time, vce(robust)
 eststo ADL
 
 // b_F_01 = 3.0940
@@ -118,15 +118,18 @@ eststo ADL
 gen dummy_time_ex = max_f_time
 format dummy_time_ex %tq
 di max_chow
-graph twoway (line chow_stat_2 time), yline(3.0940) ylabel(0(20)100) name(graph2, replace) ///
+graph twoway (line chow_stat_2 time), yline(3.0940) ylabel(0(1)5.4) name(graph2, replace) ///
 xline(`=scalar(max_f_time)',lp(shortdash)) ///
 title("QLR Test for ADL(1,4) Model") ///
 subtitle("Test of Break Between Q1:1955 and Q4:2002") ///
 legend(label(1 "Chow Statistic")) ///
-ytitle("") xtitle("Time") ///
-text(7 -40 "1% Level") ///
-text(`=scalar(max_chow)+5' `=scalar(max_f_time)+15' "Q2:1966")
+ytitle("Chow Statistic") xtitle("Time") ///
+text(3.3 -40 "1% Level") ///
+text(`=scalar(max_chow)+0.3' `=scalar(max_f_time)+15' "Q2:1966")
 
+//outputs
+capture esttab using outputs,rtf replace b(a3) se(a3) ///
+star(+ 0.10 * 0.05 ** 0.01 *** 0.001) r2(3) ar2(3) scalars(F)
 
 //forecasts
 gen buff1 = .
