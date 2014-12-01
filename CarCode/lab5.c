@@ -164,7 +164,7 @@ void PCA_ISR ( void ) __interrupt 9
 		CF = 0; /* Clear overflow flag */
 		PCA0 = 28672; /* or PCA0L = 0x34; low byte of start count */
 
-        if (counts){counts--;} //use a counter
+        //if (counts){counts--;} //use a counter
         h_counts = (h_counts) ? h_counts-1 : 19; //free wheeling timer that resets
 	}
 
