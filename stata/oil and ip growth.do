@@ -1,18 +1,19 @@
 * How to do exercise E15.1 from Stock & Watson.
 clear
 use "USMacro_Monthly.dta"
+adopath + "../stata extensions/"
 * First paste in the data from the Excel file USMacro_Monthly.xls.
-gen t = ym(Month,Year)
+gen t = ym(Year,Month)
 format t %tm
 tsset t
 
 * Generate & inspect variables.  Note that O is already generated and is named oil.
 gen ip_growth = 100 * ln(IP/L.IP)
-su ip_growth if t >= m(1952m1)
-kdensity ip_growth, n(400)  // This looks at the distribution of ip_growth.
-su oil, detail
-histogram oil, bin(50)
-twoway (tsline oil)
+summarize ip_growth if t >= m(1952m1)
+kdensity ip_growth, n(400) name("graph3",replace)  // This looks at the distribution of ip_growth.
+summarize Oil, detail
+histogram Oil, bin(50) name("graph2", replace)
+twoway (scatter Oil t), name("graph1" ,replace)
 
 * Regress growth of industrial production on 18 lags of the oil price shock variable.
 * Here we want to use HAC standard errors, to allow for time-series correlation in the error term.
@@ -23,8 +24,38 @@ twoway (tsline oil)
 *   pages 607-608, resulting in the guideline in the last two paragraphs of page 607.
 di _N-18  // Determine the number of points in time, T, to be used in the regression.  The answer turns out to be 678.
 di 0.75 * (_N-18)^(1/3)  // This number, rounded to the nearest integer, is a rule of thumb for the # of lags.
-newey ip_growth L(1/18).oil, lag(7)
-test L1.oil L2.oil L3.oil L4.oil L5.oil L6.oil L7.oil L8.oil L9.oil L10.oil L11.oil L12.oil L13.oil L14.oil L15.oil L16.oil L17.oil L18.oil
+newey ip_growth L(1/18).Oil, lag(7)
+
+estimates store oillags
+ #delimit ;
+ coefplot oillags, vertical drop(_cons) recast(line) xlabel(1/18) xtitle(Lag)
+ ytitle(Dynamic Multiplier);
+
+ #delimit cr
+ *vertical--puts the value of the coefficients on the y-axis instead of the x-axis
+ *Drop(_cons) tells stata that we do not want to plot the constant from the regression
+ *Recast(line) tells stata to connect the point estimates
+ *xlabel(1/18) tells stata to label the points on the x-axis as 1 to 18
+ 
+ *Cumulative Multipliers
+ 
+ matrix cumulmult = J(1,18,0)
+ matrix cumulmultse = J(1,18,0)
+
+local mystr "L1.Oil"
+forvalues i = 2(1)18{
+lincom `mystr' + L`i'.Oil
+matrix cumulmult[1,`i'] = r(estimate)
+matrix cumulmultse[1,`i'] = r(se)
+local mystr `mystr' + L`i'.Oil
+}
+
+*Lincom adds the dynamic multipliers and gets the standard errors.
+coefplot matrix(cumulmult), se(cumulmultse) vertical drop(_cons) xlabel(1/18) name("graphA",replace)
+
+
+
+test L1.Oil L2.Oil L3.Oil L4.Oil L5.Oil L6.Oil L7.Oil L8.Oil L9.Oil L10.Oil L11.Oil L12.Oil L13.Oil L14.Oil L15.Oil L16.Oil L17.Oil L18.Oil
 
 * Making the graphs of the dynamic multipliers and cumulative multipliers, with their
 *   confidence intervals, is a bit of a pain.  Here's how you might do it.  I've
@@ -35,6 +66,7 @@ test L1.oil L2.oil L3.oil L4.oil L5.oil L6.oil L7.oil L8.oil L9.oil L10.oil L11.
 * The program creates extra variables named lag, dynamicMult, dm_ciMin, dm_ciMax,
 *   cumulativeMult, cm_ciMin, and cm_ciMax.  These have nonmissing values in the first
 *   18 rows of data only.
+//set trace on
 capture program drop getDynamicMultipliers  // If the following program already exists, delete it before recreating it, to avoid an error message that it already exists.
 program define getDynamicMultipliers
 	* The matrix e(b), after estimation, is a row vector containing the estimates for the lags of oil.
@@ -59,10 +91,10 @@ program define getDynamicMultipliers
 		matrix infoToKeep[`i',4] = b[`i',1] + invttail(e(df_r),.025)*scalar(stderr)  // The maximum value of each confidence interval is its dynamic multiplier plus 1.96 times its standard error.  Put this into row i column 4 of infoToKeep.
 		* Estimated cumulative dynamic multiplier and confidence interval.
 		if `i'==1 {
-			local linearCombo L1.oil  // If i is 1, create a local string named linearCombo equal to "L1.oil".
+			local linearCombo L1.Oil  // If i is 1, create a local string named linearCombo equal to "L1.oil".
 		}
 		else {
-			local linearCombo `linearCombo'+L`i'.oil  // Keep adding "+L2.oil", etc., after the string linearCombo each time through the loop.
+			local linearCombo `linearCombo'+L`i'.Oil  // Keep adding "+L2.oil", etc., after the string linearCombo each time through the loop.
 		}
 		quietly lincom `linearCombo'  // Get the estimate and standard error for the linear combination L1.oil+L2.oil+..., up to the ith lag.
 		  // After the lincom command, r(estimate) contains the estimate and r(se) contains its standard error.
@@ -89,7 +121,17 @@ end
 getDynamicMultipliers  // Run the program defined above.
 
 * Make the graph for the dynamic multipliers.
-twoway (line dynamicMult lag, lcolor(blue)) (line dm_ciMin lag in 1/18, lcolor(black)) (line dm_ciMax lag in 1/18, lcolor(black)) in 1/18, title(Estimated Dynamic Multipliers and 95% Confidence Intervals) subtitle(additive effects on US % industrial production growth rate) legend(off)
+twoway (line dynamicMult lag, lcolor(blue)) ///
+(line dm_ciMin lag in 1/18, lcolor(black)) ///
+(line dm_ciMax lag in 1/18, lcolor(black)) in 1/18, ///
+title(Estimated Dynamic Multipliers and 95% Confidence Intervals) ///
+subtitle(additive effects on US % industrial production growth rate) ///
+legend(off)
 
 * Make the graph for the cumulative multipliers.
-twoway (line cumulativeMult lag, lcolor(blue)) (line cm_ciMin lag in 1/18, lcolor(black)) (line cm_ciMax lag in 1/18, lcolor(black)) in 1/18, title(Estimated Cumulative Multipliers and 95% Confidence Intervals) subtitle(additive effects to date on US % industrial production growth rate) legend(off)
+twoway (line cumulativeMult lag, lcolor(blue)) ///
+(line cm_ciMin lag in 1/18, lcolor(black)) ///
+(line cm_ciMax lag in 1/18, lcolor(black)) in 1/18, name("graph4",replace) ///
+title(Estimated Cumulative Multipliers and 95% Confidence Intervals) ///
+subtitle(additive effects to date on US % industrial production growth rate) ///
+legend(off)
