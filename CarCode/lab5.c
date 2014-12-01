@@ -92,22 +92,6 @@ void main(void)
 	prev_h_counts = h_counts; //start the checking flag
 	while(1)
 	{
-		/*
-		if(h_counts != prev_h_counts)
-		{ //run the updating first
-			prev_h_counts = h_counts; //update the check
-			while((Data[0] & 0x03) != 0x03)
-				i2c_read_data(ACCEL_ADDRESS, 0x27, Data, 1);
-
-			if((Data[0] & 0x03) == 0x03)
-			{
-				i2c_read_data(ACCEL_ADDRESS, 0x28|0x80, Data, 4);
-				avg_gx += ((Data[1] << 8) >> 4);
-				avg_gy += ((Data[3] << 8) >> 4);
-				printf("reading value %d\n\r",h_counts);
-			}
-		}
-		*/
 
 		if(!SSgain && calibrate_flag)
 		{
@@ -134,8 +118,7 @@ void main(void)
 	}
 }
 
-// Port_Init -- Initialize the used pins
-
+// Port_Init -- Initialize the used pinss
 void All_Init(void)
 {
 	P0MDOUT |= 0x50; //set output pin for CEX0 in push-pull mode
@@ -170,7 +153,6 @@ void All_Init(void)
 }
 
 // PCA_ISR -- Interrupt Service Routine for Programmable Counter Array Overflow Interrupt
-
 void PCA_ISR ( void ) __interrupt 9
 {
 	setup_count--;
@@ -189,7 +171,6 @@ void PCA_ISR ( void ) __interrupt 9
 	PCA0CN &= 0xC0; /* Handle other PCA interrupt sources */
 }
 
-
 unsigned char ADC_read()
 {
 	AMX1SL  = 0x01;			// Set the Port pin number Port 1.n, where n is a parameter passed to the function
@@ -204,15 +185,6 @@ void LCD_prompts(void)
 
 	lcd_clear();
 	lcd_print("Set Ks:\nEnter xx\n");
-
-	//////////////////////////////
-/*	keypad = read_keypad();
-	while (keypad == -1)
-		keypad = read_keypad();
-
-	ks = ((keypad - 48)*100);
-	while (read_keypad() != -1);
-*/	//////////////////////////////
 	//////////////////////////////
 	keypad = read_keypad();
 	while (keypad == -1)
@@ -239,15 +211,6 @@ void LCD_prompts(void)
 ////////////////////////////////////////////////////////////////////////////////////
 	lcd_clear();
 	lcd_print("Set Kx:\nEnter xx\n");
-
-	//////////////////////////////
-/*	keypad = read_keypad();
-	while (keypad == -1)
-		keypad = read_keypad();
-
-	kx = ((keypad - 48)*100);
-	while (read_keypad() != -1);
-*/	//////////////////////////////
 	//////////////////////////////
 	keypad = read_keypad();
 	while (keypad == -1)
@@ -272,15 +235,6 @@ void LCD_prompts(void)
 ////////////////////////////////////////////////////////////
 	lcd_clear();
 	lcd_print("Set Ky:\nEnter xx\n");
-
-	//////////////////////////////
-/*	keypad = read_keypad();
-	while (keypad == -1)
-		keypad = read_keypad();
-
-	ky = ((keypad - 48)*100);
-	while (read_keypad() != -1);
-*/	//////////////////////////////
 	//////////////////////////////
 	keypad = read_keypad();
 	while (keypad == -1)
@@ -304,8 +258,6 @@ void LCD_prompts(void)
 	while(setup_count);
 }
 
-
-
 /////////////////////////////////////////////////////////////////////////////////////////
 void Info_LCD_print(void)
 {
@@ -314,7 +266,6 @@ void Info_LCD_print(void)
 	setup_count=20;
 }
 
-/////////////////
 void LCD_calibrate_steering(void)
 {
 	char keypad;
@@ -322,16 +273,13 @@ void LCD_calibrate_steering(void)
 	char i;
 	//int b[4] = {2765,2380,2880,3400};	//all the values to the center, we can adjust
 	int b[4] = {2765,2100,2680,3260};	//all the values to the center, we can adjust
-
 	setup_count = 40;
-
 	lcd_clear();
 	lcd_print("Steering Calibration");
 	lcd_print(" Set Points L,C,& R\n");
 	lcd_print(" Increment 1-L 2-R\n");
 	lcd_print("3-Store Value");
 	while(setup_count)
-
 	//try to find the left most set point first, then the center, then finally the right
 	PCA0CP0 = 0xFFFF - b[0]; // put it near the left set point
 	for (i=1; i<4;i++)
@@ -350,22 +298,17 @@ void LCD_calibrate_steering(void)
 				keypad = read_keypad();
 
 			}
-
 			while (read_keypad() != -1);
-
-
 			if ((keypad == 49))	//turning left is decrementing
 			{
 				b[i] = b[i] - 20; //turning left is decrementing
 				PCA0CP0 = 0xFFFF - b[i];
-			}
-            
+			} 
 			else if((keypad == 50))
 			{
 				b[i] = b[i] + 20; //turn right is incrementing
 				PCA0CP0 = 0xFFFF - b[i];
-			}
-            
+			}           
 			else if ((keypad == 51))
 				break;          
         }
@@ -387,25 +330,17 @@ void LCD_calibrate_steering(void)
 
 void accel_steering(void)
 {
-	//if(!SSgain)
-	//{
-		if(gx >= 0)
-		{
-			r = TURN_RIGHT(gx, center, right, ks/10);
-		}
-		else
-		{
-			r = TURN_LEFT(-gx, center, left, ks/10);
-		}
 
-		PCA0CP0 = 0xFFFF - r;
-	//}
-
-/*	else
+	if(gx >= 0)
 	{
-		PCA0CP0 = 0xFFFF - 2680;
+		r = TURN_RIGHT(gx, center, right, ks/10);
 	}
-*/
+	else
+	{
+		r = TURN_LEFT(-gx, center, left, ks/10);
+	}
+
+	PCA0CP0 = 0xFFFF - r;
 }
 
 void calibrate_accel(void){
@@ -448,15 +383,10 @@ void get_four_readings(void){
 	for (i =0; i < 4; i++) { //do four times to get total
 		while(prev_h_counts == h_counts); //this waits
 		prev_h_counts = h_counts; //update
-	 
-	 	//printf("Reading: I= %d, h_counts = %d\n\r",i, h_counts);
-
-
 		while((Data[0] & 0x03) != 0x03) //wait for a new reading
 		{
 			i2c_read_data(ACCEL_ADDRESS, 0x27, Data, 1); //get new reading
 		}
-
 		if((Data[0] & 0x03) == 0x03)
 		{
 			i2c_read_data(ACCEL_ADDRESS, 0x28|0x80, Data, 4);
@@ -464,7 +394,6 @@ void get_four_readings(void){
 			avg_gy += ((Data[3] << 8) >> 4);
 		}
 	}
-	//printf("at the end of the four readin\r\n");
 }
 
 void Run_Car(void) //running the car
@@ -472,40 +401,30 @@ void Run_Car(void) //running the car
 	if (SSgain) calibrate_flag = 1; //set the flag high once we are back to business
 	gx = (avg_gx / 4)-gx0;
 	gy = (avg_gy / 4)-gy0;
-	//printf("%d %d\n\r", avg_gx, gx);
 	avg_gx = 0;
 	avg_gy = 0;
-	//printf("####################################################\n\r");
-
 	accel_steering();
-
 	if(!SSdrive)	// Drive if activated
 	{
-
 		motor_pw = PW_NEUT - (ky * gy)/10 + (kx * abs(gx))/10;		// If all y no x if all x no y, thus PW_MAX-PWNEUT/2047 or max accel that can be read on ramp=ky = kx=0.36
-
 		if(motor_pw > 3502)
 		{
 			motor_pw = 3502;
 		}
-
 		else if(motor_pw < 2028)
 		{
 			motor_pw = 2028;
 		}
-
 		if(gy>0)
 		{
 			gy = 0.25*gy;
 		}
-
 		PCA0CP2 = 0xFFFF - motor_pw;
 	}
 	else		// Neutral if not activated
 	{
 		motor_pw = PW_NEUT;
 		PCA0CP2 = 0xFFFF - motor_pw;
-
 	}
 	if(gy == 0 && gx == 0)
 	{
