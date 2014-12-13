@@ -195,7 +195,6 @@ if __name__ == '__main__':
 	if ds.calendar_link:
 		ds.read_calendar(ds.calendar_link)
 
-
 	for part in ds.main_tray.find_all('td'):
 		case = part['class'][0]
 		print "#"*50
@@ -205,4 +204,3 @@ if __name__ == '__main__':
 			pass
 		else:
 			func(part,ds.root_url)
-
