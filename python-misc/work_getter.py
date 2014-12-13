@@ -132,21 +132,38 @@ def red(element,base_url):
 	#this is a test day
 	#print "Test Day"
 	#print element.prettify()
+	exam_regex = re.compile('Test\s\d|Final\sExam')
+	#take the first match
+	result = None
+	for g in element.strings:
+		if result is None:
+			result = re.search(exam_regex,g)
+
+	folder_name = result.group(0)
+
+	if not os.path.exists(folder_name):
+		os.mkdir(folder_name)
+		print "Created:",folder_name
+	else:
+		print "Updating:",folder_name
+	os.chdir(folder_name)
+
 	for link in element.find_all('a'):
-		print link.string, ':',link['href']
-		filename = link['href'].split('/')
+		filename = link['href'].split('/')[-1]
+		file_url = base_url+link['href']
+		print "Downloading...", filename
+		urllib.urlretrieve(file_url,filename)
 
-
+	os.chdir('../')
 
 cal_switch = {
-	#'calendar_white':white,
+	'calendar_white':white,
 	'calendar_green':green_yellow_blue,
-	#'calendar_red':red,
+	'calendar_red':red,
 	'calendar_yellow':green_yellow_blue,
 	'calendar_blue':green_yellow_blue,
 	'default': lambda x: x
 }
-
 
 if __name__ == '__main__':
 	#determine how to call
@@ -158,7 +175,6 @@ if __name__ == '__main__':
 			#anything else will abort
 		else:
 			exit()
-		
 
 	elif len(sys.argv) == 2:
 		root_filepath = sys.argv[1]
@@ -189,5 +205,4 @@ if __name__ == '__main__':
 			pass
 		else:
 			func(part,ds.root_url)
-
 
