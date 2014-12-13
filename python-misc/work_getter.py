@@ -76,8 +76,7 @@ def white(element,base_url):
 	print "Nothing Day"
 	pass
 
-
-def green(element,base_url):
+def green_yellow_blue(element,base_url):
 	#this is a lecture day
 	lecture_pdf_links =[]
 	other_content_links = []
@@ -89,7 +88,6 @@ def green(element,base_url):
 				#every entry should have a
 				folder_name = (link.contents[0]+" "+link.contents[2]).encode('ascii', 'ignore')
 				lecture_pdf_links.append([folder_name,link['href']])
-
 		else:
 			other_content_links.append(link['href'])
 
@@ -138,27 +136,14 @@ def red(element,base_url):
 		print link.string, ':',link['href']
 		filename = link['href'].split('/')
 
-def yellow(element,base_url):
-	#this is a lab day
-	print "Lab Day"
-	for link in element.find_all('a'):
-		print link.string, ':',link['href']
-		
-
-def blue(element,base_url):
-	#this is homework day
-	print "Homework Day"
-	all_links = {}
-	for link in element.find_all('a'):
-		print link.string, ':',link['href']
 
 
 cal_switch = {
 	#'calendar_white':white,
-	'calendar_green':green,
+	'calendar_green':green_yellow_blue,
 	#'calendar_red':red,
-	#'calendar_yellow':yellow,
-	#'calendar_blue':blue,
+	'calendar_yellow':green_yellow_blue,
+	'calendar_blue':green_yellow_blue,
 	'default': lambda x: x
 }
 
