@@ -6,7 +6,6 @@ from StringIO import StringIO
 import gzip
 import re
 
-
 from bs4 import BeautifulSoup
 
 class DataStructures(object):
@@ -107,7 +106,6 @@ def green_yellow_blue(element,base_url):
 				file_url = base_url+sub_list[1]
 				print "Downloading...", filename
 				urllib.urlretrieve(file_url,filename)
-
 			else:
 				#there shoul not be more than two items in the list
 				raise RuntimeError
@@ -124,7 +122,6 @@ def green_yellow_blue(element,base_url):
 		file_url = base_url+content
 		print "Downloading...", filename
 		urllib.urlretrieve(file_url,filename)
-
 	#clean up by returning to root file
 	os.chdir("../")
 
@@ -138,22 +135,18 @@ def red(element,base_url):
 	for g in element.strings:
 		if result is None:
 			result = re.search(exam_regex,g)
-
 	folder_name = result.group(0)
-
 	if not os.path.exists(folder_name):
 		os.mkdir(folder_name)
 		print "Created:",folder_name
 	else:
 		print "Updating:",folder_name
 	os.chdir(folder_name)
-
 	for link in element.find_all('a'):
 		filename = link['href'].split('/')[-1]
 		file_url = base_url+link['href']
 		print "Downloading...", filename
 		urllib.urlretrieve(file_url,filename)
-
 	os.chdir('../')
 
 cal_switch = {
@@ -175,26 +168,20 @@ if __name__ == '__main__':
 			#anything else will abort
 		else:
 			exit()
-
 	elif len(sys.argv) == 2:
 		root_filepath = sys.argv[1]
-
 	target_dirname = "Data Structures"
 	target_dir_path = os.path.join(root_filepath,target_dirname)
-
 	if not os.path.exists(target_dir_path):
 		os.mkdir(target_dir_path)
 		print "Created:",target_dir_path,"\n"
-
 	#switch to our new directory
 	os.chdir(target_dir_path)
-
 	#start the pages
 	ds = DataStructures()
 	ds.find_calendar()
 	if ds.calendar_link:
 		ds.read_calendar(ds.calendar_link)
-
 	for part in ds.main_tray.find_all('td'):
 		case = part['class'][0]
 		print "#"*50
