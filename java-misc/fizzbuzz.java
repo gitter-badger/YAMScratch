@@ -20,7 +20,7 @@ class FizzBuzz
 	{
 		this.zoop = bar;
 	}
-	private void PrintTheState()
+	private synchronized void PrintTheState()
 	{
 		switch (zoop)
 		{
