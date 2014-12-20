@@ -1,6 +1,8 @@
 import os
 import sys
 import re
+import sqlite3
+
 import Tkinter as tk
 
 '''Keeps track of lines of code written in target directory
@@ -10,9 +12,50 @@ import Tkinter as tk
     After that I will fill in a GUI
 '''
 
-class DirReader(object):
-    def __init__(self):
-        pass
+class FileReader(object):
+
+    def __init__(self,filename):
+        self.filename = filename
+
+        self.empty_line = re.compile("^\s*$")
+
+        self.conn = sqlite3.connect(FileReader.database_name)
+        self.cur = self.conn.cursor()
+        #get the comment string from database
+        match = re.search("\.[^.]*$",self.filename)
+        if match:
+            extension = match.group(0)
+            print extension
+
+        self.cur.execute("SELECT comment_regex FROM extensions WHERE extension = ?",(extension))
+        self.cur.fetchmany()
+
+
+        
+    def count_lines(self):
+        try:
+            f = open(self.filename,"r")
+        except (OSError,IOError):
+            return None
+        else:
+            empty = 0
+            for index,line in enumerate(f):
+                #simple case if the line is not empty we count it
+                if self.empty_line.match(line):
+                    empty += 1
+                if self.
+
+            f.close()
+            #index starts at zero so we add one
+            total = index+1
+            loc = total - empty - comments
+            print loc,"/",total
+        return ()
+            
+
+
+
+
 
 '''===============GUI CODE==============='''
 
@@ -29,7 +72,10 @@ class MainWindow(tk.Frame):
 
 if __name__ == "__main__":
 
-
+    #create a toy database
+    database = "mtvr_db.sqlite"
+    fr = FileReader()
+    fr.count_lines()
 
     '''GUI PORTION
     root = tk.Tk()
