@@ -3,9 +3,7 @@ import sys
 import os
 
 #the sublime text .tmLanguage does not have a descernable pattern yet
-
 #use this to manually stage the data for insertion
-
 
 if len(sys.argv) == 3:
 	database_name = sys.argv[2]
@@ -28,7 +26,7 @@ if len(sys.argv) == 3:
 					database_name = None
 					break
 				else:
-					print "Creating... {}".format(database_name)
+					print "Creating... {}".format(datyabase_name)
 					break
 	if not database_name:
 		exit()
