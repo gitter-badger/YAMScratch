@@ -24,8 +24,29 @@ def draw_line(x0,y0,x1,y1):
 	print_board(board)
 
 def draw_circle(radius,x0,y0):
+	board = [ [' ' for x in range(0,x0+2*radius+1)] for x in range(0,y0+2*radius+1)]
+	x0 +=radius
+	y0 +=radius
+	y = 0
+	x = radius
+	RE = 1-x
+	while x>=y:
 
-	board = [ [' ' for x in range(0,x0+radius+1)] for x in range(0,y0+radius+1)]
+		board[y+y0][x+x0] = '#'
+		board[x+y0][y+x0] = '#'
+		board[-x+y0][y+x0] = '#'
+		board[-y+y0][x+x0] = '#'
+		board[-x+y0][-y+x0] = '#'
+		board[-y+y0][-x+x0] = '#'
+		board[x+y0][-y+x0] = '#'
+		board[y+y0][-x+x0] = '#'
+		y += 1
+		if RE < 0:
+			RE += 2*y +1
+		else:
+			x -= 1
+			RE = 2*(y-x+1)
+
 
 	print_board(board)
 
@@ -37,4 +58,4 @@ def print_board(board):
 	print ' '+''.join([str(x%10) for x in range(0,len(board[0]))])
 
 #draw_line(1,3,20,20)
-draw_circle(12,3,3)
+draw_circle(15,0,0)
