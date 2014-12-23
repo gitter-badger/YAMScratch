@@ -1,5 +1,6 @@
 import sys
 import os
+import math
 
 def draw_line(x0,y0,x1,y1):
 	dx = x1 - x0
@@ -46,7 +47,7 @@ def draw_circle(radius,x0,y0):
 			RE += 2*y +1
 		else:
 			x -= 1
-			RE = 2*(y-x+1)
+			RE += 2*(y-x+1)
 	print_board(board)
 
 ''' Drawing Ellipse'''
@@ -81,6 +82,47 @@ def draw_ellipse(da,db):
 
 	print_board(board)
 
+def simple_ellipse(a,b):
+	x = a
+	y = 0
+	x_square = x*x
+	y_square = y*y
+	a_sq = float(a*a)
+	b_sq = float(b*b)
+
+	x_square_next = x_square - 4*x +4
+	y_square_next = y_square + 4*y +4
+
+	'''
+		(x^2/a^2)^2-((x-2)^2/a^2)^2 + 2*((x^2*(y+2)^2)/(a^2*b^2)) -2*(((x-2)^2*y^2)/(a^2*b^2)) - 2*x^2/a^2 + 2*(x-2)^2/a^2 - 2*(y+2)^2/b^2 + 2*y^2/b^2
+	'''
+
+	
+	while(x>0):
+		print x,y
+		left = (x_square/a_sq + y_square_next/b_sq -1)
+		right = (x_square_next/a_sq +y_square/b_sq -1)
+		#print "left:",left
+		#print "right:",right
+		left = math.pow(left,2)
+		right = math.pow(right,2)
+		print "left:",left
+		print "right:",right
+
+
+		if left -right < 0:
+			#then incrementing y gives smaller error
+			y_square = y_square_next
+			y_square_next = y_square + 4*y +4
+			y += 2
+		else:
+			x_square = x_square_next
+			x_square_next = x_square - 4*x +4
+			x -=2
+		print "#"*50
+
+
+	#error		
 
 def print_board(board):
 	print '+'+'-'*len(board[0])+'+'
@@ -91,4 +133,5 @@ def print_board(board):
 
 #draw_line(1,3,20,20)
 #draw_circle(16,0,0)
-draw_ellipse(20,20)
+#draw_ellipse(20,20)
+simple_ellipse(10,10)
