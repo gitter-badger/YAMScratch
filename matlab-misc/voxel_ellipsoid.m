@@ -100,7 +100,7 @@ level = [];
 z_values = [];
 for z = [z_offset:2:C-1]
 	index = find(xz_z_list==z);
-	level(end+1,:) = [xz_x_list(index(1)),yz_y_list(index(1))];
+	level(end+1,:) = [xz_x_list(index(1))+1,yz_y_list(index(1))+1];
 	z_values(end+1) = z;
 end
 
@@ -178,9 +178,31 @@ for count = 1:length(yz_y_list)
 end
 
 for count = 1:length(x_list)
-	x
+	x = x_list(count);
+	y = y_list(count);
+	z = z_list(count);
+	%XY plane
+	one_x = [x-1,x-1,x+1,x+1];
+	one_y = [y+1,y-1,y-1,y+1];
+	one_z = [z+1,z+1,z+1,z+1];
+	fill3(one_x,one_y,one_z,'c')
+	fill3(one_x,one_y,-one_z,'c')
+	%XZ plane
+	two_x = [x-1,x-1,x+1,x+1];
+	two_y = [y+1,y+1,y+1,y+1];
+	two_z = [z+1,z-1,z-1,z+1];
+	fill3(two_x,two_y,two_z,'m')
+	fill3(two_x,two_y,-two_z,'m')
+	%YZ plane
+	three_x = [x+1,x+1,x+1,x+1];
+	three_y = [y-1,y-1,y+1,y+1];
+	three_z = [z+1,z-1,z-1,z+1];
+	fill3(three_x,three_y,three_z,'y')
+	fill3(three_x,three_y,-three_z,'y')
+
 end
-plot3(x_list,y_list,z_list,'kd')
+
+%plot3(x_list,y_list,z_list,'kd')
 hold on
 
 axis equal
