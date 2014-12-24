@@ -2,9 +2,9 @@ clear
 clc
 close all
 
-A = 101; %x axis width
-B = 77; %y axis width
-C = 50; %z axis width
+A = 31; %x axis width
+B = 51; %y axis width
+C = 31; %z axis width
 
 x_offset = mod(A+1,2); %set the coordinate we start from
 y_offset = mod(B+1,2);
@@ -95,21 +95,48 @@ while yz_y_list(end) > 1
 		yz_z_list(end+1) = yz_z_list(end);
 end
 %END YZ
+%%Calculate the A and B for each z value
+level = [];
+z_values = [];
+for z = [z_offset:2:C-1]
+	index = find(xz_z_list==z);
+	level(end+1,:) = [xz_x_list(index(1)),yz_y_list(index(1))];
+	z_values(end+1) = z;
+end
+
 
 %% START filling in
-calc_A = A;
-calc_B = B;
-x_list = [calc_A-1];
-y_list = [y_offset];
-while y_list(end) <= calc_B-2
-	[x_list,y_list] = make_step(x_list,y_list,calc_A,calc_B);
-	%there may still be some x error
+x_list = [];
+y_list = [];
+z_list = [];
+for index = 1:length(z_values)
+	calc_A = level(index,1);
+	calc_B = level(index,2);
+
+	x_list(end+1) = [calc_A-1];
+	y_list(end+1) = [y_offset];
+	while y_list(end) <= calc_B-2
+		[x_list,y_list] = make_step(x_list,y_list,calc_A,calc_B);
+		%there may still be some x error
+	end
+	%burn down any remaining x coordinate
+	while x_list(end) > 1
+			x_list(end+1) = x_list(end)- 2;
+			y_list(end+1) = y_list(end);
+	end
+	while length(z_list) < length(x_list)
+		z_list(end+1) = z_values(index);
+	end
 end
-%burn down any remaining x coordinate
-while x_list(end) > 1
-		x_list(end+1) = x_list(end)- 2;
-		y_list(end+1) = y_list(end);
-end
+
+% for count = 1:length(x_list)
+% 	x = x_list(count);
+% 	y = y_list(count);
+% 	corn_x = [x-1,x-1,x+1,x+1,x-1];
+% 	corn_y = [y+1,y-1,y-1,y+1,y+1];
+% 	fill(corn_x,corn_y,'k')
+% 	hold on
+% end
 
 
 figure
@@ -140,7 +167,7 @@ end
 
 for count = 1:length(yz_y_list)
 	y = yz_y_list(count);
-	z = xz_z_list(count);
+	z = yz_z_list(count);
 	x = x_offset;
 	plot3(x,y,z,'gd')
 	plot3(x,-y,z,'gd')
@@ -149,4 +176,11 @@ for count = 1:length(yz_y_list)
 	hold on
 	
 end
+
+for count = 1:length(x_list)
+	x
+end
+plot3(x_list,y_list,z_list,'kd')
+hold on
+
 axis equal
