@@ -60,22 +60,30 @@ for x = [x_offset:2:A-1]
 	end
 end
 
-x = A-1;
-y = y_offset;
-while y <= B-2
-	[x,y] = make_step(x,y,A,B,fig);
+x_list = [A-1];
+y_list = [y_offset];
+while y_list(end) <= B-2
+	[x_list,y_list] = make_step(x_list,y_list,A,B);
 	%there may still be some x error
 end
-%plot the most recent value
-corn_x = [x-1,x-1,x+1,x+1,x-1];
-corn_y = [y+1,y-1,y-1,y+1,y+1];
-fill(corn_x,corn_y,'k')
-hold on
 %burn down any remaining x coordinate
-while x > 1
-		x = x - 2;
-		corn_x = [x-1,x-1,x+1,x+1,x-1];
-		corn_y = [y+1,y-1,y-1,y+1,y+1];
-		fill(corn_x,corn_y,'k')
-		hold on
+while x_list(end) > 1
+		x_list(end+1) = x_list(end)- 2;
+		y_list(end+1) = y_list(end);
+end
+figure(fig)
+
+for count = 1:length(x_list)
+	x = x_list(count);
+	y = y_list(count);
+	corn_x = [x-1,x-1,x+1,x+1,x-1];
+	corn_y = [y+1,y-1,y-1,y+1,y+1];
+	fill(corn_x,corn_y,'k')
+	hold on
+	fill(-corn_x,corn_y,'k')
+	hold on
+	fill(corn_x,-corn_y,'k')
+	hold on
+	fill(-corn_x,-corn_y,'k')
+	hold on
 end
