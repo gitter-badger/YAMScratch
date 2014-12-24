@@ -18,12 +18,8 @@ Y = sqrt((1-X.^2/A^2)*B^2);
 plot(X,Y)
 hold on
 plot([-X],Y,'r')
-
-%axis([-A-1,A+1,-1,B+1])
 axis equal
-
 hold on
-
 %identify target points
 inside = [];
 outside = [];
@@ -59,7 +55,6 @@ for x = [x_offset:2:A-1]
 		end
 	end
 end
-
 x_list = [A-1];
 y_list = [y_offset];
 while y_list(end) <= B-2
@@ -72,7 +67,6 @@ while x_list(end) > 1
 		y_list(end+1) = y_list(end);
 end
 figure(fig)
-
 for count = 1:length(x_list)
 	x = x_list(count);
 	y = y_list(count);
