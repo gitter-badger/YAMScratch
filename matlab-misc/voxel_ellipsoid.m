@@ -2,8 +2,8 @@ clear
 clc
 close all
 
-A = 30; %x axis width
-B = 25; %y axis width
+A = 101; %x axis width
+B = 77; %y axis width
 C = 10; %z axis width
 
 x_offset = mod(A+1,2); %set the coordinate we start from
@@ -12,8 +12,7 @@ z_offset = mod(C+1,2);
 
 % the points are doubled to remove fractional sizes, we will map back later
 % start in first octant
-
-
+fig = figure
 X = [0:0.001:A];
 Y = sqrt((1-X.^2/A^2)*B^2);
 plot(X,Y)
@@ -40,7 +39,7 @@ for x = [x_offset:2:A-1]
 			corn_x = [x-1,x-1,x+1,x+1,x-1];
 			corn_y = [y+1,y-1,y-1,y+1,y+1];
 			if x ~= 0 && y~= 0
-				fill(corn_x,corn_y,'g')
+				%fill(corn_x,corn_y,'g')
 				hold on
 				fill(-corn_x,corn_y,'b')
 				hold on
@@ -51,11 +50,7 @@ for x = [x_offset:2:A-1]
 			else
 				fill(corn_x,corn_y,'c')
 				hold on
-				fill(-corn_x,corn_y,'c')
-				hold on
 				fill(-corn_x,-corn_y,'c')
-				hold on
-				fill(corn_x,-corn_y,'c')
 				hold on
 			end
 			plot(x,y,'bd')
@@ -65,6 +60,22 @@ for x = [x_offset:2:A-1]
 	end
 end
 
-%plot(inside(1,:),inside(2,:),'bd')
-%hold on
-%plot(outside(1,:),outside(2,:),'rd')
+x = A-1;
+y = y_offset;
+while y <= B-2
+	[x,y] = make_step(x,y,A,B,fig);
+	%there may still be some x error
+end
+%plot the most recent value
+corn_x = [x-1,x-1,x+1,x+1,x-1];
+corn_y = [y+1,y-1,y-1,y+1,y+1];
+fill(corn_x,corn_y,'k')
+hold on
+%burn down any remaining x coordinate
+while x > 1
+		x = x - 2;
+		corn_x = [x-1,x-1,x+1,x+1,x-1];
+		corn_y = [y+1,y-1,y-1,y+1,y+1];
+		fill(corn_x,corn_y,'k')
+		hold on
+end
