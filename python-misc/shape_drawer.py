@@ -110,8 +110,14 @@ def simple_ellipse(a,b):
 	return (index_x,index_y,all_x,all_y)
 
 def thick_ellipse(a,b,thickness):
+	#there is a strange bug in this routine
+	#found it: the way the rounding by division by two
+	#keeps the center of a 1 pixel diameter samller circle
+	#in the same place.
 	board = [ [' ' for x in range(0,a)] for x in range(0,b)]
-	for offset in [x for x in range(0,(thickness-1)*2+1)]:
+
+	for offset in [x*2 for x in range(0,thickness)]:
+		print offset
 		temp_a = a-offset
 		temp_b = b-offset
 		x_offset = (a+1)%2
