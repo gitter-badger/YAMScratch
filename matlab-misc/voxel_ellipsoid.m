@@ -2,8 +2,8 @@ clear
 clc
 close all
 
-A = 31; %x axis width
-B = 31; %y axis width
+A = 71; %x axis width
+B = 71; %y axis width
 C = 51; %z axis width
 
 x_offset = mod(A+1,2); %set the coordinate we start from

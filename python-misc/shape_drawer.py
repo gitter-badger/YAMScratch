@@ -51,78 +51,68 @@ def draw_circle(radius,x0,y0):
 	print_board(board)
 
 ''' Drawing Ellipse'''
-def draw_ellipse(da,db):
+def simple_ellipse(a,b,board):
 	'''
-		(x/a)^2 + (y/b)^2 = 1
-
-		a = da/2
-		b = db/2
-
+		a = width of ellipse in pixels
+		b = height of the ellipse in pixels
 	'''
-
-	board = [ ['_' for x in range(0,da)] for x in range(0,db)]
-
-	wb = db-1
-	wa = da-1
-	board[0][wa>>1] = '1'
-	board[wb][wa>>1] = '2'
-	board[0][wa-(wa>>1)] = '3'
-	board[wb][wa-(wa>>1)] = '4'
-
-	board[wb>>1][0] = '5'
-	board[wb-(wb>>1)][wa] = '6'
-	board[wb>>1][wa] = '7'
-	board[wb-(wb>>1)][0] = '8'
-
-	for x in range(wa-(wa>>1),da):
-		print x+1
-	print '#'*50
-	for y in range(wb-(wb>>1),db):
-		print y+1
+	#precompute some constants
+	a2 = a*a
+	b2 = b*b
+	x_offset = (a+1)%2
+	y_offset = (b+1)%2
+	#initialize the x and y arrays
+	x = a - 1
+	y = y_offset
+	x_list = [x]
+	y_list = [y]
+	#compute the first interation of x and y steps
+	x2n0 = x*x
+	y2n0 = y*y
+	 
+	while y_list[-1] < b-1:
+		#recursively compute the next piece
+		x2n1 = x2n0 - 4*x +4
+		y2n1 = y2n0 + 4*y +4
+		#calculate each step
+		possible = [(math.pow(b2*x2n1 + a2*y2n0 - a2*b2,2),(x2n1,y2n0),(x-2,y)),
+					(math.pow(b2*x2n0 + a2*y2n1 - a2*b2,2),(x2n0,y2n1),(x,y+2)),
+					(math.pow(b2*x2n1 + a2*y2n1 - a2*b2,2),(x2n1,y2n1),(x-2,y+2))
+					]
+		minimum = sorted(possible,key = lambda target: target[0])[0]
+		x2n0,y2n0 = minimum[1]
+		x,y = minimum[2]
+		x_list.append(x)
+		y_list.append(y)
+	#burn down the x error
+	while x > 1:
+		x -= 2
+		x_list.append(x)
+		y_list.append(y)
+	#create the entire coordinate list
+	all_x = []
+	all_y = []
+	for i in [-1,1]:
+		for j in [-1,1]:
+			for index,k in enumerate(x_list):
+				all_x.append(i*k)
+				all_y.append(j*y_list[index])
+	
+	index_x = []
+	index_y = []
+	for index,elem in enumerate(all_x):
+		x_coord = (elem - x_offset + a)>>1
+		y_coord = (all_y[index] - y_offset + b)>>1
+		index_x.append(x_coord)
+		index_y.append(y_coord)
+		board[y_coord][x_coord] = '#'
 
 	print_board(board)
 
-def simple_ellipse(a,b):
-	x = a
-	y = 0
-	x_square = x*x
-	y_square = y*y
-	a_sq = float(a*a)
-	b_sq = float(b*b)
+def thick_ellipse(a,b,thickness):
 
-	x_square_next = x_square - 4*x +4
-	y_square_next = y_square + 4*y +4
-
-	'''
-		(x^2/a^2)^2-((x-2)^2/a^2)^2 + 2*((x^2*(y+2)^2)/(a^2*b^2)) -2*(((x-2)^2*y^2)/(a^2*b^2)) - 2*x^2/a^2 + 2*(x-2)^2/a^2 - 2*(y+2)^2/b^2 + 2*y^2/b^2
-	'''
-
-	
-	while(x>0):
-		print x,y
-		left = (x_square/a_sq + y_square_next/b_sq -1)
-		right = (x_square_next/a_sq +y_square/b_sq -1)
-		#print "left:",left
-		#print "right:",right
-		left = math.pow(left,2)
-		right = math.pow(right,2)
-		print "left:",left
-		print "right:",right
-
-
-		if left -right < 0:
-			#then incrementing y gives smaller error
-			y_square = y_square_next
-			y_square_next = y_square + 4*y +4
-			y += 2
-		else:
-			x_square = x_square_next
-			x_square_next = x_square - 4*x +4
-			x -=2
-		print "#"*50
-
-
-	#error		
+	for offset in [x for x in range(0,(thickness-1)*2)]:
+		pass
 
 def print_board(board):
 	print '+'+'-'*len(board[0])+'+'
@@ -134,4 +124,9 @@ def print_board(board):
 #draw_line(1,3,20,20)
 #draw_circle(16,0,0)
 #draw_ellipse(20,20)
-simple_ellipse(10,10)
+a = int(raw_input('A: ')) 
+b = int(raw_input('B: '))
+t = int(raw_input('T: '))
+#declare board
+board = [ [' ' for x in range(0,a)] for x in range(0,b)]
+simple_ellipse(a,b,board)
