@@ -51,7 +51,7 @@ def draw_circle(radius,x0,y0):
 	print_board(board)
 
 ''' Drawing Ellipse'''
-def simple_ellipse(a,b,board):
+def simple_ellipse(a,b):
 	'''
 		a = width of ellipse in pixels
 		b = height of the ellipse in pixels
@@ -105,14 +105,25 @@ def simple_ellipse(a,b,board):
 		y_coord = (all_y[index] - y_offset + b)>>1
 		index_x.append(x_coord)
 		index_y.append(y_coord)
-		board[y_coord][x_coord] = '#'
-
-	print_board(board)
+	#this is a large return because this is for testing
+	#and we use this for different things
+	return (index_x,index_y,all_x,all_y)
 
 def thick_ellipse(a,b,thickness):
+	board = [ [' ' for x in range(0,a)] for x in range(0,b)]
+	for offset in [x for x in range(0,(thickness-1)*2+1)]:
+		temp_a = a-offset
+		temp_b = b-offset
+		x_offset = (a+1)%2
+		y_offset = (b+1)%2
+		print temp_a,temp_b
+		not_used,not_used2,x_list,y_list = simple_ellipse(temp_a,temp_b)
+		for index,elem in enumerate(x_list):
+			x_coord = (elem - x_offset + a)>>1
+			y_coord = (y_list[index] - y_offset + b)>>1
+			board[y_coord][x_coord] = '#'
 
-	for offset in [x for x in range(0,(thickness-1)*2)]:
-		pass
+	print_board(board)
 
 def print_board(board):
 	print '+'+'-'*len(board[0])+'+'
@@ -128,5 +139,6 @@ a = int(raw_input('A: '))
 b = int(raw_input('B: '))
 t = int(raw_input('T: '))
 #declare board
-board = [ [' ' for x in range(0,a)] for x in range(0,b)]
-simple_ellipse(a,b,board)
+
+#simple_ellipse(a,b,board)
+thick_ellipse(a,b,t)
