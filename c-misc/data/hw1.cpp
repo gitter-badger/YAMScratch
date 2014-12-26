@@ -42,11 +42,15 @@ void EllipsePoint_destroy(struct EllipsePoint *point)
 }
 
 //build one quarter of the ellipse
-struct EllipsePoint *calculate_ellipse(short A, short B)
+struct EllipsePoint *calculate_ellipse(unsigned short A, unsigned short B)
 { /* this will create a list of points on the ellipse starting 
 	closest to x =0, y= max */
-	long A2 = A*A; //should be 64 bits on unix platform
-	long B2 = B*B;
+	if ( (A > 0x7FFF) || (B > 0x7FFF))
+	{
+		return NULL;
+	}
+	long long A2 = A*A; //should be 64 bits on unix platform
+	long long B2 = B*B;
 	char x_offset = (A+1)%2;
 	char y_offset = (B+1)%2;
 	//create first element of list
@@ -54,25 +58,24 @@ struct EllipsePoint *calculate_ellipse(short A, short B)
 	short y = y_offset;
 	EllipsePoint * head = EllipsePoint_create(x,y,NULL,NULL);
 	//precompute the squares
-	long x2n0 = x*x;
-	long y2n0 = y*y;
-
+	long long x2n0 = x*x;
+	long long y2n0 = y*y;
 	while(head->y < B-1)
 	{
 		//recursively compute the next steps
-		long x2n1 = x2n0 - 4*x + 4;
-		long y2n1 = y2n0 + 4*y + 4;
+		long long x2n1 = x2n0 - 4*x + 4;
+		long long y2n1 = y2n0 + 4*y + 4;
 		//compute the steps
-		long x_step = abs(B2*x2n1 + A2*y2n0 - A2*B2);
-		long y_step = abs(B2*x2n0 + A2*y2n1 - A2*B2);
-		long both = abs(B2*x2n1 + A2*y2n1 - A2*B2);
-		long smallest = x_step;
+		//careful for the overflow error using regular abs()
+		long long x_step = llabs(B2*x2n1 + A2*y2n0 - A2*B2);
+		long long y_step = llabs(B2*x2n0 + A2*y2n1 - A2*B2);
+		long long both = llabs(B2*x2n1 + A2*y2n1 - A2*B2);
+		long long smallest = x_step;
 		if (y_step < smallest)
 			smallest = y_step;
 		if (both < smallest)
 			smallest = both;
 		//now that  we have the smallest
-
 		if (smallest == x_step)
 		{
 			x -= 2; //update x
@@ -111,14 +114,23 @@ struct EllipsePoint *calculate_ellipse(short A, short B)
 
 int main(int argc, char *argv[])
 {
-	struct EllipsePoint * head = calculate_ellipse(10,10);
+	//will return NULL if a or b is larger than 0x7FFF
+	unsigned short a = 0x7FFF;
+	unsigned short b = 0x7FFF;
+	struct EllipsePoint * head = calculate_ellipse(a,b);
+	if (head == NULL)
+	{
+		return 1;
+	}
 	EllipsePoint * node = head;
+	
 	while (node->next != NULL)
 	{
 		EllipsePoint_print(node);
 		node = node->next;
 	}
 	EllipsePoint_print(node);
+	
 	cout << "backwards" << endl;
 
 	while (node->prev != NULL)
@@ -127,5 +139,6 @@ int main(int argc, char *argv[])
 		node = node->prev;
 	}
 	EllipsePoint_print(node);
+	
 	return 0;
 }
