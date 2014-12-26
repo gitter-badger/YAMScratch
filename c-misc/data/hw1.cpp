@@ -14,11 +14,13 @@ using namespace std;
 struct EllipsePoint {
 	int x;
 	int y;
-	struct EllipsePoint *next;
+	EllipsePoint *next;
+	EllipsePoint *prev;
+
 };
 
 //create a new point
-struct EllipsePoint *EllipsePoint_create(int x, int y,struct EllipsePoint *next)
+struct EllipsePoint *EllipsePoint_create(int x, int y, EllipsePoint *prev, EllipsePoint *next)
 {
 	struct EllipsePoint *point = new EllipsePoint;
 	assert(point !=NULL);
@@ -50,7 +52,7 @@ struct EllipsePoint *calculate_ellipse(short A, short B)
 	//create first element of list
 	short x = A -1;
 	short y = y_offset;
-	EllipsePoint * head = EllipsePoint_create(x,y,NULL);
+	EllipsePoint * head = EllipsePoint_create(x,y,NULL,NULL);
 	//precompute the squares
 	long x2n0 = x*x;
 	long y2n0 = y*y;
@@ -70,17 +72,21 @@ struct EllipsePoint *calculate_ellipse(short A, short B)
 		if (both < smallest)
 			smallest = both;
 		//now that  we have the smallest
+
 		if (smallest == x_step)
 		{
 			x -= 2; //update x
 			x2n0 = x2n1; //update the precompute value
-			head = EllipsePoint_create(x,y,head);
+			head = EllipsePoint_create(x,y,NULL,head);
+			head->next->prev = head;
+
 		}
 		else if (smallest == y_step)
 		{
 			y += 2;
 			y2n0 = y2n1;
-			head = EllipsePoint_create(x,y,head);
+			head = EllipsePoint_create(x,y,NULL,head);
+			head->next->prev = head;
 		}
 		else
 		{
@@ -88,7 +94,8 @@ struct EllipsePoint *calculate_ellipse(short A, short B)
 			y += 2;
 			x2n0 = x2n1;
 			y2n0 = y2n1;
-			head = EllipsePoint_create(x,y,head);
+			head = EllipsePoint_create(x,y,NULL,head);
+			head->next->prev = head;
 		}
 	
 	}
@@ -96,7 +103,8 @@ struct EllipsePoint *calculate_ellipse(short A, short B)
 	while (x > 1)
 	{
 		x -= 2;
-		head = EllipsePoint_create(x,y,head);
+		head = EllipsePoint_create(x,y,NULL,head);
+		head->next->prev = head;
 	}
 	return head;
 }
@@ -105,12 +113,19 @@ int main(int argc, char *argv[])
 {
 	struct EllipsePoint * head = calculate_ellipse(10,10);
 	EllipsePoint * node = head;
-	while (node != NULL)
+	while (node->next != NULL)
 	{
 		EllipsePoint_print(node);
 		node = node->next;
 	}
-	cout << "Head node" << endl;
-	EllipsePoint_print(head);
+	EllipsePoint_print(node);
+	cout << "backwards" << endl;
+
+	while (node->prev != NULL)
+	{
+		EllipsePoint_print(node);
+		node = node->prev;
+	}
+	EllipsePoint_print(node);
 	return 0;
 }
