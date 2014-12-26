@@ -43,11 +43,6 @@ void EllipsePoint_destroy(struct EllipsePoint *point)
 struct EllipsePoint *calculate_ellipse(short A, short B)
 { /* this will create a list of points on the ellipse starting 
 	closest to x =0, y= max */
-<<<<<<< HEAD
-=======
-	assert(A <= 0xFFFF); // testing to prevent overflows
-	assert(B <= 0xFFFF);
->>>>>>> 27835bb1912b1d89968f985994853606ae62534f
 	long A2 = A*A; //should be 64 bits on unix platform
 	long B2 = B*B;
 	char x_offset = (A+1)%2;
@@ -115,10 +110,7 @@ int main(int argc, char *argv[])
 		EllipsePoint_print(node);
 		node = node->next;
 	}
-<<<<<<< HEAD
 	cout << "Head node" << endl;
 	EllipsePoint_print(head);
-=======
->>>>>>> 27835bb1912b1d89968f985994853606ae62534f
 	return 0;
 }
