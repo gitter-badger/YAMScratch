@@ -320,6 +320,40 @@ int output_isosceles_triangle(int height, string pattern, string filename)
 	return 0;
 }
 
+int output_square(int height, string pattern, string filename)
+{
+	char border = '*';
+	ofstream file(filename.c_str());
+	if(!file.good())
+	{
+		cerr << "Failed to open output file: " << filename << endl;
+		return 1; // indicate failure to open stream
+	}
+	size_t ring_length = pattern.length();
+	int pattern_index = 0;
+	for(int i = 0; i < height; i++)
+	{
+		char buffer[height+1];
+		buffer[height] = '\x0'; //null terminate
+		buffer[height-1] = border;
+		buffer[0] = border;
+		for(int j = 1; j < height-1;j++)
+			{
+			if( i == 0 || i == height - 1)
+			{
+				buffer[j] = border;
+			}
+			else
+			{
+				buffer[j] = pattern[pattern_index];
+				pattern_index = (pattern_index+1)%ring_length;
+			}
+		}
+		cout << buffer << endl;
+	}
+	return 0;
+}
+
 void print_commands(string wrong_command)
 {
 	cerr << '<' << wrong_command << "> Is not a valid command" << endl << endl;
@@ -349,6 +383,11 @@ int main(int argc, char *argv[])
 		if (command == string("bat"))
 		{
 			cout << "Im batman" << endl;
+		}
+		else if (command == string("square"))
+		{
+			int code = output_square(height,pattern,argv[4]);
+			return code;
 		}
 		else if (command == string("right_triangle"))
 		{
