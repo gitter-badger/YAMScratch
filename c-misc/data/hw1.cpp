@@ -53,7 +53,7 @@ void EllipsePoint_destroy(EllipsePoint *point)
 EllipsePoint *calculate_ellipse(unsigned short A, unsigned short B, EllipsePoint *tail)
 { /* this will create a list of points on the ellipse starting 
 	closest to x =0, y= max */
-	if ( (A >= 0x7FFF) || (B >= 0x7FFF))
+	if ((A > 0x7FFF) || (B > 0x7FFF))
 	{
 		cout << "too big" << endl;
 		return NULL;
@@ -86,12 +86,10 @@ EllipsePoint *calculate_ellipse(unsigned short A, unsigned short B, EllipsePoint
 	long long y2n0 = y*y;
 	out << "(x,y) = (" << head->x << ',' << head->y << ')' << endl;
 	while(head->y < B-1)
-	{
-		//testing
-		
+	{		
 		//recursively compute the next steps
-		long long x2n1 = x2n0 - x<<2 + 4;
-		long long y2n1 = y2n0 + y<<2 + 4;
+		long long x2n1 = x2n0 - (x<<2) + 4;
+		long long y2n1 = y2n0 + (y<<2) + 4;
 		//compute the steps
 		//careful for the overflow error using regular abs()
 		long long x_step = llabs(B2*x2n1 + A2*y2n0 - A2*B2);
@@ -144,6 +142,11 @@ EllipsePoint *calculate_ellipse(unsigned short A, unsigned short B, EllipsePoint
 
 int output_ellipse_moire(short width, short height, string pattern, string filename)
 {
+	//set the border character here
+	const char border = '*';
+	//use a non printing control character to make the outline
+	const char first_pass = 1;
+
 	//we pass in the tail so that we can run this function and the generator in separate threads
 	int x_offset = (width+1)%2;
 	int y_offset = (height+1)%2;
@@ -169,7 +172,6 @@ int output_ellipse_moire(short width, short height, string pattern, string filen
 	{
 		int x = node->y; //swap the x and y
 		int y = node->x;
-		EllipsePoint_print(node);
 		signed int x_quadrants[4] = {(x - x_offset + width)>>1,\
 									(-x - x_offset + width)>>1,\
 									(x - x_offset + width)>>1,\
@@ -183,8 +185,7 @@ int output_ellipse_moire(short width, short height, string pattern, string filen
 		{
 			int x_index = x_quadrants[i];
 			int y_index = y_quadrants[i];
-			cout << x_index << "," << y_index << endl;
-			output_buffer[y_index][x_index] = '#';
+			output_buffer[y_index][x_index] = first_pass; //use a nonprinting control character
 			if (x_index >= width>>1)
 			{
 				//null terminate the string, because x coord is strictly increasing
@@ -195,12 +196,45 @@ int output_ellipse_moire(short width, short height, string pattern, string filen
 		node = node->prev; // move to next point
 	}
 	delete node;
+	//get the length of the pattern
+	size_t ring_length = pattern.length();
+	// fill in the pattern
+	int crossing_count;
+	int pattern_index = 0;
+	for(int i = 0; i < height; i++)
+	{
+		crossing_count = 0;
+		bool crossing_flag = false;
+		//the rows
+		for(int j = 0; j < width; j++)
+		{
+			if (output_buffer[i][j] == first_pass)
+			{
+				if(!crossing_flag) crossing_flag = true;
+				output_buffer[i][j] = border; //remap the border
+			}
+			else if (output_buffer[i][j] == '\x0')
+			{
+				break;
+			}
+			else if(crossing_flag)
+			{
+				crossing_flag = false;
+				crossing_count++;
+			}
+
+			if (crossing_count%2 && !crossing_flag)
+			{
+				output_buffer[i][j] = pattern[pattern_index];
+				pattern_index = (pattern_index + 1)%ring_length;
+			}
+		}
+	}
 	//print out the output
 	for(int j = 0;j<height;j++)
 	{
 		cout << output_buffer[j] << endl;
 	}
-	
 	return 0;
 }
 
@@ -241,7 +275,12 @@ int main(int argc, char *argv[])
 		}
 		else if (command == string("circle"))
 		{
-			int code = output_ellipse_moire(30,30,pattern,argv[4]);
+			int code = output_ellipse_moire(height,height,pattern,argv[4]);
+			return code;
+		}
+		else if (command == string("ellipse"))
+		{
+			int code = output_ellipse_moire(80,height,argv[4]);
 			return code;
 		}
 		else //default
@@ -260,7 +299,7 @@ int main(int argc, char *argv[])
 
 		unsigned short c = 30;
 		EllipsePoint * tail = new EllipsePoint;
-		EllipsePoint * head = calculate_ellipse(c,c,tail);
+		EllipsePoint * head = calculate_ellipse(a,b,tail);
 		if (head == NULL)
 		{
 			return 1;
