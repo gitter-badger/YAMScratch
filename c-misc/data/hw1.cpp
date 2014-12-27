@@ -58,17 +58,11 @@ EllipsePoint *calculate_ellipse(unsigned short A, unsigned short B, EllipsePoint
 		cout << "too big" << endl;
 		return NULL;
 	}
-
 	assert(tail != NULL);
-	ofstream out("out3.txt");
-	out << "width: " << A << " height: " << B << endl;
-
 	long long A2 = A*A; //should be 64 bits on unix platform
 	long long B2 = B*B;
 	int x_offset = (A+1)%2;
 	int y_offset = (B+1)%2;
-	//
-	out << x_offset << "," << y_offset << endl;
 	//create first element of list
 	short x = A -1;
 	short y = y_offset;
@@ -84,7 +78,6 @@ EllipsePoint *calculate_ellipse(unsigned short A, unsigned short B, EllipsePoint
 	//precompute the squares
 	long long x2n0 = x*x;
 	long long y2n0 = y*y;
-	out << "(x,y) = (" << head->x << ',' << head->y << ')' << endl;
 	while(head->y < B-1)
 	{		
 		//recursively compute the next steps
@@ -125,7 +118,6 @@ EllipsePoint *calculate_ellipse(unsigned short A, unsigned short B, EllipsePoint
 			head = EllipsePoint_create(x,y,NULL,head);
 			head->next->prev = head;
 		}
-		out << "(x,y) = (" << head->x << ',' << head->y << ')' << endl;
 	}
 	//burn down the x error
 	while (x > 1)
@@ -133,10 +125,8 @@ EllipsePoint *calculate_ellipse(unsigned short A, unsigned short B, EllipsePoint
 		x -= 2;
 		head = EllipsePoint_create(x,y,NULL,head);
 		head->next->prev = head;
-		//testing
-		out << "(x,y) = (" << head->x << ',' << head->y << ')' << endl;
 	}
-	head->done = true; //
+	head->done = true; // finish the list
 	return head;
 }
 
@@ -230,9 +220,11 @@ int output_ellipse_moire(short width, short height, string pattern, string filen
 			}
 		}
 	}
+	ofstream file(filename.c_str());
 	//print out the output
 	for(int j = 0;j<height;j++)
 	{
+		file << output_buffer[j] << endl;
 		cout << output_buffer[j] << endl;
 	}
 	return 0;
@@ -280,7 +272,7 @@ int main(int argc, char *argv[])
 		}
 		else if (command == string("ellipse"))
 		{
-			int code = output_ellipse_moire(80,height,argv[4]);
+			int code = output_ellipse_moire(80,height,pattern,argv[4]);
 			return code;
 		}
 		else //default
