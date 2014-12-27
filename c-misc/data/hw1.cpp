@@ -154,6 +154,8 @@ int output_ellipse_moire(short width, short height, string pattern, string filen
 	EllipsePoint * node = tail;
 	//create new thread here
 	EllipsePoint * head = calculate_ellipse(height, width,tail);
+	head = NULL; //head is not used here
+
 	//we reverse the order of the x and y so that the tail has
 	//the minimum x coordinate in the y
 	//in effect we are reflecting about the y =x axis to increment
@@ -183,9 +185,12 @@ int output_ellipse_moire(short width, short height, string pattern, string filen
 				output_buffer[y_index][x_index+1] = '\x0';
 			}
 		}
+		delete node->next; // free the memory
+		node->next = NULL;
 		node = node->prev; // move to next point
 	}
 	delete node;
+	tail = NULL; //remove the dangling pointer
 	//get the length of the pattern
 	size_t ring_length = pattern.length();
 	// fill in the pattern
@@ -234,6 +239,11 @@ int output_right_triangle_moire(int height, string pattern, string filename)
 {
 	char border = '*';
 	ofstream file(filename.c_str());
+	if(!file.good())
+	{
+		cerr << "Failed to open output file: " << filename << endl;
+		return 1; // indicate failure to open stream
+	}
 	size_t ring_length = pattern.length();
 	int pattern_index = 0;
 	for(int i = 0; i < height; i++)
@@ -257,6 +267,56 @@ int output_right_triangle_moire(int height, string pattern, string filename)
 		cout << buffer << endl;
 		file << buffer << endl;
 	}
+	return 0;
+}
+
+int output_isosceles_triangle(int height, string pattern, string filename)
+{
+	char border = '*';
+	ofstream file(filename.c_str());
+	if(!file.good())
+	{
+		cerr << "Failed to open output file: " << filename << endl;
+		return 1; // indicate failure to open stream
+	}
+	size_t ring_length = pattern.length();
+	int pattern_index = 0;
+	for(int i = 0; i < height; i++)
+	{
+		char buffer[(height + i +1)];//leave room for the null terminator
+		int left = height-i-1;
+		int right = height+ i -1;
+		//cout << left << "," << right << endl;
+		buffer[right] = border;
+		//cout << height +i << endl;
+		buffer[height + i] = '\x0';
+		for(int j = 0; j < right; j++)
+		{
+			//cout << j << endl;
+			if(i != height -1)
+			{
+				if (j < left)
+				{
+					buffer[j] = ' ';
+				}
+				else if (j == left)
+				{
+					buffer[j] = border;
+				}
+				else
+				{
+					buffer[j] = pattern[pattern_index];
+					pattern_index = (pattern_index+1)%ring_length;
+				}
+			}
+			else
+			{
+				buffer[j] = border;
+			}
+		}
+		cout << buffer << endl;
+		file << buffer << endl;
+	}	
 	return 0;
 }
 
@@ -284,7 +344,7 @@ int main(int argc, char *argv[])
 		int height = atoi(string_height.c_str());
 		string command = string(argv[3]);
 		//cout << pattern << height << command  << out_filename << endl;
-		ofstream out_str(argv[4]); //open the file for output
+		string filename = argv[4];
 		//select from the commands available
 		if (command == string("bat"))
 		{
@@ -292,7 +352,12 @@ int main(int argc, char *argv[])
 		}
 		else if (command == string("right_triangle"))
 		{
-			int code = output_right_triangle_moire(height,pattern,argv[4]);
+			int code = output_right_triangle_moire(height,pattern,filename.c_str());
+			return code;
+		}
+		else if (command == string("isosceles_triangle"))
+		{
+			int code = output_isosceles_triangle(height, pattern, argv[4]);
 			return code;
 		}
 		else if (command == string("circle"))
