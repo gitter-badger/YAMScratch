@@ -1,6 +1,9 @@
 #include <iostream>
+#include <istream>
 #include <stdlib.h>
 #include <assert.h>
+#include <string>
+#include <fstream>
 
 using namespace std;
 
@@ -11,22 +14,27 @@ using namespace std;
 //we will never walk backwards
 //simple implementaation is fine
 //afterwards we will walk along and delete every node
+
+//should allow adoption of threaded model with less work
 struct EllipsePoint {
-	int x;
+	int x; //store the grid location
 	int y;
+	int index_x; //store the pixel location
+	int index_y;
 	EllipsePoint *next;
 	EllipsePoint *prev;
-
+	bool done; //flag to let the other thread know we are done
 };
 
 //create a new point
-struct EllipsePoint *EllipsePoint_create(int x, int y, EllipsePoint *prev, EllipsePoint *next)
+EllipsePoint *EllipsePoint_create(int x, int y, EllipsePoint *prev, EllipsePoint *next)
 {
-	struct EllipsePoint *point = new EllipsePoint;
-	assert(point !=NULL);
+	EllipsePoint *point = new EllipsePoint;
+	assert(point != NULL);
 	point->x = x;
 	point->y = y;
 	point->next = next;
+	point->done = false;
 	return point;
 }
 
@@ -35,36 +43,55 @@ void EllipsePoint_print(EllipsePoint *point)
 	cout << "(x,y) = (" << point->x << ',' << point->y << ')' << endl;
 }
 
-void EllipsePoint_destroy(struct EllipsePoint *point)
+void EllipsePoint_destroy(EllipsePoint *point)
 {
 	assert(point != NULL);
 	delete point;
 }
 
 //build one quarter of the ellipse
-struct EllipsePoint *calculate_ellipse(unsigned short A, unsigned short B)
+EllipsePoint *calculate_ellipse(unsigned short A, unsigned short B, EllipsePoint *tail)
 { /* this will create a list of points on the ellipse starting 
 	closest to x =0, y= max */
-	if ( (A > 0x7FFF) || (B > 0x7FFF))
+	if ( (A >= 0x7FFF) || (B >= 0x7FFF))
 	{
+		cout << "too big" << endl;
 		return NULL;
 	}
+
+	assert(tail != NULL);
+	ofstream out("out3.txt");
+	out << "width: " << A << " height: " << B << endl;
+
 	long long A2 = A*A; //should be 64 bits on unix platform
 	long long B2 = B*B;
-	char x_offset = (A+1)%2;
-	char y_offset = (B+1)%2;
+	int x_offset = (A+1)%2;
+	int y_offset = (B+1)%2;
+	//
+	out << x_offset << "," << y_offset << endl;
 	//create first element of list
 	short x = A -1;
 	short y = y_offset;
-	EllipsePoint * head = EllipsePoint_create(x,y,NULL,NULL);
+
+	//manually create the first node
+	tail->x = x;
+	tail->y = y;
+	tail->next = NULL;
+	tail->prev = NULL;
+	tail->done = true;
+
+	EllipsePoint * head = tail;
 	//precompute the squares
 	long long x2n0 = x*x;
 	long long y2n0 = y*y;
+	out << "(x,y) = (" << head->x << ',' << head->y << ')' << endl;
 	while(head->y < B-1)
 	{
+		//testing
+		
 		//recursively compute the next steps
-		long long x2n1 = x2n0 - 4*x + 4;
-		long long y2n1 = y2n0 + 4*y + 4;
+		long long x2n1 = x2n0 - x<<2 + 4;
+		long long y2n1 = y2n0 + y<<2 + 4;
 		//compute the steps
 		//careful for the overflow error using regular abs()
 		long long x_step = llabs(B2*x2n1 + A2*y2n0 - A2*B2);
@@ -100,7 +127,7 @@ struct EllipsePoint *calculate_ellipse(unsigned short A, unsigned short B)
 			head = EllipsePoint_create(x,y,NULL,head);
 			head->next->prev = head;
 		}
-	
+		out << "(x,y) = (" << head->x << ',' << head->y << ')' << endl;
 	}
 	//burn down the x error
 	while (x > 1)
@@ -108,37 +135,141 @@ struct EllipsePoint *calculate_ellipse(unsigned short A, unsigned short B)
 		x -= 2;
 		head = EllipsePoint_create(x,y,NULL,head);
 		head->next->prev = head;
+		//testing
+		out << "(x,y) = (" << head->x << ',' << head->y << ')' << endl;
 	}
+	head->done = true; //
 	return head;
+}
+
+int output_ellipse_moire(short width, short height, string pattern, string filename)
+{
+	//we pass in the tail so that we can run this function and the generator in separate threads
+	int x_offset = (width+1)%2;
+	int y_offset = (height+1)%2;
+	char output_buffer[height][width+1]; //add room for null terminator
+	for(int i = 0; i < height; i++)
+	{
+		for(int j =0; j < width; j++)
+		{
+			output_buffer[i][j] = ' ';
+		}
+		output_buffer[i][width] = '\x0';
+	}
+	//reverse the elements
+	EllipsePoint * tail = new EllipsePoint;
+	EllipsePoint * node = tail;
+	//create new thread here
+	EllipsePoint * head = calculate_ellipse(height, width,tail);
+	//we reverse the order of the x and y so that the tail has
+	//the minimum x coordinate in the y
+	//in effect we are reflecting about the y =x axis to increment
+	//by x while the algorithim is incrementing y
+	while (node != NULL)
+	{
+		int x = node->y; //swap the x and y
+		int y = node->x;
+		EllipsePoint_print(node);
+		signed int x_quadrants[4] = {(x - x_offset + width)>>1,\
+									(-x - x_offset + width)>>1,\
+									(x - x_offset + width)>>1,\
+									(-x - x_offset + width)>>1};
+		signed int y_quadrants[4] = {(-y - y_offset + height)>>1,\
+									(-y - y_offset + height)>>1,\
+									(y - y_offset + height)>>1,\
+									(y - y_offset + height)>>1};
+
+		for(char i = 0; i < 4; i++)
+		{
+			int x_index = x_quadrants[i];
+			int y_index = y_quadrants[i];
+			cout << x_index << "," << y_index << endl;
+			output_buffer[y_index][x_index] = '#';
+			if (x_index >= width>>1)
+			{
+				//null terminate the string, because x coord is strictly increasing
+				//a null will be overwritten if a point has a greater x_coord 
+				output_buffer[y_index][x_index+1] = '\x0';
+			}
+		}
+		node = node->prev; // move to next point
+	}
+	delete node;
+	//print out the output
+	for(int j = 0;j<height;j++)
+	{
+		cout << output_buffer[j] << endl;
+	}
+	
+	return 0;
+}
+
+
+void print_commands(string wrong_command)
+{
+	cerr << '<' << wrong_command << "> Is not a valid command" << endl << endl;
+	cerr << "Commands:" << endl;
+	cerr << "  square \t\t" << endl;
+	cerr << "  right_triangle\tplaceholder" << endl;
+	cerr << "  isoceles_triangle\tplaceholder" << endl;
+}
+
+void print_usage(void)
+{
+
 }
 
 int main(int argc, char *argv[])
 {
-	//will return NULL if a or b is larger than 0x7FFF
-	unsigned short a = 0x7FFF;
-	unsigned short b = 0x7FFF;
-	struct EllipsePoint * head = calculate_ellipse(a,b);
-	if (head == NULL)
+	if (argc == 5)
 	{
-		return 1;
-	}
-	EllipsePoint * node = head;
-	
-	while (node->next != NULL)
-	{
-		EllipsePoint_print(node);
-		node = node->next;
-	}
-	EllipsePoint_print(node);
-	
-	cout << "backwards" << endl;
+		//assign the
+		string pattern = string(argv[1]);
+		string string_height = string(argv[2]);
+		int height = atoi(string_height.c_str());
+		string command = string(argv[3]);
+		//cout << pattern << height << command  << out_filename << endl;
+		ofstream out_str(argv[4]); //open the file for output
+		//select from the commands available
+		if (command == string("bat"))
+		{
+			cout << "Im batman" << endl;
+		}
+		else if (command == string("foo"))
+		{
+			cout << "not a fool" << endl;
+		}
+		else if (command == string("circle"))
+		{
+			int code = output_ellipse_moire(30,30,pattern,argv[4]);
+			return code;
+		}
+		else //default
+		{
+			print_commands(command);
+			exit(1);
+		}
+		return 0;
 
-	while (node->prev != NULL)
-	{
-		EllipsePoint_print(node);
-		node = node->prev;
 	}
-	EllipsePoint_print(node);
-	
-	return 0;
+	else if (argc == 1)
+	{
+		//will return NULL if a or b is larger than 0x7FFF
+		unsigned short a = 0x7FFF;
+		unsigned short b = 0x7FFF;
+
+		unsigned short c = 30;
+		EllipsePoint * tail = new EllipsePoint;
+		EllipsePoint * head = calculate_ellipse(c,c,tail);
+		if (head == NULL)
+		{
+			return 1;
+		}
+		EllipsePoint_print(tail);
+		EllipsePoint_print(tail->prev);
+		EllipsePoint_print(head);
+		//clean up the ellipse
+
+		return 0;
+	}
 }
