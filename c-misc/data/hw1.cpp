@@ -230,6 +230,10 @@ int output_ellipse_moire(short width, short height, string pattern, string filen
 	return 0;
 }
 
+int output_right_triangle_moire(int height, string pattern, string filename)
+{
+	return 0;
+}
 
 void print_commands(string wrong_command)
 {
