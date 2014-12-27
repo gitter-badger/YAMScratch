@@ -232,6 +232,31 @@ int output_ellipse_moire(short width, short height, string pattern, string filen
 
 int output_right_triangle_moire(int height, string pattern, string filename)
 {
+	char border = '*';
+	ofstream file(filename.c_str());
+	size_t ring_length = pattern.length();
+	int pattern_index = 0;
+	for(int i = 0; i < height; i++)
+	{
+		char buffer[i+1];
+		buffer[0] = border;
+		buffer[i] = border;
+		buffer[i+1] = '\x0';
+		for(int j = 1;j < i;j++)
+		{
+			if (i != height-1)
+			{
+				buffer[j] = pattern[pattern_index];
+				pattern_index = (pattern_index+1)%ring_length;
+			}
+			else
+			{
+				buffer[j] = border;
+			}
+		}
+		cout << buffer << endl;
+		file << buffer << endl;
+	}
 	return 0;
 }
 
@@ -265,9 +290,10 @@ int main(int argc, char *argv[])
 		{
 			cout << "Im batman" << endl;
 		}
-		else if (command == string("foo"))
+		else if (command == string("right_triangle"))
 		{
-			cout << "not a fool" << endl;
+			int code = output_right_triangle_moire(height,pattern,argv[4]);
+			return code;
 		}
 		else if (command == string("circle"))
 		{
