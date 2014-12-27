@@ -185,11 +185,13 @@ int output_ellipse_moire(short width, short height, string pattern, string filen
 				output_buffer[y_index][x_index+1] = '\x0';
 			}
 		}
-		delete node->next; // free the memory
+		if(node->next != NULL)
+			EllipsePoint_destroy(node->next); // free the memory
 		node->next = NULL;
 		node = node->prev; // move to next point
 	}
-	delete node;
+	assert(node == NULL);
+	EllipsePoint_print(tail);
 	tail = NULL; //remove the dangling pointer
 	//get the length of the pattern
 	size_t ring_length = pattern.length();
@@ -356,16 +358,16 @@ int output_square(int height, string pattern, string filename)
 
 void print_commands(string wrong_command)
 {
-	cerr << '<' << wrong_command << "> Is not a valid command" << endl << endl;
-	cerr << "Commands:" << endl;
-	cerr << "  square \t\t" << endl;
-	cerr << "  right_triangle\tplaceholder" << endl;
-	cerr << "  isoceles_triangle\tplaceholder" << endl;
+	cout << '<' << wrong_command << "> Is not a valid command" << endl << endl;
+	cout << "Commands:" << endl;
+	cout << "  square \t\t" << endl;
+	cout << "  right_triangle\tplaceholder" << endl;
+	cout << "  isoceles_triangle\tplaceholder" << endl;
 }
 
 void print_usage(void)
 {
-
+	cout <<
 }
 
 int main(int argc, char *argv[])

@@ -2,7 +2,7 @@
 BIN = ./bin/
 SOURCE = ./source/
 
-LIST=$(BIN)ex16 $(BIN)ex17
+LIST=$(BIN)ex16 $(BIN)ex17 $(BIN)just
 CC = gcc
 
 all: $(LIST)
