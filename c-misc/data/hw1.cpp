@@ -151,7 +151,6 @@ int output_ellipse_moire(short width, short height, string pattern, string filen
 	}
 	//reverse the elements
 	EllipsePoint * tail = new EllipsePoint;
-	EllipsePoint * node = tail;
 	//create new thread here
 	EllipsePoint * head = calculate_ellipse(height, width,tail);
 	head = NULL; //head is not used here
@@ -160,10 +159,10 @@ int output_ellipse_moire(short width, short height, string pattern, string filen
 	//the minimum x coordinate in the y
 	//in effect we are reflecting about the y =x axis to increment
 	//by x while the algorithim is incrementing y
-	while (node != NULL)
+	while (tail != NULL)
 	{
-		int x = node->y; //swap the x and y
-		int y = node->x;
+		int x = tail->y; //swap the x and y
+		int y = tail->x;
 		signed int x_quadrants[4] = {(x - x_offset + width)>>1,\
 									(-x - x_offset + width)>>1,\
 									(x - x_offset + width)>>1,\
@@ -185,14 +184,26 @@ int output_ellipse_moire(short width, short height, string pattern, string filen
 				output_buffer[y_index][x_index+1] = '\x0';
 			}
 		}
-		if(node->next != NULL)
-			EllipsePoint_destroy(node->next); // free the memory
-		node->next = NULL;
-		node = node->prev; // move to next point
+		
+		if(tail->prev != NULL)
+		{
+			tail = tail->prev; // move to next point
+			//cout << "now on ";
+			//EllipsePoint_print(tail);
+			//cout << "deleting ";
+			//EllipsePoint_print(tail->next);
+			EllipsePoint_destroy(tail->next); // free the memory
+			tail->next = NULL;
+		}
+		else
+		{
+			//cout << "final delete";
+			//EllipsePoint_print(tail);
+			EllipsePoint_destroy(tail);
+			tail = NULL;
+		}
 	}
-	assert(node == NULL);
-	EllipsePoint_print(tail);
-	tail = NULL; //remove the dangling pointer
+	assert(tail == NULL);
 	//get the length of the pattern
 	size_t ring_length = pattern.length();
 	// fill in the pattern
@@ -358,16 +369,16 @@ int output_square(int height, string pattern, string filename)
 
 void print_commands(string wrong_command)
 {
-	cout << '<' << wrong_command << "> Is not a valid command" << endl << endl;
-	cout << "Commands:" << endl;
-	cout << "  square \t\t" << endl;
-	cout << "  right_triangle\tplaceholder" << endl;
-	cout << "  isoceles_triangle\tplaceholder" << endl;
+	cerr << '<' << wrong_command << "> Is not a valid command" << endl << endl;
+	cerr << "Commands:" << endl;
+	cerr << "  square \t\t" << endl;
+	cerr << "  right_triangle\tplaceholder" << endl;
+	cerr << "  isoceles_triangle\tplaceholder" << endl;
 }
 
 void print_usage(void)
 {
-	cout <<
+	cerr << endl;
 }
 
 int main(int argc, char *argv[])
