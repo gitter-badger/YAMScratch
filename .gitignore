@@ -1,5 +1,25 @@
 *.o
 *.exe
 *.class
-bin/
 *.dat
+
+#hide the sublime packages
+*.sublime-package*
+
+include/
+bin/
+motivator/Matlab/
+
+#ignore test input files
+PracticeInput*
+out.txt
+
+#ignore archives
+*.tgz
+*.zip
+*.gz
+
+#ignore images
+*.jpg
+*.png
+*.bmp
