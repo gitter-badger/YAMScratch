@@ -130,7 +130,7 @@ EllipsePoint *calculate_ellipse(unsigned short A, unsigned short B, EllipsePoint
 	return head;
 }
 
-int output_ellipse_moire(short width, short height, string pattern, string filename)
+int output_ellipse_moire(short width, short height, string pattern, ofstream & file)
 {
 	//set the border character here
 	const char border = '*';
@@ -238,7 +238,6 @@ int output_ellipse_moire(short width, short height, string pattern, string filen
 			}
 		}
 	}
-	ofstream file(filename.c_str());
 	//print out the output
 	for(int j = 0;j<height;j++)
 	{
@@ -248,15 +247,9 @@ int output_ellipse_moire(short width, short height, string pattern, string filen
 	return 0;
 }
 
-int output_right_triangle_moire(int height, string pattern, string filename)
+int output_right_triangle_moire(int height, string pattern, ofstream & file)
 {
 	char border = '*';
-	ofstream file(filename.c_str());
-	if(!file.good())
-	{
-		cerr << "Failed to open output file: " << filename << endl;
-		return 1; // indicate failure to open stream
-	}
 	size_t ring_length = pattern.length();
 	int pattern_index = 0;
 	for(int i = 0; i < height; i++)
@@ -283,15 +276,9 @@ int output_right_triangle_moire(int height, string pattern, string filename)
 	return 0;
 }
 
-int output_isosceles_triangle(int height, string pattern, string filename)
+int output_isosceles_triangle(int height, string pattern, ofstream & file)
 {
 	char border = '*';
-	ofstream file(filename.c_str());
-	if(!file.good())
-	{
-		cerr << "Failed to open output file: " << filename << endl;
-		return 1; // indicate failure to open stream
-	}
 	size_t ring_length = pattern.length();
 	int pattern_index = 0;
 	for(int i = 0; i < height; i++)
@@ -333,15 +320,10 @@ int output_isosceles_triangle(int height, string pattern, string filename)
 	return 0;
 }
 
-int output_square(int height, string pattern, string filename)
+int output_square(int height, string pattern, ofstream  &  file)
 {
 	char border = '*';
-	ofstream file(filename.c_str());
-	if(!file.good())
-	{
-		cerr << "Failed to open output file: " << filename << endl;
-		return 1; // indicate failure to open stream
-	}
+	//ofstream file(filename.c_str());
 	size_t ring_length = pattern.length();
 	int pattern_index = 0;
 	for(int i = 0; i < height; i++)
@@ -364,6 +346,11 @@ int output_square(int height, string pattern, string filename)
 		}
 		cout << buffer << endl;
 	}
+	return 0;
+}
+
+int output_bat_symbol(short height, string pattern, ofstream & out_ptr)
+{
 	return 0;
 }
 
@@ -391,7 +378,12 @@ int main(int argc, char *argv[])
 		int height = atoi(string_height.c_str());
 		string command = string(argv[3]);
 		//cout << pattern << height << command  << out_filename << endl;
-		string filename = argv[4];
+		ofstream out_str(argv[4]);
+		if(!out_str.good())
+		{	
+			cerr << "Failed to open output file: " << argv[4] <<endl;
+			return 1; // indicate failure to open stream
+		}
 		//select from the commands available
 		if (command == string("bat"))
 		{
@@ -399,27 +391,28 @@ int main(int argc, char *argv[])
 		}
 		else if (command == string("square"))
 		{
-			int code = output_square(height,pattern,argv[4]);
+			ofstream file(argv[4]);
+			int code = output_square(height,pattern, out_str);
 			return code;
 		}
 		else if (command == string("right_triangle"))
 		{
-			int code = output_right_triangle_moire(height,pattern,filename.c_str());
+			int code = output_right_triangle_moire(height,pattern,out_str);
 			return code;
 		}
 		else if (command == string("isosceles_triangle"))
 		{
-			int code = output_isosceles_triangle(height, pattern, argv[4]);
+			int code = output_isosceles_triangle(height, pattern, out_str);
 			return code;
 		}
 		else if (command == string("circle"))
 		{
-			int code = output_ellipse_moire(height,height,pattern,argv[4]);
+			int code = output_ellipse_moire(height,height,pattern,out_str);
 			return code;
 		}
 		else if (command == string("ellipse"))
 		{
-			int code = output_ellipse_moire(80,height,pattern,argv[4]);
+			int code = output_ellipse_moire(80,height,pattern,out_str);
 			return code;
 		}
 		else //default
