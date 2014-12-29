@@ -24,6 +24,8 @@ int output_ellipse_moire(short width, short height, string pattern, ofstream & f
 	//we pass in the tail so that we can run this function and the generator in separate threads
 	int x_offset = (width+1)%2;
 	int y_offset = (height+1)%2;
+	//we do not need a 
+
 	char output_buffer[height][width+1]; //add room for null terminator
 	for(int i = 0; i < height; i++)
 	{
@@ -125,8 +127,8 @@ int output_ellipse_moire(short width, short height, string pattern, ofstream & f
 	//print out the output
 	for(int j = 0;j<height;j++)
 	{
-		file << output_buffer[j] << endl;
-		cout << output_buffer[j] << endl;
+		//file << output_buffer[j] << endl;
+		//cout << output_buffer[j] << endl;
 	}
 	return 0;
 }
