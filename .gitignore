@@ -10,7 +10,7 @@ include/
 bin/
 motivator/Matlab/
 Data\ Structures/
-c-misc/data/*.txt
+c-misc/DS\ projects/*.txt
 
 #ignore test input files
 PracticeInput*
