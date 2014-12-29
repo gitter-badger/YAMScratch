@@ -1,7 +1,7 @@
 YAMScratch
 ==========
 
-Code scratch pad using power of Git. These aren't the droids you're looking for.
+Code scratch pad tracked with Git. Nothing important. These aren't the droids you're looking for.
 
 
 Ideas for hackathon:
