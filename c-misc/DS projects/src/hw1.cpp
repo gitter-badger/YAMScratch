@@ -11,7 +11,6 @@ using namespace std;
 
 //create a linked list to store each point as it is created
 //we will never insert into this list
-//we will never walk backwards
 //simple implementaation is fine
 //afterwards we will walk along and delete every node
 int output_ellipse_moire(short width, short height, string pattern, ofstream & file)
