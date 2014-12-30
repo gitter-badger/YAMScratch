@@ -1,9 +1,18 @@
 BIN = ./bin/
 
+INC = ./include/
+CFLAGS = -Wall
 # $< is the source  $@ is the target
 
+LIST = $(BIN)hw1 $(BIN)hw2
+
+all: $(LIST)
+
 $(BIN)hw1 : ./src/hw1.cpp
-	g++ -g ./include/ellipse.cpp $< $(CFLAGS) -o $@
+	g++ -g $(INC)ellipse.cpp $< $(CFLAGS) -o $@
+
+$(BIN)hw2 : ./src/hw2.cpp
+	g++ -g $(INC)bowling_frame.h $< $(CFLAGS) -o $@
 
 clean:
-	$(RM) $(BIN)hw1
+	$(RM) $(LIST)

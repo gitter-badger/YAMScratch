@@ -6,7 +6,7 @@
 #hide the sublime packages
 *.sublime-package*
 
-include/
+
 bin/
 motivator/Matlab/
 Data\ Structures/
