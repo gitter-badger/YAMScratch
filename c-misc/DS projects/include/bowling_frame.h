@@ -6,19 +6,24 @@ class BowlingFrame
 {
 public:
 	BowlingFrame(int throw_count) : num_throws_(throw_count) {};
-	~BowlingFrame();
-	BowlingFrame(const BowlingFrame &obj);
+	BowlingFrame(const BowlingFrame& frame) {copy(frame);};
+	~BowlingFrame(){};
+	
 
 	//GETTERS
 	int getNumThrows(void) const;
 	int getFrameScore(void) const;
 	//SETTERS
-	void setThrowScores();
+	void setThrowScores(){};
 
 	
 private: //Representation
+	//PRIVATE MEMBER FUNCTIONS
+	void copy(const BowlingFrame& frame);
+
+	//REPRESENTATION
 	int num_throws_;
-	int throws_[];
+	int throws_[3];
 	int frame_score_;
 
 };

@@ -3,24 +3,14 @@
 
 #include "bowling_frame.h"
 
-BowlingFrame::BowlingFrame(char throw_count)
-{
-	throws_ = new int[throw_count];
-}
 
-BowlingFrame::~BowlingFrame()
-{
-	delete [] throws_; //clean up our array
-}
-
-BowlingFrame::BowlingFrame(const BowlingFrame &obj)
 //============GETTERS==============
-int BowlingFrame::getNumThrows()
+int BowlingFrame::getNumThrows() const
 {
 	return num_throws_;
 }
 
-int BowlingFrame::getFrameScore()
+int BowlingFrame::getFrameScore() const
 {
 	return frame_score_;
 }

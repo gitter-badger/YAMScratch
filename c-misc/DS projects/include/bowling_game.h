@@ -4,8 +4,8 @@
 class BowlingGame
 {
 public:
-	BowlingGame();
-	~BowlingGame();
+	BowlingGame(){};
+	~BowlingGame(){};
 
 private:
 

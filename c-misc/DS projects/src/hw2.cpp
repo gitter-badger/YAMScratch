@@ -14,6 +14,14 @@ int main(int argc, char const *argv[])
 		string input_filename(argv[1]);
 		string output_filename(argv[2]);
 		cout << input_filename << endl << output_filename << endl;
+		
+		//create a game
+		BowlingGame *game = new BowlingGame();
+		ParserBowling *parser= new ParserBowling();
+		//parse the input
+		parser->foo();
+		int a = parser->readFile(input_filename,game);
+		cout << "hi" <<  a<<endl;
 	}
 	/* code */
 	return 0;

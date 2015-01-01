@@ -2,6 +2,7 @@
 #define Parser_Bowling_
 
 #include <string>
+#include <fstream>
 
 #include "bowling_game.h"
 #include "bowling_player.h"
@@ -10,17 +11,17 @@
 class ParserBowling
 {
 public:
-	ParserBowling(const std::string filename): filename_(filename){};
-	~ParserBowling();
+	ParserBowling(){};
+	~ParserBowling(){};
 
-	void readFile(); //
-	void readFile(BowlingGame *game);
-
+	void foo(){std::cout << "foo" << std::endl;};
+	int readFile(std::string input_filename, BowlingGame *game);
 
 private:
-	std::string filename_;
-	std::istream in_str_; //input file stream
-	BowlingGame game_; // the game
+	void addPlayerInstance();
+	void addFrame();
+
+	std::ifstream in_str_; //input file stream
 
 };
 
