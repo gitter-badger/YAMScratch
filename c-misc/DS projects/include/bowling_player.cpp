@@ -4,16 +4,7 @@
 
 #include "bowling_player.h"
 #include "bowling_frame.h"
-
-#ifndef NUM_FRAMES_PER_GAME
-#define NUM_FRAMES_PER_GAME 10
-#endif
-
-#ifndef END_PADDING_FRAMES
-#define END_PADDING_FRAMES 2
-#endif
-
-#define TOTAL_SIZE NUM_FRAMES_PER_GAME + END_PADDING_FRAMES
+#include "bowling_constants.h"
 
 BowlingPlayer::BowlingPlayer()
 {
@@ -22,12 +13,12 @@ BowlingPlayer::BowlingPlayer()
 	num_frames_ = NUM_FRAMES_PER_GAME;
 }
 
-BowlingPlayer::BowlingPlayer(std::string fname, std::string lname)
+BowlingPlayer::BowlingPlayer(std::string fname, std::string lname, int frames)
 {
 	first_name_ = fname;
 	last_name_ = lname;
-	frames_ = new BowlingFrame[TOTAL_SIZE];
-	num_frames_ = NUM_FRAMES_PER_GAME;
+	frames_ = new BowlingFrame[frames];
+	num_frames_ = frames;
 }
 
 BowlingPlayer::~BowlingPlayer()
@@ -154,11 +145,15 @@ void BowlingPlayer::setFrame(const int index,const int first)
 	else
 	{
 		frames_[index].setFirstThrow(first);
+		if(first == PINS_PER_FRAME)
+			frames_[index].setStrike(true);
 	}
 }
 
 void BowlingPlayer::setFrame(const int index,const int first, const int second)
 {
-	this->setFrame(index,first);
+	this->setFrame(index,first); // take advantage of all that error checking
 	frames_[index].setSecondThrow(second);
+	if((first + second ) == PINS_PER_FRAME && !frames_[index].isStrike())
+		frames_[index].setSpare(true);
 }

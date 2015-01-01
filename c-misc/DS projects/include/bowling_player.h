@@ -8,7 +8,7 @@ class BowlingPlayer
 {
 public:
 	BowlingPlayer();
-	BowlingPlayer(std::string fname,std::string lname);
+	BowlingPlayer(std::string fname,std::string lname,int frames);
 	BowlingPlayer(const BowlingPlayer&);
 	~BowlingPlayer();
 
@@ -23,10 +23,14 @@ public:
 	std::string getFirstNameLowerCaseOnly() const;
 	std::string getLastNameLowerCaseOnly() const;
 	int getFinalScore();
+	
+	bool isFrameStrike(int index) {return frames_[index].isStrike(); };
+	bool isFrameSpare(int index) {return frames_[index].isSpare(); };
 
 	//SETTERS
 	void setFrame(const int index,const int first); // try a little polymorphism
 	void setFrame(const int index,const int first,const int second);
+
 
 	//
 

@@ -15,7 +15,7 @@ public:
 	void clear();
 	int size() {return num_players_;};
 	//SETTERS
-	void pushBackPlayer(const BowlingPlayer&);
+	void pushBackPlayer(const BowlingPlayer& player);
 
 
 	

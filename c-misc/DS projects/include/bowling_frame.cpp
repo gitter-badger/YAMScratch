@@ -24,6 +24,15 @@ int BowlingFrame::getFrameScore() const
 	return first_throw_ + second_throw_;
 }
 
+bool BowlingFrame::isStrike()
+{
+	return is_strike_;
+}
+
+bool BowlingFrame::isSpare()
+{
+	return is_spare_;
+}
 
 //============SETTERS==============
 
@@ -43,3 +52,27 @@ void BowlingFrame::setSecondThrow(const int value)
 {
 	second_throw_ = value;
 }
+
+void BowlingFrame::setStrike(bool state)
+{
+	if(state)
+	{
+		is_strike_ = state;
+		is_spare_ = false;
+	}
+	else
+		is_strike_ = false;
+}
+
+void BowlingFrame::setSpare(bool state)
+{
+	if(state)
+	{
+		is_spare_ = state;
+		is_strike_ = false;
+	}
+	else
+		is_spare_ = false;
+}
+
+

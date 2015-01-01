@@ -19,6 +19,9 @@ public:
 	void setFirstThrow(const int value);
 	void setSecondThrow(const int value);
 	void setCumulativeScore(const int score);
+	//these latch
+	void setStrike(bool state);
+	void setSpare(bool state);
 
 	
 private: //Representation
@@ -30,6 +33,8 @@ private: //Representation
 	int second_throw_;
 	int frame_number_;
 	int cumulative_score_;
+	bool is_strike_;
+	bool is_spare_;
 
 };
 
