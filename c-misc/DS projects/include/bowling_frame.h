@@ -12,7 +12,9 @@ public:
 	bool operator< (const BowlingFrame& rhs);
 	
 	//GETTERS
-	int getFrameScore(void) const;
+	int getFrameScore() const;
+	bool isStrike();
+	bool isSpare();
 	//SETTERS
 	void setFirstThrow(const int value);
 	void setSecondThrow(const int value);

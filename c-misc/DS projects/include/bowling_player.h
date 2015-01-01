@@ -7,11 +7,14 @@
 class BowlingPlayer
 {
 public:
+	BowlingPlayer();
 	BowlingPlayer(std::string fname,std::string lname);
+	BowlingPlayer(const BowlingPlayer&);
 	~BowlingPlayer();
 
 	//OPERATORS
-	bool operator< (const BowlingPlayer &rhs) const;
+	bool operator < (const BowlingPlayer &rhs) const;
+	BowlingPlayer& operator = (const BowlingPlayer& player);
 
 	//GETTERS
 	std::string getFullName() const;
@@ -19,17 +22,22 @@ public:
 	std::string getLastName() const;
 	std::string getFirstNameLowerCaseOnly() const;
 	std::string getLastNameLowerCaseOnly() const;
-	int getFinalScore() const;
+	int getFinalScore();
 
 	//SETTERS
 	void setFrame(const int index,const int first); // try a little polymorphism
 	void setFrame(const int index,const int first,const int second);
 
+	//
+
 private:
+	void copy(const BowlingPlayer& rhs);
 	std::string first_name_;
 	std::string last_name_;
+	bool final_score_available_;
 	int num_frames_;
 	BowlingFrame *frames_;
+
 
 
 };

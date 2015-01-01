@@ -14,13 +14,10 @@ public:
 	ParserBowling(){};
 	~ParserBowling(){};
 
-	void foo(){std::cout << "foo" << std::endl;};
+	//UTILITY
 	int readFile(std::string input_filename, BowlingGame *game);
 
 private:
-	void addPlayerInstance();
-	void addFrame();
-
 	std::ifstream in_str_; //input file stream
 
 };

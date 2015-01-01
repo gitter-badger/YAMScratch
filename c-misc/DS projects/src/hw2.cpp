@@ -19,7 +19,6 @@ int main(int argc, char const *argv[])
 		BowlingGame *game = new BowlingGame();
 		ParserBowling *parser= new ParserBowling();
 		//parse the input
-		parser->foo();
 		int a = parser->readFile(input_filename,game);
 		cout << "hi" <<  a<<endl;
 	}

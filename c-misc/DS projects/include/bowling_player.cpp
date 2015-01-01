@@ -15,6 +15,13 @@
 
 #define TOTAL_SIZE NUM_FRAMES_PER_GAME + END_PADDING_FRAMES
 
+BowlingPlayer::BowlingPlayer()
+{
+	final_score_available_ = false;
+	frames_ = new BowlingFrame[TOTAL_SIZE];
+	num_frames_ = NUM_FRAMES_PER_GAME;
+}
+
 BowlingPlayer::BowlingPlayer(std::string fname, std::string lname)
 {
 	first_name_ = fname;
@@ -28,7 +35,29 @@ BowlingPlayer::~BowlingPlayer()
 	delete [] frames_;
 }
 
-bool BowlingPlayer::operator< (const BowlingPlayer &rhs) const
+BowlingPlayer& BowlingPlayer::operator = (const BowlingPlayer& rhs)
+{
+	if(this != &rhs)
+	{
+		delete [] frames_;
+		this->copy(rhs);
+	}
+	return *this;
+}
+
+void BowlingPlayer::copy(const BowlingPlayer& player)
+{
+	this->first_name_ = player.first_name_;
+	this->last_name_ = player.last_name_;
+	this->final_score_available_ = player.final_score_available_;
+	this->num_frames_ = player.num_frames_;
+	//copy the data
+	this->frames_ = new BowlingFrame[this->num_frames_];
+	for(int i = 0; i< this->num_frames_; ++i)
+		this->frames_[i] = player.frames_[i];
+}
+
+bool BowlingPlayer::operator < (const BowlingPlayer &rhs) const
 {
 	bool result;
 	//this only works as long as strings are letters
@@ -90,9 +119,24 @@ std::string BowlingPlayer::getLastNameLowerCaseOnly() const
 	return s;
 }
 
-int BowlingPlayer::getFinalScore() const
+int BowlingPlayer::getFinalScore()
 {
-	return 0;
+	if(!this->final_score_available_)
+	{
+		//int cumulative_score = 0;
+		//update the cumulative scores
+
+		this->final_score_available_ = true; // flip the flag
+	}
+	//now that we have final scores report them
+	if(num_frames_ >= NUM_FRAMES_PER_GAME)
+	{
+		return frames_[NUM_FRAMES_PER_GAME-1].getFrameScore();
+	}
+	else
+	{
+		return frames_[num_frames_ - 1].getFrameScore();
+	}
 }
 
 void BowlingPlayer::setFrame(const int index,const int first)
