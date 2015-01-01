@@ -4,7 +4,8 @@ INC = ./include/
 CFLAGS = -Wall
 # $< is the source  $@ is the target
 
-LIST = $(BIN)hw1 $(BIN)hw2
+#LIST = $(BIN)hw1
+LIST = $(BIN)hw2
 
 all: $(LIST)
 

@@ -1,21 +1,30 @@
 #include <fstream>
+#include <iostream>
 
 #include "bowling_frame.h"
 
-class regular_bowling_frame
+BowlingFrame::BowlingFrame(char throw_count)
 {
-public:
-	regular_bowling_frame(arguments);
-	~regular_bowling_frame();
+	throws_ = new int[throw_count];
+}
 
-	/* data */
-};
-
-class final_bowling_frame
+BowlingFrame::~BowlingFrame()
 {
-public:
-	bowling_frame(arguments);
-	~bowling_frame();
+	delete [] throws_; //clean up our array
+}
 
-	/* data */
-};
+BowlingFrame::BowlingFrame(const BowlingFrame &obj)
+//============GETTERS==============
+int BowlingFrame::getNumThrows()
+{
+	return num_throws_;
+}
+
+int BowlingFrame::getFrameScore()
+{
+	return frame_score_;
+}
+
+
+//============SETTERS==============
+

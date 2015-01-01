@@ -45,7 +45,7 @@ EllipsePoint *calculate_ellipse(unsigned short A, unsigned short B, EllipsePoint
 	assert(tail != NULL);
 	long long A2 = A*A; //should be 64 bits on unix platform
 	long long B2 = B*B;
-	int x_offset = (A+1)%2;
+	//int x_offset = (A+1)%2;
 	int y_offset = (B+1)%2;
 	//create first element of list
 	short x = A -1;
