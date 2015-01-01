@@ -8,8 +8,6 @@
 #include "bowling_player.h"
 #include "bowling_constants.h"
 
-
-
 int ParserBowling::readFile(std::string input_filename, BowlingGame* game)
 {
 

@@ -9,7 +9,7 @@ class BowlingPlayer
 public:
 	BowlingPlayer();
 	BowlingPlayer(std::string fname,std::string lname,int frames);
-	BowlingPlayer(const BowlingPlayer&);
+	BowlingPlayer(const BowlingPlayer& p) {copy(p);};
 	~BowlingPlayer();
 
 	//OPERATORS
@@ -23,7 +23,7 @@ public:
 	std::string getFirstNameLowerCaseOnly() const;
 	std::string getLastNameLowerCaseOnly() const;
 	int getFinalScore();
-	
+
 	bool isFrameStrike(int index) {return frames_[index].isStrike(); };
 	bool isFrameSpare(int index) {return frames_[index].isSpare(); };
 

@@ -3,7 +3,6 @@
 
 #include "bowling_frame.h"
 
-
 BowlingFrame::BowlingFrame()
 {
 
@@ -74,5 +73,3 @@ void BowlingFrame::setSpare(bool state)
 	else
 		is_spare_ = false;
 }
-
-

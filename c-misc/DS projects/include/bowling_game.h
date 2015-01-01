@@ -12,7 +12,7 @@ public:
 	~BowlingGame() {delete [] players_;};
 
 	//GETTERS
-	void clear();
+	void clear() {delete [] players_; create();};
 	int size() {return num_players_;};
 	//SETTERS
 	void pushBackPlayer(const BowlingPlayer& player);
