@@ -5,16 +5,18 @@
 class BowlingFrame
 {
 public:
-	BowlingFrame(int throw_count) : num_throws_(throw_count) {};
+	BowlingFrame();
 	BowlingFrame(const BowlingFrame& frame) {copy(frame);};
 	~BowlingFrame(){};
 	
-
+	bool operator< (const BowlingFrame& rhs);
+	
 	//GETTERS
-	int getNumThrows(void) const;
 	int getFrameScore(void) const;
 	//SETTERS
-	void setThrowScores(){};
+	void setFirstThrow(const int value);
+	void setSecondThrow(const int value);
+	void setCumulativeScore(const int score);
 
 	
 private: //Representation
@@ -22,9 +24,10 @@ private: //Representation
 	void copy(const BowlingFrame& frame);
 
 	//REPRESENTATION
-	int num_throws_;
-	int throws_[3];
-	int frame_score_;
+	int first_throw_;
+	int second_throw_;
+	int frame_number_;
+	int cumulative_score_;
 
 };
 

@@ -2,13 +2,12 @@
 #define Bowling_Player_
 
 #include <string>
-#include <vector>
 #include "bowling_frame.h"
 
 class BowlingPlayer
 {
 public:
-	BowlingPlayer(std::string fname,std::string lname) : first_name_(fname), last_name_(lname) {};
+	BowlingPlayer(std::string fname,std::string lname);
 	~BowlingPlayer();
 
 	//OPERATORS
@@ -23,10 +22,14 @@ public:
 	int getFinalScore() const;
 
 	//SETTERS
+	void setFrame(const int index,const int first); // try a little polymorphism
+	void setFrame(const int index,const int first,const int second);
+
 private:
 	std::string first_name_;
 	std::string last_name_;
-	std::vector<BowlingFrame> frames_;
+	int num_frames_;
+	BowlingFrame *frames_;
 
 
 };
