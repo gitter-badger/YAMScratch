@@ -41,7 +41,7 @@ void BowlingPlayer::copy(const BowlingPlayer& player)
 	this->first_name_ = player.first_name_;
 	this->last_name_ = player.last_name_;
 	this->final_score_available_ = player.final_score_available_;
-	this->num_frames_ = player.num_frames_;
+	this->num_frames_ = player.num_frames_;;
 	//copy the data
 	this->frames_ = new BowlingFrame[this->num_frames_];
 	for(int i = 0; i< this->num_frames_; ++i)
@@ -51,31 +51,23 @@ void BowlingPlayer::copy(const BowlingPlayer& player)
 bool BowlingPlayer::operator < (const BowlingPlayer &rhs) const
 {
 	bool result;
+	std::cout << this->getLastNameLowerCaseOnly() << std::endl;
+	std::cout << rhs.getLastNameLowerCaseOnly() << std::endl;
+	std::cout << this->getLastNameLowerCaseOnly().compare(rhs.getLastNameLowerCaseOnly()) << std::endl;
+	std::cout << "==================================" << std::endl;
 	//this only works as long as strings are letters
-	switch (this->getLastNameLowerCaseOnly().compare(rhs.getLastNameLowerCaseOnly()))
+	int compare = this->getLastNameLowerCaseOnly().compare(rhs.getLastNameLowerCaseOnly());
+	if(compare < 0)
+		result = true;
+	else if(compare > 0)
+		result = false;
+	else
 	{
-		case -1:
+		compare = (this->getFirstNameLowerCaseOnly().compare(rhs.getFirstNameLowerCaseOnly()));
+		if(compare < 0)
 			result = true;
-			break;
-		case 1:
+		else
 			result = false;
-			break;
-		case 0:
-			//evaluate the first names
-			switch(this->getFirstNameLowerCaseOnly().compare(rhs.getFirstNameLowerCaseOnly()))
-			{
-				case -1:
-					result = true;
-					break;
-				case 1:
-					result = false;
-					break;
-				case 0:
-					//if they are exactly the same favor this string 
-					result = true;
-					break;
-			}
-			break;
 	}
 	return result;
 }

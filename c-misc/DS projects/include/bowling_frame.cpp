@@ -5,7 +5,8 @@
 
 BowlingFrame::BowlingFrame()
 {
-
+	is_spare_ = false;
+	is_strike_ = false;
 }
 
 bool BowlingFrame::operator< (const BowlingFrame& rhs)
@@ -54,22 +55,12 @@ void BowlingFrame::setSecondThrow(const int value)
 
 void BowlingFrame::setStrike(bool state)
 {
-	if(state)
-	{
 		is_strike_ = state;
-		is_spare_ = false;
-	}
-	else
-		is_strike_ = false;
+		std::cout << "setting strike" << std::endl;
 }
 
 void BowlingFrame::setSpare(bool state)
 {
-	if(state)
-	{
 		is_spare_ = state;
-		is_strike_ = false;
-	}
-	else
-		is_spare_ = false;
+		std::cout << "setting spare" << std::endl;
 }

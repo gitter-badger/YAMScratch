@@ -21,15 +21,20 @@ int main(int argc, char const *argv[])
 		BowlingGame *game = new BowlingGame();
 		ParserBowling *parser= new ParserBowling();
 		//parse the input
-		int a = parser->readFile(input_filename,game);
+		parser->readFile(input_filename,game);
 		//sort the player names
-		std::sort(game->begin(),game->end());
-		BowlingPlayer* p;
+		cout << "hi" <<endl;
+		cout << "size " << game->size() << endl; 
 
+		std::sort(game->begin(),game->end());
+		
+		BowlingPlayer* p;
 		for(p = game->begin(); p != game->end(); p++)
 			cout << p->getFirstName() << " " << p->getLastName() << endl;
+		
+		
 
-		cout << "hi" <<  a<<endl;
+		
 	}
 	/* code */
 	return 0;
