@@ -34,7 +34,7 @@
 #endif
 
 #ifndef FILL
-#define FILL '_'
+#define FILL ' '
 #endif
 
 #ifndef LEFT_NAME_PAD

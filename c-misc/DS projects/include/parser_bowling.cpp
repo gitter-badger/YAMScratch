@@ -75,26 +75,25 @@ int ParserBowling::readFile(std::string input_filename, BowlingGame* game)
 				{
 					if(player->isFrameStrike(frame_count))
 					{
-						std::cout << player->getFullName() << std::endl;
-						std::cout << "last frame strike " << std::endl;
+						//std::cout << player->getFullName() << std::endl;
+						//std::cout << "last frame strike " << std::endl;
 						//manually get the next two pieces from stream
 						in_str_ >> first_throw >> second_throw;
-						std::cout << "throws: " << first_throw << " , " << second_throw << std::endl;
+						//std::cout << "throws: " << first_throw << " , " << second_throw << std::endl;
 						player->setFrame(frame_count+1,first_throw,0);
 						player->setFrame(frame_count+2,second_throw,0);
-						
+
 					}
 					else if(player->isFrameSpare(frame_count))
 					{
-						std::cout << player->getFullName() << std::endl;
+						//std::cout << player->getFullName() << std::endl;
 
-						std::cout << "last frame spare " << frame_count << std::endl;
+						//std::cout << "last frame spare " << frame_count << std::endl;
 						//manually get the next piece from stream
 						in_str_ >> first_throw;
-						std::cout << "throws: " << first_throw << " , " << 0 << std::endl;
+						//std::cout << "throws: " << first_throw << " , " << 0 << std::endl;
 						player->setFrame(frame_count+1,first_throw,0);
 					}
-					std::cout<< "===============================" << std::endl;
 				}
 			}
 			//check if there is another

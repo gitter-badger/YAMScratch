@@ -23,6 +23,8 @@ public:
 	std::string getFirstNameLowerCaseOnly() const;
 	std::string getLastNameLowerCaseOnly() const;
 	int getFinalScore();
+	int getFrameScore(int index){return frames_[index].getFrameScore(); };
+	int getAdjustedFrameScore(int index) {return frames_[index].getAdjustedScore(); };
 	int getFrameFirstThrow(int index) {return frames_[index].getFirstThrow(); };
 	int getFrameSecondThrow(int index) {return frames_[index].getSecondThrow(); };
 
@@ -32,6 +34,7 @@ public:
 	//SETTERS
 	void setFrame(const int index,const int first); // try a little polymorphism
 	void setFrame(const int index,const int first,const int second);
+	void setFrameScore(int index, int score) {frames_[index].setFrameScore(score);};
 	
 	typedef BowlingFrame* iterator;
 	typedef const BowlingFrame* const_iterator;

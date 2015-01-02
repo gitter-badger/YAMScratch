@@ -67,13 +67,18 @@ void BowlingGame::outputScoreBoard()
 	{
 		name_line.str(std::string());
 		name_line.clear();
+		score_line.str(std::string());
+		score_line.clear();
 
 		name_line << std::setw(LEFT_NAME_PAD) << std::setfill(FILL) << std::left << VERTICAL_SEPERATOR;
 		name_line << std::setw(max_name_size_) << std::setfill(FILL) << std::left << player->getFullName();
 		name_line << std::setw(RIGHT_NAME_PAD) << std::setfill(FILL) << std::right << VERTICAL_SEPERATOR;
-		
+		score_line << std::setw(LEFT_NAME_PAD+max_name_size_) << std::setfill(FILL) << std::left << VERTICAL_SEPERATOR;
+		score_line << std::setw(RIGHT_NAME_PAD) << std::setfill(FILL) << std::right << VERTICAL_SEPERATOR;
+
 		std::string first_score;
 		std::string second_score;
+		int cumulative_score = 0;
 		for(int i = 0; i < NUM_FRAMES_PER_GAME-1; i++)
 		{
 			//get the values
@@ -92,10 +97,13 @@ void BowlingGame::outputScoreBoard()
 				first_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameFirstThrow(i)) )->str();
 				second_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameSecondThrow(i)) )->str();
 			}
+			cumulative_score += player->getAdjustedFrameScore(i);
 			//fill in the values calculated
 			name_line << std::setw(THROW_VALUE_WIDTH) << std::setfill(FILL) << std::right << first_score;
 			name_line << std::setw(THROW_VALUE_WIDTH) << std::setfill(FILL) << std::right << second_score;
 			name_line << std::setw(RIGHT_NAME_PAD) << std::setfill(FILL) << std::right << VERTICAL_SEPERATOR;
+			score_line << std::setw(2*THROW_VALUE_WIDTH) << std::setfill(FILL) << std::right << cumulative_score;
+			score_line << std::setw(RIGHT_NAME_PAD) << std::setfill(FILL) << std::right << VERTICAL_SEPERATOR;
 		}
 		//fill in the last frame
 		std::string third_score;
@@ -138,13 +146,16 @@ void BowlingGame::outputScoreBoard()
 			second_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameSecondThrow(NUM_FRAMES_PER_GAME-1)) )->str();
 			third_score = FILL;
 		}
+		cumulative_score += player->getAdjustedFrameScore(NUM_FRAMES_PER_GAME - 1);
 		name_line << std::setw(THROW_VALUE_WIDTH) << std::setfill(FILL) << std::right << first_score;
 		name_line << std::setw(THROW_VALUE_WIDTH) << std::setfill(FILL) << std::right << second_score;
 		name_line << std::setw(THROW_VALUE_WIDTH) << std::setfill(FILL) << std::right << third_score;
-
+		score_line << std::setw(3*THROW_VALUE_WIDTH) << std::setfill(FILL) << std::right << cumulative_score;
+		//close the last one
 		name_line << std::setw(RIGHT_NAME_PAD) << std::setfill(FILL) << std::right << VERTICAL_SEPERATOR;
+		score_line << std::setw(RIGHT_NAME_PAD) << std::setfill(FILL) << std::right << VERTICAL_SEPERATOR;
 
-		std::cout << name_line.str() << std::endl << player->isFrameSpare(NUM_FRAMES_PER_GAME-1) << std::endl;
+		std::cout << name_line.str() << std::endl << score_line.str() << std::endl << std::endl;
 	}
 
 
