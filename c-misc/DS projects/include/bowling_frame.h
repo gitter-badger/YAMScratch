@@ -13,7 +13,6 @@ public:
 	
 	//GETTERS
 	int getFrameScore() const;
-	int getAdjustedScore();
 	bool isStrike();
 	bool isSpare();
 	int getFirstThrow() {return first_throw_; };

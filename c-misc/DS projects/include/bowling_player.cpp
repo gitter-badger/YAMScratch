@@ -104,12 +104,18 @@ int BowlingPlayer::getFinalScore()
 	{
 		//int cumulative_score = 0;
 		//update the cumulative scores
-
+		int accumluator = 0;
+		for(int i = 0; i < NUM_FRAMES_PER_GAME; i++)
+		{
+			accumluator += getAdjustedFrameScore(i);
+		}
+		this->final_score_ = accumluator;
 		this->final_score_available_ = true; // flip the flag
 	}
 	//now that we have final scores report them
 	if(num_frames_ >= NUM_FRAMES_PER_GAME)
 	{
+		//return the final score for the last frame scored
 		return frames_[NUM_FRAMES_PER_GAME-1].getFrameScore();
 	}
 	else
@@ -136,6 +142,8 @@ void BowlingPlayer::setFrame(const int index,const int first)
 		if(first == PINS_PER_FRAME)
 			frames_[index].setStrike(true);
 	}
+	//reset the final score flag
+	final_score_available_ = false;
 }
 
 void BowlingPlayer::setFrame(const int index,const int first, const int second)
@@ -144,4 +152,41 @@ void BowlingPlayer::setFrame(const int index,const int first, const int second)
 	frames_[index].setSecondThrow(second);
 	if((first + second ) == PINS_PER_FRAME && !frames_[index].isStrike())
 		frames_[index].setSpare(true);
+
+	final_score_available_ = false;
+}
+
+int BowlingPlayer::getAdjustedFrameScore(int i)
+{
+	int score= 0;
+	if(frames_[i].isStrike())
+	{
+		score += PINS_PER_FRAME;
+		if(frames_[i+1].isStrike())
+		{
+			score += PINS_PER_FRAME;
+			if (frames_[i+2].isStrike())
+			{
+				score += PINS_PER_FRAME;
+			}
+			else
+				score += frames_[i+2].getFirstThrow();
+		}
+		else if(frames_[i+1].isSpare())
+		{
+			score += PINS_PER_FRAME;
+		}
+		else
+		{
+			score += frames_[i+1].getFrameScore();
+		}
+	}
+	else if(frames_[i].isSpare())
+	{
+		score += PINS_PER_FRAME;
+		score += frames_[i+1].getFirstThrow();
+	}
+	else
+		score += frames_[i].getFrameScore();
+	return score;
 }

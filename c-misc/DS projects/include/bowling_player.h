@@ -24,7 +24,7 @@ public:
 	std::string getLastNameLowerCaseOnly() const;
 	int getFinalScore();
 	int getFrameScore(int index){return frames_[index].getFrameScore(); };
-	int getAdjustedFrameScore(int index) {return frames_[index].getAdjustedScore(); };
+	int getAdjustedFrameScore(int index);
 	int getFrameFirstThrow(int index) {return frames_[index].getFirstThrow(); };
 	int getFrameSecondThrow(int index) {return frames_[index].getSecondThrow(); };
 
@@ -51,6 +51,7 @@ private:
 	std::string first_name_;
 	std::string last_name_;
 	bool final_score_available_;
+	int final_score_;
 	int num_frames_;
 	BowlingFrame *frames_;
 

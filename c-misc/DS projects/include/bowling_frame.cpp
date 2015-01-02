@@ -24,11 +24,6 @@ int BowlingFrame::getFrameScore() const
 	return first_throw_ + second_throw_;
 }
 
-int BowlingFrame::getAdjustedScore()
-{
-	return 3;
-}
-
 bool BowlingFrame::isStrike()
 {
 	return is_strike_;

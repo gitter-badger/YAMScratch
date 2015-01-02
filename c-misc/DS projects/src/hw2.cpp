@@ -33,7 +33,8 @@ int main(int argc, char const *argv[])
 		*/
 		game->outputScoreBoard();
 
-		
+		delete parser;
+		delete game;
 	}
 	/* code */
 	return 0;

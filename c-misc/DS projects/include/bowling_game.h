@@ -2,6 +2,8 @@
 #define Bowling_Game_
 
 #include "bowling_player.h"
+#include <string>
+
 
 //container class for BowlingPlayers
 class BowlingGame
@@ -27,6 +29,7 @@ public:
 	const_iterator end() const {return players_ + num_players_; };
 	//UTILITY
 	void outputScoreBoard();
+	std::string filterScoreForZeros(int score);
 
 private:
 	void updateMaxPlayerNameLength();
