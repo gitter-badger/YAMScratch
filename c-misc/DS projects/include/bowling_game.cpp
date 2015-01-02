@@ -7,6 +7,7 @@
 
 #include "bowling_game.h"
 #include "bowling_constants.h"
+#include "bowling_player.h"
 
 void BowlingGame::create()
 {
@@ -173,8 +174,18 @@ void BowlingGame::outputScoreBoard(std::string filename)
 		score_line << std::setw(RIGHT_NAME_PAD) << std::setfill(FILL) << std::right << VERTICAL_SEPERATOR;
 		//stream the results out
 		out_str_ << border << std::endl << name_line.str() << std::endl << score_line.str() << std::endl;
+		//set the final score
+		player->updateFinalScore();
 	}
 	out_str_ << border << std::endl << std::endl;
+	//sort the players by score
+	/*
+	for(BowlingPlayer* player = this->begin(); player != this->end(); player++)
+	{
+		std::cout << player->getFullName() << " " << player->getFinalScore() << std::endl;
+	}
+*/
+	std::sort(this->begin(),this->end(),BowlingPlayer::sortByScore);
 	//print out the player names
 	for(BowlingPlayer* player = this->begin(); player != this->end(); player++)
 	{

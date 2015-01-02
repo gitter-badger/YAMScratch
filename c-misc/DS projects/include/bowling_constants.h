@@ -22,7 +22,7 @@
 #endif
 
 #ifndef HORIZONTAL_SEPERATOR
-#define HORIZONTAL_SEPERATOR '='
+#define HORIZONTAL_SEPERATOR '-'
 #endif
 
 #ifndef STRIKE_CHAR

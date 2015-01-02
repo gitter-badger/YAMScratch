@@ -22,7 +22,10 @@ public:
 	std::string getLastName() const;
 	std::string getFirstNameLowerCaseOnly() const;
 	std::string getLastNameLowerCaseOnly() const;
-	int getFinalScore();
+
+	int updateFinalScore();
+	int getFinalScore() const {return final_score_; };
+
 	int getFrameScore(int index){return frames_[index].getFrameScore(); };
 	int getAdjustedFrameScore(int index);
 	int getFrameFirstThrow(int index) {return frames_[index].getFirstThrow(); };
@@ -45,6 +48,7 @@ public:
 	const_iterator end() const {return frames_ + num_frames_; };
 
 	//
+	static bool sortByScore(const BowlingPlayer& p1, const BowlingPlayer& p2);
 
 private:
 	void copy(const BowlingPlayer& rhs);

@@ -9,12 +9,15 @@
 BowlingPlayer::BowlingPlayer()
 {
 	final_score_available_ = false;
+	final_score_ = 0;
 	frames_ = new BowlingFrame[TOTAL_SIZE];
 	num_frames_ = NUM_FRAMES_PER_GAME;
 }
 
 BowlingPlayer::BowlingPlayer(std::string fname, std::string lname, int frames)
 {
+	final_score_available_ = false;
+	final_score_ = 0;
 	first_name_ = fname;
 	last_name_ = lname;
 	frames_ = new BowlingFrame[frames];
@@ -41,7 +44,8 @@ void BowlingPlayer::copy(const BowlingPlayer& player)
 	this->first_name_ = player.first_name_;
 	this->last_name_ = player.last_name_;
 	this->final_score_available_ = player.final_score_available_;
-	this->num_frames_ = player.num_frames_;;
+	this->final_score_ = player.final_score_;
+	this->num_frames_ = player.num_frames_;
 	//copy the data
 	this->frames_ = new BowlingFrame[this->num_frames_];
 	for(int i = 0; i< this->num_frames_; ++i)
@@ -98,7 +102,7 @@ std::string BowlingPlayer::getLastNameLowerCaseOnly() const
 	return s;
 }
 
-int BowlingPlayer::getFinalScore()
+int BowlingPlayer::updateFinalScore()
 {
 	if(!this->final_score_available_)
 	{
@@ -181,4 +185,12 @@ int BowlingPlayer::getAdjustedFrameScore(int i)
 	else
 		score += frames_[i].getFrameScore();
 	return score;
+}
+
+bool BowlingPlayer::sortByScore(const BowlingPlayer& p1, const BowlingPlayer& p2)
+{
+	int a = p1.getFinalScore();
+	int b = p2.getFinalScore();
+	//std::cout << a << " " << b << std::endl;
+	return (a > b);
 }
