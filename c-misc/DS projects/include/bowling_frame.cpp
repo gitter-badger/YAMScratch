@@ -56,11 +56,9 @@ void BowlingFrame::setSecondThrow(const int value)
 void BowlingFrame::setStrike(bool state)
 {
 		is_strike_ = state;
-		std::cout << "setting strike" << std::endl;
 }
 
 void BowlingFrame::setSpare(bool state)
 {
 		is_spare_ = state;
-		std::cout << "setting spare" << std::endl;
 }

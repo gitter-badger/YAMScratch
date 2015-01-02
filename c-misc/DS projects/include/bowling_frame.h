@@ -15,6 +15,8 @@ public:
 	int getFrameScore() const;
 	bool isStrike();
 	bool isSpare();
+	int getFirstThrow() {return first_throw_; };
+	int getSecondThrow() {return second_throw_; };
 	//SETTERS
 	void setFirstThrow(const int value);
 	void setSecondThrow(const int value);

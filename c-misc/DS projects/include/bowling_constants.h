@@ -16,3 +16,35 @@
 #ifndef PINS_PER_FRAME
 #define PINS_PER_FRAME 10
 #endif
+
+#ifndef VERTICAL_SEPERATOR
+#define VERTICAL_SEPERATOR '|'
+#endif
+
+#ifndef STRIKE_CHAR
+#define STRIKE_CHAR 'X'
+#endif
+
+#ifndef SPARE_CHAR
+#define SPARE_CHAR '/'
+#endif
+
+#ifndef SCRATCH_CHAR
+#define SCRATCH_CHAR '-'
+#endif
+
+#ifndef FILL
+#define FILL '_'
+#endif
+
+#ifndef LEFT_NAME_PAD
+#define LEFT_NAME_PAD 2
+#endif
+
+#ifndef RIGHT_NAME_PAD
+#define RIGHT_NAME_PAD 2
+#endif
+
+#ifndef THROW_VALUE_WIDTH
+#define THROW_VALUE_WIDTH 2
+#endif

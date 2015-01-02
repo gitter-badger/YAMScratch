@@ -17,17 +17,15 @@ int ParserBowling::readFile(std::string input_filename, BowlingGame* game)
 	{
 		std::string first_name;
 		std::string last_name;
-		int row_count = 1;
+		int line_count = 0;
 		while(!in_str_.eof())
 		{
 			in_str_ >> first_name;
-
-			std::cout << std::endl << "row count " << row_count << std::endl << std::endl;
-			row_count++;
 			//we are assuming that the input format is good
 			//stronger error checking would go here
 			in_str_>> last_name;
-			std::cout << first_name << ' ' << last_name << std::endl;
+			line_count++;
+			//std::cout << first_name << ' ' << last_name << std::endl;
 			//create a new player
 
 			BowlingPlayer* player = new BowlingPlayer(first_name,last_name,TOTAL_SIZE);
@@ -41,12 +39,24 @@ int ParserBowling::readFile(std::string input_filename, BowlingGame* game)
 				if(first_throw < PINS_PER_FRAME)
 				{
 					in_str_ >> second_throw;
+					if(second_throw > PINS_PER_FRAME - first_throw)
+					{
+						//this should never happen
+						std::cerr << "More than " << PINS_PER_FRAME - first_throw << " knocked over: "
+								<< second_throw << std::endl << "Input file format error!" 
+								<< " @line " << line_count << std::endl;
+
+						exit(1);
+					}
 				}
 				else if(first_throw > PINS_PER_FRAME)
 				{
 					//this should never happen
 					std::cerr << "More than " << PINS_PER_FRAME << " knocked over: "
-							<< first_throw << std::endl << "Input file format error!" << std::endl;
+							<< first_throw << std::endl << "Input file format error!" 
+							<< " @line " << line_count << std::endl;
+
+					exit(1);
 				}
 				else
 				{
@@ -57,31 +67,30 @@ int ParserBowling::readFile(std::string input_filename, BowlingGame* game)
 				
 				player->setFrame(frame_count,first_throw,second_throw);
 
-				std::cout << "throws: " << first_throw << " , " << second_throw
-							<< " Strike: " << player->isFrameStrike(frame_count)
-							<< " Spare: " << player->isFrameSpare(frame_count) << std::endl;
+				//std::cout << "throws: " << first_throw << " , " << second_throw
+				//			<< " Strike: " << player->isFrameStrike(frame_count)
+				//			<< " Spare: " << player->isFrameSpare(frame_count) << std::endl;
 				//extend the frame count
 				if(frame_count == NUM_FRAMES_PER_GAME -1)
 				{
 					if(player->isFrameStrike(frame_count))
 					{
-						std::cout << "last frame strike " << frame_count << std::endl;
+						//std::cout << "last frame strike " << frame_count << std::endl;
 						//manually get the next two pieces from stream
 						in_str_ >> first_throw >> second_throw;
-						std::cout << "throws: " << first_throw << " , " << second_throw << std::endl;
+						//std::cout << "throws: " << first_throw << " , " << second_throw << std::endl;
 						player->setFrame(frame_count+1,first_throw,0);
 						player->setFrame(frame_count+2,second_throw,0);
 					}
 					else if(player->isFrameSpare(frame_count))
 					{
-						std::cout << "last frame spare " << frame_count << std::endl;
+						//td::cout << "last frame spare " << frame_count << std::endl;
 						//manually get the next piece from stream
 						in_str_ >> first_throw;
-						std::cout << "throws: " << first_throw << " , " << 0 << std::endl;
+						//std::cout << "throws: " << first_throw << " , " << 0 << std::endl;
 						player->setFrame(frame_count+1,first_throw,0);
 					}
 				}
-
 			}
 			//check if there is another
 			game->pushBackPlayer(*player);
@@ -101,6 +110,5 @@ int ParserBowling::readFile(std::string input_filename, BowlingGame* game)
 		std::cerr << "Failed to open for reading file: " << input_filename
 					<< std::endl;
 	}
-	std::cout << "leaving parser" << std::endl;
 	return 0;
 }

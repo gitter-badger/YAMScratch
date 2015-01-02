@@ -51,10 +51,6 @@ void BowlingPlayer::copy(const BowlingPlayer& player)
 bool BowlingPlayer::operator < (const BowlingPlayer &rhs) const
 {
 	bool result;
-	std::cout << this->getLastNameLowerCaseOnly() << std::endl;
-	std::cout << rhs.getLastNameLowerCaseOnly() << std::endl;
-	std::cout << this->getLastNameLowerCaseOnly().compare(rhs.getLastNameLowerCaseOnly()) << std::endl;
-	std::cout << "==================================" << std::endl;
 	//this only works as long as strings are letters
 	int compare = this->getLastNameLowerCaseOnly().compare(rhs.getLastNameLowerCaseOnly());
 	if(compare < 0)
@@ -62,7 +58,7 @@ bool BowlingPlayer::operator < (const BowlingPlayer &rhs) const
 	else if(compare > 0)
 		result = false;
 	else
-	{
+		{
 		compare = (this->getFirstNameLowerCaseOnly().compare(rhs.getFirstNameLowerCaseOnly()));
 		if(compare < 0)
 			result = true;

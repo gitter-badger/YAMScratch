@@ -15,7 +15,7 @@ int main(int argc, char const *argv[])
 	{
 		string input_filename(argv[1]);
 		string output_filename(argv[2]);
-		cout << input_filename << endl << output_filename << endl;
+		//cout << input_filename << endl << output_filename << endl;
 		
 		//create a game
 		BowlingGame *game = new BowlingGame();
@@ -23,16 +23,16 @@ int main(int argc, char const *argv[])
 		//parse the input
 		parser->readFile(input_filename,game);
 		//sort the player names
-		cout << "hi" <<endl;
-		cout << "size " << game->size() << endl; 
+		//cout << "size " << game->size() << endl; 
 
 		std::sort(game->begin(),game->end());
 		
 		BowlingPlayer* p;
 		for(p = game->begin(); p != game->end(); p++)
-			cout << p->getFirstName() << " " << p->getLastName() << endl;
+
+			cout << p->getFullName() << endl;
 		
-		
+		game->outputScoreBoard();
 
 		
 	}
