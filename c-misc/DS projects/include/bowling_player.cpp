@@ -113,15 +113,7 @@ int BowlingPlayer::getFinalScore()
 		this->final_score_available_ = true; // flip the flag
 	}
 	//now that we have final scores report them
-	if(num_frames_ >= NUM_FRAMES_PER_GAME)
-	{
-		//return the final score for the last frame scored
-		return frames_[NUM_FRAMES_PER_GAME-1].getFrameScore();
-	}
-	else
-	{
-		return frames_[num_frames_ - 1].getFrameScore();
-	}
+	return final_score_;
 }
 
 void BowlingPlayer::setFrame(const int index,const int first)

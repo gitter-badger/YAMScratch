@@ -56,7 +56,7 @@ void BowlingGame::updateMaxPlayerNameLength()
 	}
 }
 
-void BowlingGame::outputScoreBoard()
+void BowlingGame::outputScoreBoard(std::string filename)
 {
 	//sort the players
 	std::sort(this->begin(),this->end());
@@ -70,6 +70,9 @@ void BowlingGame::outputScoreBoard()
 							+ NUM_FRAMES_PER_GAME * NUM_THROWS_PER_FRAME * THROW_VALUE_WIDTH \
 							+ THROW_VALUE_WIDTH;
 	std::string border(score_board_length, HORIZONTAL_SEPERATOR);
+
+	//open the output stream
+	std::ofstream out_str_(filename.c_str());
 
 	for(BowlingPlayer* player = this->begin(); player != this->end(); player++)
 	{
@@ -168,10 +171,19 @@ void BowlingGame::outputScoreBoard()
 		//close the last one
 		name_line << std::setw(RIGHT_NAME_PAD) << std::setfill(FILL) << std::right << VERTICAL_SEPERATOR;
 		score_line << std::setw(RIGHT_NAME_PAD) << std::setfill(FILL) << std::right << VERTICAL_SEPERATOR;
-
-		std::cout << border << std::endl << name_line.str() << std::endl << score_line.str() << std::endl;
+		//stream the results out
+		out_str_ << border << std::endl << name_line.str() << std::endl << score_line.str() << std::endl;
 	}
-	std::cout << border << std::endl;
+	out_str_ << border << std::endl << std::endl;
+	//print out the player names
+	for(BowlingPlayer* player = this->begin(); player != this->end(); player++)
+	{
+		out_str_ << std::setw(max_name_size_+1) << std::setfill(FILL) << std::left << player->getFullName();
+		out_str_ << std::setw(THROW_VALUE_WIDTH*NUM_THROWS_PER_FRAME) << std::setfill(FILL) << std::right << player->getFinalScore();
+		out_str_ << std::endl;
+	}
+	//trailing whitespace
+	out_str_ << std::endl;
 }
 
 std::string BowlingGame::filterScoreForZeros(int val)

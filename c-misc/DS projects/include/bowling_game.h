@@ -28,7 +28,7 @@ public:
 	iterator end() {return players_ + num_players_; };
 	const_iterator end() const {return players_ + num_players_; };
 	//UTILITY
-	void outputScoreBoard();
+	void outputScoreBoard(std::string);
 	std::string filterScoreForZeros(int score);
 
 private:

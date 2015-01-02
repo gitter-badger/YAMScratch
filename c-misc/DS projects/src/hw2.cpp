@@ -31,7 +31,7 @@ int main(int argc, char const *argv[])
 		for(p = game->begin(); p != game->end(); p++)
 			cout << p->getFullName() << endl;
 		*/
-		game->outputScoreBoard();
+		game->outputScoreBoard(output_filename);
 
 		delete parser;
 		delete game;
