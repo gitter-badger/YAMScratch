@@ -99,46 +99,44 @@ void BowlingGame::outputScoreBoard()
 		}
 		//fill in the last frame
 		std::string third_score;
-		if(player->isFrameStrike(NUM_FRAMES_PER_GAME))
+		if(player->isFrameStrike(NUM_FRAMES_PER_GAME-1))
+		{
+			first_score = STRIKE_CHAR;
+			if(player->isFrameStrike(NUM_FRAMES_PER_GAME))
 			{
-				first_score = STRIKE_CHAR;
+				second_score = STRIKE_CHAR;
 				if(player->isFrameStrike(NUM_FRAMES_PER_GAME + 1))
-				{
-					second_score = STRIKE_CHAR;
-					if(player->isFrameStrike(NUM_FRAMES_PER_GAME + 2))
-						third_score = STRIKE_CHAR;
-					else
-						third_score = static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameFirstThrow(NUM_FRAMES_PER_GAME + 2)) )->str();
-				}
-				else if(player->isFrameSpare(NUM_FRAMES_PER_GAME + 1))
-				{
-					second_score = static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameFirstThrow(NUM_FRAMES_PER_GAME + 1)) )->str();
-					third_score = SPARE_CHAR;
-				}
+					third_score = STRIKE_CHAR;
 				else
-				{
-					second_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameFirstThrow(NUM_FRAMES_PER_GAME + 1)) )->str();
-					third_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameSecondThrow(NUM_FRAMES_PER_GAME + 1)) )->str();
-
-				}
-				
+					third_score = static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameFirstThrow(NUM_FRAMES_PER_GAME + 1)) )->str();
 			}
-		else if(player->isFrameSpare(NUM_FRAMES_PER_GAME))
+			else if(player->isFrameSpare(NUM_FRAMES_PER_GAME))
+			{
+				second_score = static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameFirstThrow(NUM_FRAMES_PER_GAME)) )->str();
+				third_score = SPARE_CHAR;
+			}
+			else
+			{
+				second_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameFirstThrow(NUM_FRAMES_PER_GAME )) )->str();
+				third_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameSecondThrow(NUM_FRAMES_PER_GAME )) )->str();
+			}	
+		}
+		else if(player->isFrameSpare(NUM_FRAMES_PER_GAME-1))
 		{
 			second_score = SPARE_CHAR;
-			first_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameFirstThrow(NUM_FRAMES_PER_GAME)) )->str();
-			if(player->isFrameStrike(NUM_FRAMES_PER_GAME + 1))
+			first_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameFirstThrow(NUM_FRAMES_PER_GAME-1)) )->str();
+			if(player->isFrameStrike(NUM_FRAMES_PER_GAME))
 			{
 				third_score = STRIKE_CHAR;
 			}
 			else
-				third_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameFirstThrow(NUM_FRAMES_PER_GAME + 1)) )->str();
-
+				third_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameFirstThrow(NUM_FRAMES_PER_GAME )) )->str();
 		}
 		else
 		{
-			first_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameFirstThrow(NUM_FRAMES_PER_GAME)) )->str();
-			second_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameSecondThrow(NUM_FRAMES_PER_GAME)) )->str();
+			first_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameFirstThrow(NUM_FRAMES_PER_GAME-1)) )->str();
+			second_score =  static_cast<std::ostringstream*>(&(std::ostringstream() << player->getFrameSecondThrow(NUM_FRAMES_PER_GAME-1)) )->str();
+			third_score = FILL;
 		}
 		name_line << std::setw(THROW_VALUE_WIDTH) << std::setfill(FILL) << std::right << first_score;
 		name_line << std::setw(THROW_VALUE_WIDTH) << std::setfill(FILL) << std::right << second_score;
@@ -146,7 +144,7 @@ void BowlingGame::outputScoreBoard()
 
 		name_line << std::setw(RIGHT_NAME_PAD) << std::setfill(FILL) << std::right << VERTICAL_SEPERATOR;
 
-		std::cout << name_line.str() << std::endl << std::endl;
+		std::cout << name_line.str() << std::endl << player->isFrameSpare(NUM_FRAMES_PER_GAME-1) << std::endl;
 	}
 
 

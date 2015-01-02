@@ -26,12 +26,11 @@ int main(int argc, char const *argv[])
 		//cout << "size " << game->size() << endl; 
 
 		std::sort(game->begin(),game->end());
-		
+		/*
 		BowlingPlayer* p;
 		for(p = game->begin(); p != game->end(); p++)
-
 			cout << p->getFullName() << endl;
-		
+		*/
 		game->outputScoreBoard();
 
 		
