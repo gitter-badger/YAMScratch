@@ -21,5 +21,4 @@ private:
 	std::ifstream in_str_; //input file stream
 
 };
-
 #endif

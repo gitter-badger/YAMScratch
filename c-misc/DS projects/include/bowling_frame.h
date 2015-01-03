@@ -1,7 +1,6 @@
 #ifndef BowlingFrame_
 #define BowlingFrame_
 
-
 class BowlingFrame
 {
 public:
@@ -25,7 +24,6 @@ public:
 	void setStrike(bool state);
 	void setSpare(bool state);
 
-	
 private: //Representation
 	//PRIVATE MEMBER FUNCTIONS
 	void copy(const BowlingFrame& frame);
@@ -37,7 +35,5 @@ private: //Representation
 	int adjusted_score_;
 	bool is_strike_;
 	bool is_spare_;
-
 };
-
 #endif

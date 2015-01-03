@@ -59,13 +59,13 @@ void BowlingGame::updateMaxPlayerNameLength()
 
 void BowlingGame::outputScoreBoard(std::string filename)
 {
-	//sort the players
+	//sort the players by names using overloaded < operator
 	std::sort(this->begin(),this->end());
 	//find the max name size
 	this->updateMaxPlayerNameLength();
 	//prepare the output buffers
 	std::stringstream name_line, score_line,vsp;
-
+	//make the top and bottom borders
 	int score_board_length = LEFT_NAME_PAD + max_name_size_ + RIGHT_NAME_PAD \
 							+ NUM_FRAMES_PER_GAME * RIGHT_NAME_PAD \
 							+ NUM_FRAMES_PER_GAME * NUM_THROWS_PER_FRAME * THROW_VALUE_WIDTH \
@@ -178,13 +178,6 @@ void BowlingGame::outputScoreBoard(std::string filename)
 		player->updateFinalScore();
 	}
 	out_str_ << border << std::endl << std::endl;
-	//sort the players by score
-	/*
-	for(BowlingPlayer* player = this->begin(); player != this->end(); player++)
-	{
-		std::cout << player->getFullName() << " " << player->getFinalScore() << std::endl;
-	}
-*/
 	std::sort(this->begin(),this->end(),BowlingPlayer::sortByScore);
 	//print out the player names
 	for(BowlingPlayer* player = this->begin(); player != this->end(); player++)

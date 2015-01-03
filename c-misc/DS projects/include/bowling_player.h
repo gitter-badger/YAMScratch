@@ -58,8 +58,5 @@ private:
 	int final_score_;
 	int num_frames_;
 	BowlingFrame *frames_;
-
-
-
 };
 #endif
