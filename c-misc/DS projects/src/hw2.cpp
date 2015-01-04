@@ -23,7 +23,7 @@ int main(int argc, char const *argv[])
 		//sort the player names
 		std::sort(game->begin(),game->end());
 		game->outputScoreBoard(output_filename);
-
+		//free all resources
 		delete parser;
 		delete game;
 	}

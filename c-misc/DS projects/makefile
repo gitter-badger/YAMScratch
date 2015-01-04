@@ -6,6 +6,7 @@ CFLAGS = -Wall
 
 #LIST = $(BIN)hw1
 LIST = $(BIN)hw2
+#LIST = $(BIN)hw3
 
 all: $(LIST)
 
@@ -16,6 +17,11 @@ HW2_INC = $(INC)bowling_frame.cpp $(INC)bowling_player.cpp $(INC)bowling_game.cp
 
 $(BIN)hw2 : ./src/hw2.cpp
 	g++ -g $(HW2_INC) $< $(CFLAGS) -o $@
+
+HW3_INC = 
+
+$(BIN)hw3 : ./src/hw3.cpp
+	g++ -g $(HW3_INC) $< $(CFLAGS) -o $@
 
 clean:
 	$(RM) $(LIST)
