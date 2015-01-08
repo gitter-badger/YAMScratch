@@ -5,8 +5,8 @@ CFLAGS = -Wall
 # $< is the source  $@ is the target
 
 #LIST = $(BIN)hw1
-LIST = $(BIN)hw2
-#LIST = $(BIN)hw3
+#LIST = $(BIN)hw2
+LIST = $(BIN)hw3
 
 all: $(LIST)
 

@@ -4,7 +4,8 @@ template <typedef T>
 class JaggedArray
 {
 public:
-	JaggedArray(arguments); //default constructor
+	JaggedArray(){create(); } //default constructor
+	JaggedArray(int bins){create(int bins); } //bin constructor
 	JaggedArray(const JaggedArray& j){copy(j); } //copy constructor
 	JaggedArray& JaggedArray(JaggedArray&); //move constructor
 	~JaggedArray(); //destructor
@@ -25,6 +26,11 @@ public:
 	void print();
 
 private:
+	create();
+	create(int bins);
+
+	copy(const JaggedArray& j);
+
 	int numElements_;
 	int numBins_;
 	int *offsets_;
