@@ -1,7 +1,7 @@
 BIN = ./bin/
 
 INC = ./include/
-CFLAGS = -Wall
+CFLAGS = -Wall -g
 # $< is the source  $@ is the target
 
 #LIST = $(BIN)hw1
@@ -16,12 +16,12 @@ $(BIN)hw1 : ./src/hw1.cpp
 HW2_INC = $(INC)bowling_frame.cpp $(INC)bowling_player.cpp $(INC)bowling_game.cpp $(INC)parser_bowling.cpp
 
 $(BIN)hw2 : ./src/hw2.cpp
-	g++ -g $(HW2_INC) $< $(CFLAGS) -o $@
+	g++ $(HW2_INC) $< $(CFLAGS) -o $@
 
-HW3_INC = 
+HW3_INC =
 
-$(BIN)hw3 : ./src/hw3.cpp
-	g++ -g $(HW3_INC) $< $(CFLAGS) -o $@
+$(BIN)hw3 : ./src/main3.cpp
+	g++ $(HW3_INC) $< $(CFLAGS) -o $@
 
 clean:
 	$(RM) $(LIST)
