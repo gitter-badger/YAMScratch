@@ -145,7 +145,26 @@ template<typename T> T JaggedArray<T>::getElement(unsigned int bin, unsigned int
 
 template<typename T> void JaggedArray<T>::removeElement(unsigned int bin, unsigned int slot) {
     if(isPacked_) {PACKED_ERROR; exit(1);}
-    if (1);
+    //otherwise we continue and test for validity
+    if(bin < this->numBins_) {
+        //now test the slots number
+        if(slot < counts_[bin]) {
+            //create a temp to hold new
+            T* temp = new T[(counts_[bin]-1)];
+            //walk up list and copy over
+            for(unsigned int i = 0; i < slot; i++) {
+                temp[i] = unpacked_values_[bin][i];
+            }
+            //now copy over the remaining
+            for(unsigned int i = slot+1; i < counts_[bin]; i++) {
+                temp[i-1] = unpacked_values_[bin][i];
+            }
+            //clean up the old array
+            delete [] unpacked_values_[bin];
+            //swap in the new array
+            unpacked_values_[bin] = temp;
+        } else {SLOT_INDEX_ERROR; exit(1);}
+    } else { BIN_INDEX_ERROR(bin,this->numBins_); exit(1);}
 }
 
 template<typename T> void JaggedArray<T>::addElement(unsigned int bin, T obj)
