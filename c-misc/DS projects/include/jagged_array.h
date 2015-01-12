@@ -6,10 +6,10 @@ class JaggedArray {
 public:
     JaggedArray(); //default constructor
     JaggedArray(unsigned int bins); //bin constructor
-    JaggedArray(const JaggedArray& j){copy(j); } //copy constructor
+    JaggedArray(const JaggedArray& j); //copy constructor
     ~JaggedArray(); //destructor
 
-    JaggedArray& operator = (const JaggedArray& j);
+    JaggedArray& operator = (const JaggedArray& rhs);
 
     //GETTERS
     unsigned int numElements() const {return numElements_; }
@@ -57,7 +57,7 @@ private:
 //default constructor
 template<typename T> JaggedArray<T>::JaggedArray() \
     : isPacked_(false), numElements_(0), numBins_(0), offsets_(NULL), \
-    packed_values_(NULL), unpacked_values_(NULL), counts_(0) {}
+    packed_values_(NULL), unpacked_values_(NULL), counts_(NULL) {}
 
 //bin constructor
 template<typename T> JaggedArray<T>::JaggedArray(unsigned int bins) \
@@ -75,25 +75,83 @@ template<typename T> JaggedArray<T>::JaggedArray(unsigned int bins) \
     }
 }
 
+template<typename T> JaggedArray<T>::JaggedArray(const JaggedArray<T>& j) \
+    : isPacked_(false), numElements_(0), numBins_(0), offsets_(NULL), \
+    packed_values_(NULL), unpacked_values_(NULL), counts_(NULL)
+    {
+        this->copy(j);
+    }
+
 template<typename T> JaggedArray<T>::~JaggedArray() {
     //delete all the arrays
-    this->clear();
+    if(!this->isPacked_){
+        //only remove things if it is unpacked
+        this->clear();
+    }
     if(offsets_ != NULL) delete [] offsets_;
     if(packed_values_ != NULL) delete [] packed_values_;
     if(counts_ != NULL) delete [] counts_;
     if(unpacked_values_ != NULL) delete [] unpacked_values_;
 }
 
-template<typename T> JaggedArray<T>& JaggedArray<T>::operator = (const JaggedArray<T>& j) { 
-    if(this != &j) {
+template<typename T> JaggedArray<T>& JaggedArray<T>::operator = (const JaggedArray<T>& rhs) { 
+    if(this != &rhs) {
+        //make all pointers null
+        if(this->packed_values_ != NULL) {
+            delete [] this->packed_values_;
+            this->packed_values_ = NULL;
+        }
+
+        if(this->offsets_ != NULL) {
+            delete [] this->offsets_;
+            this->offsets_ = NULL;
+        }
+        if(this->unpacked_values_ != NULL) {
+            if(this->numElements_) {
+                this->clear(); 
+            }
+            delete [] this->unpacked_values_;
+            this->unpacked_values_ = NULL; 
+        }
+        if(this->counts_ != NULL) {
+            delete [] this->counts_;
+            this->counts_ = NULL;
+        }
         
-        this->copy(j);
+        this->copy(rhs);
     }
     return *this;
 }
 //must copy packed and unpacked
-template<typename T> void JaggedArray<T>::copy(const JaggedArray& j) {
-    this->isPacked_ = j.isPacked_;
+template<typename T> void JaggedArray<T>::copy(const JaggedArray<T>& j) {
+    //copying over
+    this->isPacked_ = j.isPacked();
+    this->numBins_ = j.numBins();
+    this->numElements_ = j.numElements();
+
+    if(this->isPacked_) {
+        this->packed_values_ = new T[this->numElements_];
+        this->offsets_ = new int[this->numBins_];
+        for(unsigned int i = 0; i < this->numElements_; i ++) {
+            this->packed_values_[i] = j.packed_values_[i];
+        }
+        for(unsigned int i = 0; i < this->numBins_; i ++) {
+            this->offsets_[i] = j.offsets_[i];        }
+    } else {
+        this->counts_ = new unsigned int[this->numBins_];
+        //allocate a new array for values
+        this->unpacked_values_ = new T*[this->numBins_];
+        for(unsigned int i = 0; i < this-> numBins_; i++) {
+            unsigned int slots = j.numElementsInBin(i);
+            this->counts_[i] = slots;
+            //allocate these elements to new array
+            T* temp = new T[slots];
+            for(unsigned int k = 0; k < slots; k++) {
+                temp[k] = j.getElement(i,k);
+            }
+            this->unpacked_values_[i] = temp;
+        }
+    }
 }
 //=========================================================================
 //GETTERS
@@ -106,7 +164,7 @@ template<typename T> unsigned int JaggedArray<T>::numElementsInBin(unsigned int 
         if(bin < numBins_) {
             //compute how many elements in that bin
             if(bin == numBins_ -1) {
-                return numBins_  -1 - offsets_[bin];
+                return numElements_  - offsets_[bin];
             } else {
                 return offsets_[bin+1] - offsets_[bin];
             }
@@ -316,6 +374,9 @@ template<typename T> void JaggedArray<T>::clear() {
 //Utility functions
 #define FILL ' '
 template<typename T> void JaggedArray<T>::print() {
+    //print out the num of elementd and bins
+    std::cout << std::setw(10) << std::setfill(FILL) << std::left << "bins: " << this->numBins_ << std::endl;
+    std::cout << std::setw(10) << std::left << "elements: " << this->numElements_ << std::endl;
     // find the max field width for num of slots in bin
     int mfw = (numElements_ /10 )+2;
     if(isPacked_) { //easy to represent
@@ -329,6 +390,16 @@ template<typename T> void JaggedArray<T>::print() {
             std::cout << packed_values_[i] << FILL;
         }
         std::cout << std::endl;
+        if(this->unpacked_values_ == NULL) {
+            std::cout << "unpacked_values_ = NULL" << std::endl;
+        } else {
+            std::cout << "unpacked_values_ = not NULL!" << std::endl;
+        }
+        if(this->counts_ == NULL) {
+            std::cout << "counts = NULL" << std::endl;
+        } else {
+            std::cout << "counts = not NULL!" << std::endl;
+        }
     } else {
         // determine the max number of slots in a bin as we display them
         //we only have to call setfill once in this case
@@ -358,6 +429,17 @@ template<typename T> void JaggedArray<T>::print() {
             //finish the printing
             std::cout << std::endl;
         }
+        if(this->packed_values_ == NULL) {
+            std::cout << "packed_values_ = NULL" << std::endl;
+        } else {
+            std::cout << "packed_values_ = not NULL!" << std::endl;
+        }
+        if(this->offsets_ == NULL) {
+            std::cout << "offsets = NULL" << std::endl;
+        } else {
+            std::cout << "offsets = not NULL!" << std::endl;
+        }
+        std::cout << std::endl;
     }
 }
 
