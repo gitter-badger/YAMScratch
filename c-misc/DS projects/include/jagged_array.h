@@ -91,7 +91,7 @@ template<typename T> JaggedArray<T>& JaggedArray<T>::operator = (const JaggedArr
 }
 
 template<typename T> void JaggedArray<T>::copy(const JaggedArray& j) {
-    this->isPacked_ = j.isPacked_
+    this->isPacked_ = j.isPacked_;
 }
 //=========================================================================
 //GETTERS
@@ -116,10 +116,44 @@ template<typename T> void JaggedArray<T>::pack() {
 
 
 template<typename T> void JaggedArray<T>::unpack() {
+    unsigned int num_bin_slots;
     if(isPacked_) {
+        //allocate a new array to hold the elements
+        unpacked_values_ = new T*[numBins_];
+        counts_ = new unsigned int[numBins_];
+        if(unpacked_values_ == NULL || counts_ == NULL) {NULL_POINTER_EXCEPTION; exit(1); }
+        //proceed once each
         for(unsigned int i = 0; i < numBins_; i++) {
+            if(i == numBins_ - 1) { //for the last one we calculate differenly
+                num_bin_slots = numElements_ - offsets_[i];
+            } else {
+                num_bin_slots = offsets_[i+1] - offsets_[i];
+            }
+            //now unpack into each bin
+            if(num_bin_slots) { //check for zero elements
+                T* temp = new T[num_bin_slots];
+                if(temp == NULL) { NULL_POINTER_EXCEPTION; exit(1);}
+                //copy over the new values
+                for(unsigned int j = 0; j < num_bin_slots; j++) {
+                    temp[j] = packed_values_[ ( j + offsets_[i] ) ];
+                }
+                //swap the new array in
+                unpacked_values_[i] = temp;
+                //update the bin counts
+            } else { //there are no values to copy
+                unpacked_values_[i] = NULL;
+            }
+            //update the number of counts in each bin
+            counts_[i] = num_bin_slots;
 
         }
+        //release the packed values
+        delete [] packed_values_;
+        delete [] offsets_;
+        packed_values_ = NULL;
+        offsets_ = NULL;
+        //change the state to unpacked
+        isPacked_ = false;
     }
     // if it is already unpacked nothing to be done
 }
