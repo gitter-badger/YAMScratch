@@ -42,6 +42,7 @@ private:
 //====================BEGIN MEMBERS==============================//
 #include <iostream>
 #include <cstdlib>
+#include <iomanip>
 
 //error reporting macros
 #define PACKED_ERROR {\
@@ -113,7 +114,6 @@ template<typename T> void JaggedArray<T>::pack() {
 
     }
 }
-
 
 template<typename T> void JaggedArray<T>::unpack() {
     unsigned int num_bin_slots;
@@ -245,9 +245,7 @@ template<typename T> void JaggedArray<T>::addElement(unsigned int bin, T obj)
             counts_[bin] += 1;
             numElements_ += 1;
         }
-    }
-    //if we do not return then we end up here
-    PACKED_ERROR; exit(1);
+    } else {PACKED_ERROR; exit(1);}
 }
 
 template<typename T> void JaggedArray<T>::clear() {
@@ -267,9 +265,42 @@ template<typename T> void JaggedArray<T>::clear() {
 
 //=========================================================================
 //Utility functions
+#define FILL ' '
 template<typename T> void JaggedArray<T>::print() {
-    std::cout << "print not implemented" << std::endl;
-}
+    // find the max field width for num of slots in bin
+    int mfw = (numElements_ /10 )+2;
+    if(isPacked_) { //easy to represent
 
+    } else {
+        // determine the max number of slots in a bin as we display them
+        //we only have to call setfill once in this case
+        std::cout << std::setw(10) << std::setfill(FILL) << std::left << "counts: ";
+        unsigned int maximum = 0;
+        for(unsigned int i = 0; i < numBins_; i ++) {
+            maximum = (counts_[i] > maximum) ? counts_[i] : maximum;
+            std::cout << std::setw(mfw) << std::right << counts_[i];
+        }
+        std::cout << std::endl;
+        //now print the  bins
+        for(unsigned int i = 0; i < maximum; i ++) {
+            if(!i) { //only print the header the first time
+                std::cout << std::setw(10)<< std::left << "contents: ";
+            } else {
+                std::cout << std::setw(10) << FILL;
+            }
+            //print out each column
+            for(unsigned int j = 0; j < numBins_; j++) {
+                std::cout << std::setw(mfw) << std::right;
+                if( i < counts_[j]) { //only print if there is something 
+                    std::cout << unpacked_values_[j][i];
+                } else {
+                    std::cout << FILL;
+                }
+            }
+            //finish the printing
+            std::cout << std::endl;
+        }
+    }
+}
 
 #endif
