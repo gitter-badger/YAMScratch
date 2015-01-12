@@ -378,7 +378,9 @@ template<typename T> void JaggedArray<T>::print() {
     std::cout << std::setw(10) << std::setfill(FILL) << std::left << "bins: " << this->numBins_ << std::endl;
     std::cout << std::setw(10) << std::left << "elements: " << this->numElements_ << std::endl;
     // find the max field width for num of slots in bin
-    int mfw = (numElements_ /10 )+2;
+    int temp = numElements_;
+    int mfw = 0;
+    for(mfw = 0; (temp); temp /= 10, mfw++ );
     if(isPacked_) { //easy to represent
         std::cout << std::setw(10) << std::setfill(FILL) << std::left << "offsets: ";
         for(unsigned int i = 0; i < numBins_; i++) {
