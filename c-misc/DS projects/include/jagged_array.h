@@ -27,7 +27,6 @@ public:
 
 private:
     void copy(const JaggedArray& j);
-    bool isBinValid(unsigned int bin) const;
 
     //REPRESENTATION
     bool isPacked_; //true when packed
@@ -52,6 +51,7 @@ private:
                             std::cerr << "you asked for bin index = " << (ask_bin) << std::endl; \
                             std::cerr << "maximum bin was bin index = " << (max_bin) << std::endl; }
 #define SLOT_INDEX_ERROR { std::cerr << "Slot index error" << std::endl; }
+#define NULL_POINTER_EXCEPTION {std::cerr << "Null pointer exception" << std::endl;}
 
 //default constructor
 template<typename T> JaggedArray<T>::JaggedArray() \
@@ -61,10 +61,18 @@ template<typename T> JaggedArray<T>::JaggedArray() \
 //bin constructor
 template<typename T> JaggedArray<T>::JaggedArray(unsigned int bins) \
     : isPacked_(false), numElements_(0), numBins_(bins), offsets_(NULL), \
-    packed_values_(NULL), unpacked_values_(NULL), counts_(NULL) {
-        //initialize the array of bin counts
-        counts_ = new unsigned int[numBins_];
+    packed_values_(NULL), unpacked_values_(NULL), counts_(NULL) 
+{
+    //initialize the array of bin counts
+    counts_ = new unsigned int[numBins_];
+    for(unsigned int i = 0; i < numBins_; i++) {
+        counts_[i] = 0;
     }
+    unpacked_values_ = new T*[numBins_];
+    for(unsigned int i = 0; i < numBins_; i++) {
+        unpacked_values_[i] = NULL;
+    }
+}
 
 template<typename T> JaggedArray<T>::~JaggedArray() {
     //delete all the arrays
@@ -83,12 +91,12 @@ template<typename T> JaggedArray<T>& JaggedArray<T>::operator = (const JaggedArr
 }
 
 template<typename T> void JaggedArray<T>::copy(const JaggedArray& j) {
-    
+    this->isPacked_ = j.isPacked_
 }
 //=========================================================================
 //GETTERS
 template<typename T> unsigned int JaggedArray<T>::numElementsInBin(unsigned int bin) const {
-    if(this->isBinValid(bin)){
+    if(bin < numBins_){
         return counts_[bin];
     } else {BIN_INDEX_ERROR(bin,this->numBins_); exit(1); }
 }
@@ -117,7 +125,6 @@ template<typename T> void JaggedArray<T>::unpack() {
 }
 
 //=========================================================================
-//Editing representation
 template<typename T> T JaggedArray<T>::getElement(unsigned int bin, unsigned int element) const {
     if(this->isPacked_) { //if packed we must do a little math to find our bin
         if(bin < this->numBins_-1) {
@@ -142,15 +149,27 @@ template<typename T> T JaggedArray<T>::getElement(unsigned int bin, unsigned int
         } else { BIN_INDEX_ERROR(bin, this->numBins_); exit(1); }
     }
 }
-
+//=========================================================================
+//MODIFIERS
+//exits if we try to edit in packed mode
+//also does usual checks for indices
 template<typename T> void JaggedArray<T>::removeElement(unsigned int bin, unsigned int slot) {
     if(isPacked_) {PACKED_ERROR; exit(1);}
     //otherwise we continue and test for validity
     if(bin < this->numBins_) {
         //now test the slots number
         if(slot < counts_[bin]) {
+            if(counts_[bin] == 1) {
+                //removing this element will result in zero size array
+                delete [] unpacked_values_[bin];
+                unpacked_values_[bin] = NULL;
+                counts_[bin] = 0;
+                numElements_ -= 1;
+                return;
+            }
             //create a temp to hold new
             T* temp = new T[(counts_[bin]-1)];
+            if(temp == NULL) { NULL_POINTER_EXCEPTION; exit(1); } //checking for null
             //walk up list and copy over
             for(unsigned int i = 0; i < slot; i++) {
                 temp[i] = unpacked_values_[bin][i];
@@ -163,6 +182,9 @@ template<typename T> void JaggedArray<T>::removeElement(unsigned int bin, unsign
             delete [] unpacked_values_[bin];
             //swap in the new array
             unpacked_values_[bin] = temp;
+            //update the number of elements
+            counts_[bin] -= 1;
+            numElements_ -= 1;
         } else {SLOT_INDEX_ERROR; exit(1);}
     } else { BIN_INDEX_ERROR(bin,this->numBins_); exit(1);}
 }
@@ -170,10 +192,11 @@ template<typename T> void JaggedArray<T>::removeElement(unsigned int bin, unsign
 template<typename T> void JaggedArray<T>::addElement(unsigned int bin, T obj)
 {
     if(!isPacked_) {
-        if(isBinValid(bin)) {
+        if(bin < numBins_) {
             //allocate new storage for that bin
             int num_new_elements = counts_[bin] + 1;
             T* temp = new T[num_new_elements];
+            if(temp == NULL) { NULL_POINTER_EXCEPTION; exit(1); } //checking for null
             //copy the old elements into the temp array
             for(int i = 0; i < num_new_elements - 1; i ++) {
                 temp[i] = unpacked_values_[bin][i];
@@ -184,6 +207,9 @@ template<typename T> void JaggedArray<T>::addElement(unsigned int bin, T obj)
             delete [] unpacked_values_[bin];
             //swap in the new array
             unpacked_values_[bin] = temp;
+            //update the number in bins
+            counts_[bin] += 1;
+            numElements_ += 1;
         }
     }
     //if we do not return then we end up here
@@ -191,16 +217,22 @@ template<typename T> void JaggedArray<T>::addElement(unsigned int bin, T obj)
 }
 
 template<typename T> void JaggedArray<T>::clear() {
-    
+    if(!isPacked_) {
+        //free the unpacked values
+        for(unsigned int i = 0; i < numBins_ ; i++) {
+            if(unpacked_values_[i] != NULL) {
+                delete [] unpacked_values_[i];
+                unpacked_values_[i] = NULL; //zero out the array
+                counts_[i] = 0; //clear the number of elements in each bin
+            }
+        }
+        //this occurs only after the array is all deleted
+        numElements_ = 0; //zero out the number of elements
+    } else { PACKED_ERROR; exit(1); }
 }
 
 //=========================================================================
 //Utility functions
-
-template<typename T> bool JaggedArray<T>::isBinValid(unsigned int bin) const {
-    return bin < numBins_;
-}
-
 template<typename T> void JaggedArray<T>::print() {
     std::cout << "print not implemented" << std::endl;
 }
