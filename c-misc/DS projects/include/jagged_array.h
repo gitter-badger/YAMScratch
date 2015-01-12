@@ -77,6 +77,7 @@ template<typename T> JaggedArray<T>::JaggedArray(unsigned int bins) \
 
 template<typename T> JaggedArray<T>::~JaggedArray() {
     //delete all the arrays
+    this->clear();
     if(offsets_ != NULL) delete [] offsets_;
     if(packed_values_ != NULL) delete [] packed_values_;
     if(counts_ != NULL) delete [] counts_;
@@ -90,7 +91,7 @@ template<typename T> JaggedArray<T>& JaggedArray<T>::operator = (const JaggedArr
     }
     return *this;
 }
-
+//must copy packed and unpacked
 template<typename T> void JaggedArray<T>::copy(const JaggedArray& j) {
     this->isPacked_ = j.isPacked_;
 }
@@ -132,14 +133,16 @@ template<typename T> void JaggedArray<T>::pack() {
                 //fill in each bin
                 if(i < numBins_ -1) {
                     offsets_[i+1] = offsets_[i] + counts_[i];
-                } else { //only case for last element
-                    offsets_[i+1] = offsets_[i] + counts_[i];
-                }
+                } //for the last element no value is written
                 //copy over each of the values
                 for(unsigned int j = 0; j < counts_[i]; j++) {
                     *fill_ptr++ = unpacked_values_[i][j];
                 }
+                //clean up the values
+                delete [] unpacked_values_[i];
+                unpacked_values_[i] = NULL;
             }
+            fill_ptr = NULL;
 
         } else {
             offsets_ = new int[numBins_];
@@ -286,6 +289,7 @@ template<typename T> void JaggedArray<T>::addElement(unsigned int bin, T obj)
             delete [] unpacked_values_[bin];
             //swap in the new array
             unpacked_values_[bin] = temp;
+            temp = NULL;
             //update the number in bins
             counts_[bin] += 1;
             numElements_ += 1;
