@@ -97,9 +97,21 @@ template<typename T> void JaggedArray<T>::copy(const JaggedArray& j) {
 //=========================================================================
 //GETTERS
 template<typename T> unsigned int JaggedArray<T>::numElementsInBin(unsigned int bin) const {
-    if(bin < numBins_){
-        return counts_[bin];
-    } else {BIN_INDEX_ERROR(bin,this->numBins_); exit(1); }
+    if(!isPacked_) {
+        if(bin < numBins_) {
+            return counts_[bin];
+        } else {BIN_INDEX_ERROR(bin,this->numBins_); exit(1); }
+    } else {
+        if(bin < numBins_) {
+            //compute how many elements in that bin
+            if(bin == numBins_ -1) {
+                return numBins_ - offsets_[bin];
+            } else {
+                return offsets_[bin+1] - offsets_[bin];
+            }
+
+        } else {BIN_INDEX_ERROR(bin, this->numBins_); exit(1); }
+    }
 }
 
 //=========================================================================
@@ -111,6 +123,7 @@ template<typename T> void JaggedArray<T>::pack() {
 
     } else {
         offsets_ = NULL;
+
 
     }
 }
