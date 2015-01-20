@@ -33,9 +33,12 @@ plot3(0,0,0,'kd')
 hold on
 
 %iterate slice by slice upwards
+begining_x = x;
 for k = z_offset:2:C
     z = k;
     y = y_offset;
+    %reset the value of x
+    x = begining_x;
     disp('Finding Error')
     error = (B^2*x^2 + A^2*y^2 - A^2*B^2)*C^2 + A^2*B^2*z^2;
     disp(error)
@@ -58,19 +61,24 @@ for k = z_offset:2:C
     end
     %add the start points to a graph
     disp([x,y,z]);
-     x_list(end+1) = x;
-     y_list(end+1) = y;
-     z_list(end+1) = z;
-     plot_3point(x,y,z,fig);
+    %reset the beginning value of x
+    begining_x = x;
+    x_list(end+1) = x;
+    y_list(end+1) = y;
+    z_list(end+1) = z;
+    plot_3point(x,y,z,fig);
     %now progress along the circumfrance
-    while y < B-2
-        x_step = error + C^2*4*(1-x);
-        xy_step = error + C^2*4*(y-x+2);
-        y_step = error + C^2*4*(y+1);
+    %compare the error from just the inner part
+    while y < B-2 && x > 0
+        x_step = error + C^2*B^2*(-4*x+4);
+        xy_step = error + C^2*(B^2*(-4*x+4) + A^2*(4*y+4));
+        y_step = error + C^2*A^2*(4*y+4);
+        %disp('Error')
+        %disp(error)
         choices = [x_step,xy_step,y_step];
-        disp(choices)
+        %disp(choices)
         sorted_choices = sort(choices);
-        disp(sorted_choices);
+        %disp(sorted_choices);
         if sorted_choices(3) <= 0
             key = sorted_choices(3);
         elseif sorted_choices(2) <= 0
