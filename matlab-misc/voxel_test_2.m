@@ -2,9 +2,9 @@ clear
 clc
 close all;
 
-A = 75;
-B = 100;
-C = 35;
+A = 40;
+B = 3;
+C = 30;
 
 x_offset = mod(A+1,2); %set the coordinate we start from
 y_offset = mod(B+1,2);
@@ -69,7 +69,7 @@ for k = z_offset:2:C
     plot_3point(x,y,z,fig);
     %now progress along the circumfrance
     %compare the error from just the inner part
-    while y < B-2 && x > 0
+    while x > 0
         x_step = error + C^2*B^2*(-4*x+4);
         xy_step = error + C^2*(B^2*(-4*x+4) + A^2*(4*y+4));
         y_step = error + C^2*A^2*(4*y+4);
@@ -106,8 +106,33 @@ for k = z_offset:2:C
         x_list(end+1) = x;
         y_list(end+1) = y;
         z_list(end+1) = z;
-        plot_3point(x,y,z,fig);
+        %plot_3point(x,y,z,fig);
     end
     
     
+end
+
+for count = 1:length(x_list)
+	x = x_list(count);
+	y = y_list(count);
+	z = z_list(count);
+	%XY plane
+	one_x = [x-1,x-1,x+1,x+1];
+	one_y = [y+1,y-1,y-1,y+1];
+	one_z = [z+1,z+1,z+1,z+1];
+	fill3(one_x,one_y,one_z,'c')
+	fill3(one_x,one_y,-one_z,'c')
+	%XZ plane
+	two_x = [x-1,x-1,x+1,x+1];
+	two_y = [y+1,y+1,y+1,y+1];
+	two_z = [z+1,z-1,z-1,z+1];
+	fill3(two_x,two_y,two_z,'m')
+	fill3(two_x,two_y,-two_z,'m')
+	%YZ plane
+	three_x = [x+1,x+1,x+1,x+1];
+	three_y = [y-1,y-1,y+1,y+1];
+	three_z = [z+1,z-1,z-1,z+1];
+	fill3(three_x,three_y,three_z,'y')
+	fill3(three_x,three_y,-three_z,'y')
+
 end
