@@ -11,10 +11,11 @@ bin/
 motivator/Matlab/
 Data\ Structures/
 c-misc/DS\ projects/*.txt
-
 #ignore test input files
 PracticeInput*
 out.txt
+
+main3.cpp
 
 #ignore archives
 *.tgz
