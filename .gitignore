@@ -16,7 +16,7 @@ PracticeInput*
 out.txt
 
 main3.cpp
-
+*.jar
 #ignore archives
 *.tgz
 *.zip
