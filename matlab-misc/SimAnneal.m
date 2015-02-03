@@ -24,7 +24,7 @@ x_k = rand('double')*(U-L) - (U-L)/2.0;
 fprintf(fid, 'Starting x: %f\n', x_k );
 fprintf(fid, 'x, f(x), g(x)\n' ); %tell the format
 
-N = 10; %
+N = 500; %
 epoch_length = 2*N; %twice
 
 mesh_size = (U-L) /5; %initialize the mesh size for a jump of 1/5 interval
@@ -42,7 +42,7 @@ fprintf(fid, 'Nearby: %10.10f,%10.10f,%10.10f\n',[x_nearby, f_near, g_near] );
 T_max = -abs(f_near - f_x_k) / log(0.9);
 T_min = min([1,T_max]*0.001);
 Temp = T_max;
-fprintf(fid, 'T_max: %10.10f \n T_min: %10.10f\n', [T_max,T_min]);
+fprintf(fid, 'T_max: %10.16f \n T_min: %10.16f\n', [T_max,T_min]);
 
 memo = false; % flag to skip recalculating first time through loop
 
@@ -51,7 +51,7 @@ cool_ratio = 0.98; %should be (0.5,0.99)
 
 for search = 1:epoch_length
 	%log which iteration we are on
-	fprintf(fid, 'Iteration: %i, Temp = %10.10f\n', [search,Temp] );
+	fprintf(fid, 'Iteration: %i, Temp = %10.16f\n', [search,Temp] );
 	%evaluate the test point x_k
 	if(memo)
 		[f_x_k, g_x_k] = func1(x_k);
