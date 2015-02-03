@@ -19,8 +19,8 @@ fid = fopen('results.txt','at');
 
 %randomly pick a intial starting point on interval [-1000,1000]
 U = 3.5;
-L = 1.2;
-x_k = rand('double')*(U-L) + L;
+L = -0.3;
+x_k = rand('double')*(U-L) + (U-L)/2;
 fprintf(fid, 'Starting x: %f\n', x_k );
 fprintf(fid, 'x, f(x), g(x)\n' ); %tell the format
 
@@ -30,7 +30,7 @@ epoch_length = 2*N; %twice
 mesh_size = (U-L) /5; %initialize the mesh size for a jump of 1/5 interval
 
 epsilon = 0.001; %neighborhood radius
-trial_radius = 0.01; % SA trial point radius
+trial_radius = 0.001; % SA trial point radius
 
 x_nearby = x_k + (rand*2 -1) *trial_radius;
 
