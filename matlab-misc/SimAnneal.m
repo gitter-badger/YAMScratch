@@ -6,6 +6,8 @@ close all;
 %	with Derivative Information
 %		Fengming Ma
 %	International Mathematical Forum, 3, 2008, no. 37, 1835 - 1840
+% Isaiah Bell 
+% 2015 (c) All rights reserved
 
 %%ALGORITHM
 %first repeat the simulated annealing accpetance trials m times.
