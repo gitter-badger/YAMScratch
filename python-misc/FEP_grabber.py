@@ -2,6 +2,7 @@ import urllib
 import urllib2
 import sys
 import os
+import re
 from StringIO import StringIO
 import gzip
 
@@ -18,11 +19,13 @@ header['Cache-Control'] = "no-cache"
 header['Accept-Language'] = "en,en-GB,q=0.5"
 header['Accept-Encoding'] = "gzip,deflate"
 
-data = urllib.urlencode({})
+data = None
 
 req = urllib2.Request(url,data,header)
+print req
 response = urllib2.urlopen(req)
 page = response.read(response)
+
 if response.info().get('Content-Encoding') == 'gzip':
 			vuff = StringIO(page)
 			f = gzip.GzipFile(fileobj=vuff)
@@ -31,4 +34,15 @@ if response.info().get('Content-Encoding') == 'gzip':
 else:
 	soup = BeautifulSoup(page)
 
-print soup.prettify()
+#all pieces
+all_class_homepages = set()
+for link in soup.find_all('a'):
+	if link.has_attr('href'):
+		#find all of the links that actually have something
+		#ignoring the '/' directory
+		if re.match('^..*/$', link['href']):
+			print link['href']
+			all_class_homepages.add(link)
+
+#visit all of the class pages one by one and download everythin!!
+#print soup.prettify()
