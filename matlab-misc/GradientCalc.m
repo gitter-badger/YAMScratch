@@ -1,11 +1,10 @@
-function [] = GradientCalc(fhandle,varargin)
+function [f_prime] = GradientCalc(fhandle,varargin)
 	p = inputParser;
 	VECTOR_SIZE = 128; 
 	defaultStep = 37;
 
 	defaultLocation = zeros(VECTOR_SIZE,1);
 	wrapper = @(M)(validSize(M,VECTOR_SIZE));
-	 
 	check_fun = @(x)(isa(x,'function_handle'));
 	%load the requirements
 	addRequired(p,'fhandle',check_fun);
@@ -38,7 +37,6 @@ function [] = GradientCalc(fhandle,varargin)
 		%put it back
 		LOCATION(dimension) = swap;
 	end
-	disp(f_prime)
 	return
 end
 
