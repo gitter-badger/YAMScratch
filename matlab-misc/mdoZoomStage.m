@@ -1,4 +1,4 @@
-function [alpha] = zoom_stage()
+function [alpha] = mdoZoomStage()
 
 return
 end
