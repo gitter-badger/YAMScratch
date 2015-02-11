@@ -9,6 +9,7 @@ function [] = mdoPlotGoldenSectionData(cost_data, fig, tolerance, z_space)
 % fig - the figure handle to plot on
 % tolerance - smalled interval size to show on plot
 % z_space - the z-spacing of the ticks, choose something based on the y-scale of your plot
+
 	figure(fig)
 	[r,c] = size(cost_data);
 	for index = 1:r

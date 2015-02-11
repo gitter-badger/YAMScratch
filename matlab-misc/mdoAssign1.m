@@ -53,10 +53,10 @@ a = -2;
 b = 4;
 epsilon = 1e-7;
 [left,right,cost_data] = mdoGoldenSection(objective,a,b,epsilon);
-%create a z_buffer to graphically show golden section convergence
 tolerance = (b-a)*1e-3; %visable convergence intervals
-mdoPlotGoldenSectionData(cost_data, fig1, tolerance, 0.5)
 
+mdoPlotGoldenSectionData(cost_data, fig1, tolerance, 0.5) % using specialized plotting function
+%plotting the function values
 x_vals = [a-.5:0.01:b+.5];
 y_vals = simple(x_vals);
 plot(x_vals,y_vals)
