@@ -62,9 +62,26 @@ for index = 1:r
 		break
 	end
 end
+%take the approximation of the function value at one side of the interval
+%as the z value starting the z buffer
+start_z = cost_data(stop_index,2);
+%the spacing on the z-axis for each element
+z_spacing = 0.1;
+tick_size = 0.25*z_spacing;
+%work backwards from the smalles interval we consider
+for level = stop_index:-1:1
+	hold on
+	left_ticks = [cost_data(level,1),cost_data(level,1)];
+	right_ticks = [cost_data(level,3),cost_data(level,3)];
+	y_ticks = [-tick_size, tick_size];
+	y_ticks = y_ticks + start_z + z_spacing*level;
+	plot(left_ticks,y_ticks,'k')
+	hold on
+	plot(right_ticks,y_ticks,'k');
+	hold on
+	plot([cost_data(level,1),cost_data(level,3)],[1,1]*(start_z + z_spacing*level),'k')
+end
 
-top_z = max([cost_data(1,1),cost_data(1,3)]);
-disp(top_z)
 
 x_vals = [a-.5:0.01:b+.5];
 y_vals = simple(x_vals);
