@@ -26,12 +26,14 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 	bound_cond.f_high = NaN; bound_cond.g_high = NaN;
 	%these two below never change
 	bound_cond.f_init = f_0; bound_cond.g_init = g_0;
+	%create closure to hold the objective function
+	phi = @(a) (obj(x0 + p*a))
 	while true
 		disp(index)
 		%usually here we only evaluate the function
-		%f_this = obj(x0 + p*alpha_this)
+		%f_this = phi(alpha_this)
 		%however here just do both together because it is so fast
-		[f_this, g_this] = obj(x0 + p*alpha_this);
+		[f_this, g_this] = phi(alpha_this);
 		%test the Amjiro condition right away
 		if (f_this > (f_0 + mu_1*alpha_this*g_0)) ...
 			|| ((f_this > f_prev) && (index > 1))
@@ -46,7 +48,7 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 			end
 			bound_cond.f_high = f_this; 
 			bound_cond.g_high = g_this;
-			alpha = mdoZoomStage(objective, alpha_prev, alpha_this, bound_cond);
+			alpha = mdoZoomStage(phi, alpha_prev, alpha_this, bound_cond);
 			return
 		end
 		%with expensive derivatives we would evaluate the derivative only if necessary
@@ -61,7 +63,7 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 			bound_cond.g_high = g_prev;
 			bound_cond.f_low = f_this; 
 			bound_cond.g_low = g_this;
-			alpha = mdoZoomStage(objective, alpha_this,alpha_prev,bound_cond);
+			alpha = mdoZoomStage(phi, alpha_this,alpha_prev,bound_cond);
 			return
 		else
 			%do a binary search for an acceptable step
