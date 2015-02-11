@@ -46,7 +46,7 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 			end
 			bound_cond.f_high = f_this; 
 			bound_cond.g_high = g_this;
-			alpha = mdoZoomStage(alpha_prev, alpha_this, bound_cond);
+			alpha = mdoZoomStage(objective, alpha_prev, alpha_this, bound_cond);
 			return
 		end
 		%with expensive derivatives we would evaluate the derivative only if necessary
@@ -61,7 +61,7 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 			bound_cond.g_high = g_prev;
 			bound_cond.f_low = f_this; 
 			bound_cond.g_low = g_this;
-			alpha = mdoZoomStage(alpha_this,alpha_prev,bound_cond);
+			alpha = mdoZoomStage(objective, alpha_this,alpha_prev,bound_cond);
 			return
 		else
 			%do a binary search for an acceptable step
