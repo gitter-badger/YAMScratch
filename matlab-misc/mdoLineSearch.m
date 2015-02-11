@@ -11,7 +11,7 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 % Outputs:
 % alpha - a step satisfying the strong-Wolfe conditions
 	%create closure to hold the objective function
-	phi = @(a) (obj(x0 + p*a))
+	phi = @(a) (obj(x0 + p*a));
 	%alpha_prev is a0 to start
 	alpha_prev = 0;
 	[f_0, g_0] = phi(alpha_prev);
@@ -30,14 +30,13 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 	bound_cond.mu_1 = mu_1; bound_cond.mu_2 = mu_2;
 	bound_cond.p = p;
 	while true
-		disp(index)
 		%usually here we only evaluate the function
 		%f_this = phi(alpha_this)
 		%however here just do both together because it is so fast
 		[f_this, g_this] = phi(alpha_this);
 		%test the Amjiro condition right away
 		%statement evaluates true only if sufficent decrease is not met
-		if (f_this > (f_0 + mu_1*alpha_this*g_0)) ...
+		if (f_this > (f_0 + mu_1*alpha_this*g_0.'*p)) ...
 			|| ((f_this > f_prev) && (index > 1))
 			%all of the pre calculated information is wrapped up in struct
 			%and passed in as boundary condition for this interval

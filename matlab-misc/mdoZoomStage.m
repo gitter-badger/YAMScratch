@@ -12,8 +12,6 @@ function [alpha] = mdoZoomStage(phi,al_low,al_high,b)
 %		mu_1 - initial condition for sufficient decrease
 %		mu_2 - initial condition for curvature decrease
 %		p - the direction of search
-disp(b)
-%rename struct for shortness
 	while true
 		%find a trial point between al_low and al_high
 		%this uses bisection
