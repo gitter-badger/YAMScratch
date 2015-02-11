@@ -54,34 +54,8 @@ b = 4;
 epsilon = 1e-7;
 [left,right,cost_data] = mdoGoldenSection(objective,a,b,epsilon);
 %create a z_buffer to graphically show golden section convergence
-tolerance = (b-a)*1e-2; %visable convergence intervals
-[r,c] = size(cost_data);
-for index = 1:r
-	if (cost_data(index,3) - cost_data(index,1) < tolerance)
-		stop_index = index;
-		break
-	end
-end
-%take the approximation of the function value at one side of the interval
-%as the z value starting the z buffer
-start_z = cost_data(stop_index,2);
-%the spacing on the z-axis for each element
-z_spacing = 0.1;
-tick_size = 0.25*z_spacing;
-%work backwards from the smalles interval we consider
-for level = stop_index:-1:1
-	hold on
-	left_ticks = [cost_data(level,1),cost_data(level,1)];
-	right_ticks = [cost_data(level,3),cost_data(level,3)];
-	y_ticks = [-tick_size, tick_size];
-	y_ticks = y_ticks + start_z + z_spacing*level;
-	plot(left_ticks,y_ticks,'k')
-	hold on
-	plot(right_ticks,y_ticks,'k');
-	hold on
-	plot([cost_data(level,1),cost_data(level,3)],[1,1]*(start_z + z_spacing*level),'k')
-end
-
+tolerance = (b-a)*1e-3; %visable convergence intervals
+mdoPlotGoldenSectionData(cost_data, fig1, tolerance, 0.5)
 
 x_vals = [a-.5:0.01:b+.5];
 y_vals = simple(x_vals);
