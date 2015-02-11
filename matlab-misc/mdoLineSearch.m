@@ -10,6 +10,7 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 % alpha_max - the maximum allowable step length
 % Outputs:
 % alpha - a step satisfying the strong-Wolfe conditions
+
 	%create closure to hold the objective function
 	phi = @(a) (obj(x0 + p*a));
 	%alpha_prev is a0 to start
