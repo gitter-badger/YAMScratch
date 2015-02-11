@@ -34,5 +34,7 @@ while true
 	[f_curr, g_curr] = objective(x1);
 	if (norm(g_curr) < norm(g_init)*1e-6)
 		break;
+	else
+		disp(norm(g_curr)/norm(g_init))
 	end
 end

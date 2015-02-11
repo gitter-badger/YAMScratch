@@ -10,10 +10,11 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 % alpha_max - the maximum allowable step length
 % Outputs:
 % alpha - a step satisfying the strong-Wolfe conditions
-
+	%create closure to hold the objective function
+	phi = @(a) (obj(x0 + p*a))
 	%alpha_prev is a0 to start
 	alpha_prev = 0;
-	[f_0, g_0] = obj(x0);
+	[f_0, g_0] = phi(alpha_prev);
 	%keep a copy of the inital point evaluations around
 	[f_prev, g_prev] = deal(f_0, g_0);
 	alpha_this = alpha_init;
@@ -26,8 +27,6 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 	bound_cond.f_high = NaN; bound_cond.g_high = NaN;
 	%these two below never change
 	bound_cond.f_init = f_0; bound_cond.g_init = g_0;
-	%create closure to hold the objective function
-	phi = @(a) (obj(x0 + p*a))
 	while true
 		disp(index)
 		%usually here we only evaluate the function
@@ -35,6 +34,7 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 		%however here just do both together because it is so fast
 		[f_this, g_this] = phi(alpha_this);
 		%test the Amjiro condition right away
+		%statement evaluates true only if sufficent decrease is not met
 		if (f_this > (f_0 + mu_1*alpha_this*g_0)) ...
 			|| ((f_this > f_prev) && (index > 1))
 			%all of the pre calculated information is wrapped up in struct
@@ -53,12 +53,17 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 		end
 		%with expensive derivatives we would evaluate the derivative only if necessary
 		%g_this = some derivative call here
-		%below the statement is only valid for 1D case, need different formulation for N-D
-		if (abs(g_this) <= -mu_2*g_0)
+		%check the curvature condition
+		if (abs(g_this.'*p) <= mu_2*abs(g_0.'*p))
+			%when the curvature is decreasing, it means we are moving towards
+			%local minimum along direction p
 			alpha = alpha_this;
 			return
-		%statment also only valid for 1D case
-		elseif (g_this >= 0)
+		%if the gradient changes to be aligned with the search direction
+		%we know that when we started that the gradient aligned antiparallel
+		%therefore becuse the function is analytic the gradient must have been 
+		%perpendicular somewhere in this interval
+		elseif (g_this.'*p >= 0)
 			bound_cond.f_high = f_prev;
 			bound_cond.g_high = g_prev;
 			bound_cond.f_low = f_this; 
