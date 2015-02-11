@@ -13,7 +13,6 @@ function [left,right,cost_data] = mdoGoldenSection(obj,a,b,epsilon)
 
 	%using these at floating point is not great but does work for this toy example
 	tau = (sqrt(5) - 1)/2;
-	disp(tau)
 	%find the original endpoints
 	[f_a,dummy] = obj(a);
 	[f_b,dummy] = obj(b);

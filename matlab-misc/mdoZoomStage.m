@@ -12,7 +12,8 @@ function [alpha] = mdoZoomStage(phi,al_low,al_high,b)
 %		mu_1 - initial condition for sufficient decrease
 %		mu_2 - initial condition for curvature decrease
 %		p - the direction of search
-	while true
+	iteration = 1;
+	while iteration < 100
 		%find a trial point between al_low and al_high
 		%this uses bisection
 		a_trial = (al_low + al_high) /2;
@@ -33,20 +34,22 @@ function [alpha] = mdoZoomStage(phi,al_low,al_high,b)
 				return
 			elseif (g_trial*(al_high - al_low) >= 0)
 				%replace high point with low point
-				al_high = a_low;
+				al_high = al_low;
 				b.f_high = b.f_low;
 				b.g_high = b.g_low;
 				%make sure these values are not used
 				b.f_low = NaN;
 				b.g_low = NaN;
-				a_low = NaN;
+				al_low = NaN;
 			end
 			%replace low point with trial point
 			al_low = a_trial;
 			b.f_low = f_trial;
 			b.g_low = g_trial;
 		end
+		iteration = iteration + 1;
 	end
-
+	%return with the best guess if iteration count is exceeded
+	alpha = a_trial;
 	return
 end	

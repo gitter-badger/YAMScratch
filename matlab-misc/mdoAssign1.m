@@ -14,37 +14,45 @@ plot(test_x,simple_y)
 %this returns [f, f'] of the simple function above
 objective = @(x)(deal((x^2-x),(2*x-1))) 
 %configure the linesearch parameters here
-x_prev = 2;
+x_prev = 2.8;
 mu_1 = 1e-4;
 mu_2 = 0.9;
 alpha_init = 1;
 %alpha_init = input('Enter inital step length: ');
 alpha_max = 3;
-
+hold on
+plot(x_prev,simple(x_prev),'gd');
+hold on
 %do a bad thing and have infinite while loop to simulate do while
+[f_init,g_init] = objective(x_prev);
+%store each run of function for plotting convergence
+g_metric = [];
+x_metric = [x_prev];
 while true
 	%compute the descent direction of the objective function
 	%in this case we directly evaluate the gradient and then normalize
-	[f_init,g_init] = objective(x_prev);
-	p = -g_init./norm(g_init);
-
+	[f_this,g_this] = objective(x_prev);
+	p = -g_this./norm(g_this);
 	step = mdoLineSearch(objective, p, x_prev, mu_1, mu_2, alpha_init, alpha_max);
 	%jump to this point
 	x_curr = x_prev + p*step;
+	x_metric(end+1) = x_curr;
 	%these two never change
 	hold on
 	plot(x_curr,simple(x_curr),'rd');
 	hold on
 	%test if the gradient has been reduced enough to quit
 	[f_curr, g_curr] = objective(x_curr);
-	if (norm(g_curr) < norm(g_init)*1e-6)
+	if (norm(g_curr) < norm(g_init)*1e-25)
+		g_metric(end+1) = (norm(g_curr)/norm(g_init));
 		break;
 	else
-		disp(norm(g_curr)/norm(g_init))
+		g_metric(end+1) = (norm(g_curr)/norm(g_init));
 	end
-	x_prev = x_curr
+	x_prev = x_curr;
 end
-
+%calculate the difference from actual point
+x_metric = abs(x_metric - 0.5);
 %test by golden section method
 
 fig1 = figure;
@@ -54,12 +62,28 @@ b = 4;
 epsilon = 1e-7;
 [left,right,cost_data] = mdoGoldenSection(objective,a,b,epsilon);
 tolerance = (b-a)*1e-3; %visable convergence intervals
-
+%figure out the relative error metric
+gold_metric = abs(cost_data(:,1) - cost_data(:,3));
 mdoPlotGoldenSectionData(cost_data, fig1, tolerance, 0.5) % using specialized plotting function
 %plotting the function values
 x_vals = [a-.5:0.01:b+.5];
 y_vals = simple(x_vals);
 plot(x_vals,y_vals)
+
+%compare the results from the line search
+fig_metric = figure;
+figure(fig_metric);
+semilogy(1:length(g_metric), g_metric,'kd:')
+hold on
+
+semilogy(1:length(x_metric), x_metric, 'ko-.')
+hold on
+semilogy(1:length(gold_metric), gold_metric, 'rd--')
+hold on
+
+title('Line search and golden section search')
+xlabel('Iterations k')
+legend('|g_k|/|g_0|','|x_k - x.|', '\delta_k');
 
 %test the real question
 fig2 = figure;
