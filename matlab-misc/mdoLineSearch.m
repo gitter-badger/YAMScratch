@@ -25,8 +25,10 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 	bound_cond = struct;
 	bound_cond.f_low = NaN; bound_cond.g_low = NaN;
 	bound_cond.f_high = NaN; bound_cond.g_high = NaN;
-	%these two below never change
+	%these below never change
 	bound_cond.f_init = f_0; bound_cond.g_init = g_0;
+	bound_cond.mu_1 = mu_1; bound_cond.mu_2 = mu_2;
+	bound_cond.p = p;
 	while true
 		disp(index)
 		%usually here we only evaluate the function
