@@ -40,7 +40,28 @@ while true
 	else
 		disp(norm(g_curr)/norm(g_init))
 	end
-	input('Proceed?')
 	x_prev = x_curr
-
 end
+
+%test by golden section method
+
+fig1 = figure;
+figure(fig1);
+[left,right,cost_data] = mdoGoldenSection(objective,-2,4,1e-7);
+
+%test the real question
+fig2 = figure;
+figure(fig2);
+
+%create the drag equation
+rho = 1.23;	%density of air kg/m^3
+mu = 17.8 * 1e-6; % viscosity of air kg/(m sec)
+Velocity = 35; %airspeed m/sec
+S = 11.8; %planform area m^2
+S_wet = 2.05*S; % wing wetted area m^2
+k = 1.2; %form factor
+C_l = 0.3; %lift coefficient
+e = 0.96; %Oswald efficiency factor
+
+Reynolds = @(l_char) (rho*Velocity*l_char/mu);
+
