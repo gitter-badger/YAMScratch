@@ -3,6 +3,7 @@
 %All rights reserved
 clear
 clc
+close all;
 %setup test function
 simple = @(x) (x.^2-x);
 %prepare plotting the function
@@ -16,7 +17,8 @@ objective = @(x)(deal((x^2-x),(2*x-1)))
 x_prev = 2;
 mu_1 = 1e-4;
 mu_2 = 0.9;
-alpha_init = input('Enter inital step length: ');
+alpha_init = 1;
+%alpha_init = input('Enter inital step length: ');
 alpha_max = 3;
 
 %do a bad thing and have infinite while loop to simulate do while
@@ -49,8 +51,21 @@ fig1 = figure;
 figure(fig1);
 a = -2;
 b = 4;
-epsilon = 1e-15;
+epsilon = 1e-7;
 [left,right,cost_data] = mdoGoldenSection(objective,a,b,epsilon);
+%create a z_buffer to graphically show golden section convergence
+tolerance = (b-a)*1e-2; %visable convergence intervals
+[r,c] = size(cost_data);
+for index = 1:r
+	if (cost_data(index,3) - cost_data(index,1) < tolerance)
+		stop_index = index;
+		break
+	end
+end
+
+top_z = max([cost_data(1,1),cost_data(1,3)]);
+disp(top_z)
+
 x_vals = [a-.5:0.01:b+.5];
 y_vals = simple(x_vals);
 plot(x_vals,y_vals)

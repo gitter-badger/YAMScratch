@@ -27,7 +27,6 @@ function [left,right,cost_data] = mdoGoldenSection(obj,a,b,epsilon)
 		right = b;
 		%only do logging if we are going to use it
 		if nargout == 3
-			disp(iteration)
 			cost_data(iteration,1) = a; cost_data(iteration,2) = f_a; 
 			cost_data(iteration,3) = b; cost_data(iteration,4) = f_b;
 		end
@@ -52,7 +51,7 @@ function [left,right,cost_data] = mdoGoldenSection(obj,a,b,epsilon)
 			f_b = f_d;
 			%store the result of c as the closer to b, point d
 			d = c;
-			f_d = f_c
+			f_d = f_c;
 			%set the flag so that point c will be recalculated
 			c = NaN;
 			f_c = NaN;
