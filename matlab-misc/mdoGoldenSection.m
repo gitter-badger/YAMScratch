@@ -10,36 +10,42 @@ function [left,right,cost_data] = mdoGoldenSection(obj,a,b,epsilon)
 % left - left side of interval containing minimum
 % right - right side of interval containing minimum
 % cost_data - history of points visited for plotting purposes
+
 	%using these at floating point is not great but does work for this toy example
 	tau = (sqrt(5) - 1)/2;
+	disp(tau)
 	%find the original endpoints
-	f_a = obj(a);
-	f_b = obj(b);
+	[f_a,dummy] = obj(a);
+	[f_b,dummy] = obj(b);
 	c = NaN;
 	d = NaN;
 	iteration = 1;
 	%fake a do while loop with the condition at end
+	cost_data = [];
 	while true
+		left = a;
+		right = b;
 		%only do logging if we are going to use it
-		if nargout == 2
+		if nargout == 3
+			disp(iteration)
 			cost_data(iteration,1) = a; cost_data(iteration,2) = f_a; 
 			cost_data(iteration,3) = b; cost_data(iteration,4) = f_b;
 		end
 		iteration = iteration + 1;
 		%only update the one which has not been calculated
-		if c == NaN
-			c = b + tau*(a-b)
-			f_c = obj(c);
+		if isnan(c)
+			c = b + tau*(a-b);
+			[f_c,dummy] = obj(c);
 		end
-		if d == NaN
-			d = a + tau*(b-a)
-			f_d = obj(d);
+		if isnan(d)
+			d = a + tau*(b-a);
+			[f_d,dummy] = obj(d);
 		end
 		%store the values of c and d for termination condition
 		x_2 = c;
 		x_4 = d;
 		%compare the values
-		if f_c < f_d
+		if (f_c < f_d)
 			%then the interval [a,d] contains min
 			%move the end of interval so that b is now where d is
 			b = d;

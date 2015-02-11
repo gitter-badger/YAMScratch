@@ -47,7 +47,13 @@ end
 
 fig1 = figure;
 figure(fig1);
-[left,right,cost_data] = mdoGoldenSection(objective,-2,4,1e-7);
+a = -2;
+b = 4;
+epsilon = 1e-15;
+[left,right,cost_data] = mdoGoldenSection(objective,a,b,epsilon);
+x_vals = [a-.5:0.01:b+.5];
+y_vals = simple(x_vals);
+plot(x_vals,y_vals)
 
 %test the real question
 fig2 = figure;
