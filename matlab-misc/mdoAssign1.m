@@ -149,7 +149,7 @@ while counter < 100
 	plot(x_curr,Cd(x_curr),'rd');
 	hold on
 	%test if the gradient has been reduced enough to quit
-	[f_curr, g_curr] = objective(x_curr);
+	[f_curr, g_curr] = this_obj(x_curr);
 	if (norm(g_curr) < norm(g_init)*1e-25)
 		sec_g_metric(end+1) = (norm(g_curr)/norm(g_init));
 		break;
