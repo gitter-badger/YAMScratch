@@ -99,5 +99,19 @@ k = 1.2; %form factor
 C_l = 0.3; %lift coefficient
 e = 0.96; %Oswald efficiency factor
 
-Reynolds = @(l_char) (rho*Velocity*l_char/mu);
+cons_1 = k*(S_wet/S)*0.074;
+cons_1 = cons_1 * (rho*Velocity*sqrt(S)/mu)^-0.2;
+cons_2 = C_l^2/(pi*e);
+other_Cd = @(A) (cons_1*(A^0.1)+ cons_2/A);
 
+Reynolds = @(l_char) (rho*Velocity*l_char/mu);
+c = @(A)(sqrt(S/A));
+C_f = @(A) (0.074*(Reynolds(c(A))^-0.2));
+
+C_d = @(A) (k*C_f(A)*S_wet/S + C_l^2/(pi*A*e));
+Aspect_ratios = [0.001:1000:10000000];
+drag_co = zeros(length(Aspect_ratios),1);
+for index = 1:length(Aspect_ratios)
+	drag_co(index) = C_d(Aspect_ratios(index));
+end
+plot(Aspect_ratios,drag_co,'b')
