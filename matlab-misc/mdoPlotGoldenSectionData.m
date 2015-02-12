@@ -12,17 +12,19 @@ function [] = mdoPlotGoldenSectionData(cost_data, fig, tolerance, z_space)
 
 	figure(fig)
 	[r,c] = size(cost_data);
+	r = min([r,15]);
 	for index = 1:r
 		if (cost_data(index,3) - cost_data(index,1) < tolerance)
 			stop_index = index;
 			break
 		end
+		stop_index = index;	
 	end
 	%take the approximation of the function value at one side of the interval
 	%as the z value starting the z buffer
 	start_z = cost_data(stop_index,2);
 	%the spacing on the z-axis for each element
-	z_spacing = 0.5;
+	z_spacing = z_space;
 	tick_size = 0.3*z_spacing;
 	%work backwards from the smalles interval we consider
 	index = 1;
