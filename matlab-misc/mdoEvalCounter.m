@@ -1,5 +1,5 @@
 function [fhandle] = mdoEvalCounter(func_handle,counter)
-	counter.count = 37
+	counter.count = 0;
 	function varargout = wrapper(varargin)
 		counter.increment();
 		%only accept wrapped functions with constant number of outputs
@@ -7,10 +7,10 @@ function [fhandle] = mdoEvalCounter(func_handle,counter)
 		disp(num_out)
 		baseException = MException('wrapper:notCool','foo');
 		if num_out < 0
-			%throw(baseException)
+			throw(baseException)
 		end
 		temp = zeros(num_out,1);
-		[varargout{:}] = deal(func_handle(varargin{:}));
+		[varargout{1:num_out}] = func_handle(varargin{:});
 		return
 	end
 	fhandle = @wrapper;

@@ -103,30 +103,12 @@ legend('|g_k|/|g_0|','|x_k - x.|', '\delta_k');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %							QUESTION 2 									%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%create the drag equation
-rho = 1.23;	%density of air kg/m^3
-mu = 17.8 * 1e-6; % viscosity of air kg/(m sec)
-Velocity = 35; %airspeed m/sec
-S = 11.8; %planform area m^2
-S_wet = 2.05*S; % wing wetted area m^2
-k = 1.2; %form factor
-C_l = 0.3; %lift coefficient
-e = 0.96; %Oswald efficiency factor
-cons_1 = k*(S_wet/S)*0.074;
-cons_1 = cons_1 * (rho*Velocity*sqrt(S)/mu)^-0.2;
-cons_2 = C_l^2/(pi*e);
-Cd = @(A) (cons_1*(A^0.1)+ cons_2/A);
-Cd_prime = @(A) (cons_1*A^-0.9/10 - cons_2/A^2);
-%%Below is equivalent expression using lambdas 
-%Reynolds = @(l_char) (rho*Velocity*l_char/mu);
-%c = @(A)(sqrt(S/A));
-%C_f = @(A) (0.074*(Reynolds(c(A))^-0.2));
-%C_d = @(A) (k*C_f(A)*S_wet/S + C_l^2/(pi*A*e));
+this_obj = @mdoDragCoefficient;
 
 Aspect_ratios = [1:0.001:50];
 drag_co = zeros(length(Aspect_ratios),1);
 for index = 1:length(Aspect_ratios)
-	drag_co(index) = Cd(Aspect_ratios(index));
+	drag_co(index) = mdoDragCoefficient(Aspect_ratios(index));
 end
 %get one figure for golden section
 fig_gold2 = figure;
@@ -143,7 +125,6 @@ xlabel('Aspect Ratio');
 foo2 = ylabel('C_d','Rotation',0);
 set(foo2,'Units','Normalized','Position',[-0.1 0.55 0]);
 %%%%%%%%%%%%%%%%%% LINESEARCH BEGIN %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-this_obj = @(A) (deal(Cd(A),Cd_prime(A)));
 x_prev = 1;
 mu_1 = 1e-4;
 mu_2 = 0.9;
@@ -151,7 +132,7 @@ alpha_init = 1;
 %alpha_init = input('Enter inital step length: ');
 alpha_max = 3;
 hold on
-plot(x_prev,Cd(x_prev),'ks');
+plot(x_prev,this_obj(x_prev),'ks');
 hold on
 [f_init,g_init] = this_obj(x_prev);
 %store each run of function for plotting convergence
@@ -170,7 +151,7 @@ while counter < 100
 	x_metric(end+1) = x_curr;
 	%these two never change
 	hold on
-	plot(x_curr,Cd(x_curr),'rd');
+	plot(x_curr,this_obj(x_curr),'rd');
 	hold on
 	%test if the gradient has been reduced enough to quit
 	[f_curr, g_curr] = this_obj(x_curr);
@@ -199,11 +180,11 @@ mdoPlotGoldenSectionData(sec_cost_data, fig_gold2, tolerance, 0.002) % using spe
 x_vals = [a-.5:0.01:b+.5];
 y_vals = zeros(length(x_vals),1);
 for index = 1:length(x_vals)
-	y_vals(index) = Cd(x_vals(index));
+	y_vals(index) = this_obj(x_vals(index));
 end
 plot(x_vals,y_vals)
 hold on
-plot(28.39424799779898,Cd(28.39424799779898),'k*')
+plot(28.39424799779898,this_obj(28.39424799779898),'k*')
 
 %compare the results from the line search
 r_fig_metric = figure;
