@@ -20,7 +20,7 @@ objective = @(x)(deal((x^2-x),(2*x-1)))
 x_prev = 2;
 mu_1 = 1e-4;
 mu_2 = 0.9;
-alpha_init = 1;
+alpha_init = .9;
 %alpha_init = input('Enter inital step length: ');
 alpha_max = 3;
 plot(x_prev,simple(x_prev),'ks');
@@ -65,13 +65,18 @@ b = 4;
 epsilon = 1e-7;
 [left,right,cost_data] = mdoGoldenSection(objective,a,b,epsilon);
 tolerance = (b-a)*1e-3; %visable convergence intervals
+x_vals = [a-.5:0.01:b+.5];
+y_vals = simple(x_vals);
+plot(x_vals,y_vals)
+legend('f(x)')
+xlabel('x')
+bat2 = ylabel('f(x)','Rotation',0);
+set(bat2,'Units','Normalized','Position',[-0.07 0.5 0]);
 %figure out the relative error metric
 gold_metric = abs(cost_data(:,1) - cost_data(:,3));
 mdoPlotGoldenSectionData(cost_data, fig_gold1, tolerance, 0.5) % using specialized plotting function
 %plotting the function values
-x_vals = [a-.5:0.01:b+.5];
-y_vals = simple(x_vals);
-plot(x_vals,y_vals)
+
 
 %compare the results from the line search
 figure(fig1);
@@ -79,15 +84,11 @@ legend_1 = legend('f(x)','x_0','x_k');
 xlabel('x')
 bat1 = ylabel('f(x)','Rotation',0);
 set(bat1,'Units','Normalized','Position',[-0.07 0.5 0]);
-figure(fig_gold1)
-legend('f(x)')
-xlabel('x')
-bat2 = ylabel('f(x)','Rotation',0);
-set(bat2,'Units','Normalized','Position',[-0.07 0.5 0]);
+
 
 fig_metric = figure;
 figure(fig_metric);
-semilogy(1:length(g_metric), g_metric,'kd:')
+semilogy(2:length(g_metric)+1, g_metric,'kd:')
 hold on
 semilogy(1:length(x_metric), x_metric, 'ko-.')
 hold on
@@ -187,7 +188,7 @@ a = 3;
 b = 50;
 epsilon = 1e-7;
 [left,right,sec_cost_data] = mdoGoldenSection(this_obj,a,b,epsilon);
-tolerance = (b-a)*1e-7; %visable convergence intervals
+tolerance = (b-a)*1e-6; %visable convergence intervals
 %figure out the relative error metric
 gold_metric = abs(sec_cost_data(:,1) - sec_cost_data(:,3));
 mdoPlotGoldenSectionData(sec_cost_data, fig_gold2, tolerance, 0.001) % using specialized plotting function
@@ -202,7 +203,7 @@ plot(x_vals,y_vals)
 %compare the results from the line search
 r_fig_metric = figure;
 figure(r_fig_metric);
-semilogy(1:length(sec_g_metric), sec_g_metric,'gd:')
+semilogy(2:length(sec_g_metric)+1, sec_g_metric,'gd:')
 hold on
 
 semilogy(1:length(x_metric), x_metric, 'ko-.')
