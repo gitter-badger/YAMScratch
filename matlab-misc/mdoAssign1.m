@@ -134,7 +134,6 @@ hold on
 sec_g_metric = [];
 x_metric = [x_prev];
 counter = 1;
-disp('starting linesearch')
 while counter < 100
 	%compute the descent direction of the objective function
 	%in this case we directly evaluate the gradient and then normalize

@@ -8,7 +8,7 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 % mu_2 - the curvature condition parameter; mu_1 < mu_2 < 1
 % alpha_init - the initial step length
 % alpha_max - the maximum allowable step length
-% Outputs:
+% Returns:
 % alpha - a step satisfying the strong-Wolfe conditions
 
 	%create closure to hold the objective function

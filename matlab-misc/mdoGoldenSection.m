@@ -1,4 +1,5 @@
 function [left,right,cost_data] = mdoGoldenSection(obj,a,b,epsilon)
+%% [left,right,cost_data] = mdoGoldenSection(obj,a,b,epsilon)
 % Purpose: returns the location of a point that is in the neighborhood of a stationary point
 % Inputs:
 % obj - function handle which returns [f,f']
@@ -6,7 +7,7 @@ function [left,right,cost_data] = mdoGoldenSection(obj,a,b,epsilon)
 % b - the right side of 1D interval
 % epsilon - the tolerance criteria for neighborhood
 % should statisfy a < b 
-% Outputs:
+% Returns:
 % left - left side of interval containing minimum
 % right - right side of interval containing minimum
 % cost_data - history of points visited for plotting purposes

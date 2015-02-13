@@ -1,4 +1,5 @@
 function [alpha] = mdoZoomStage(phi,al_low,al_high,b)
+%% [alpha] = mdoZoomStage(phi,al_low,al_high,b)
 %Purpose: returns an acceptable step size
 % al_low - the step size for which phi is smaller
 % al_high - the step size for which phi is larger
@@ -12,10 +13,14 @@ function [alpha] = mdoZoomStage(phi,al_low,al_high,b)
 %		mu_1 - initial condition for sufficient decrease
 %		mu_2 - initial condition for curvature decrease
 %		p - the direction of search
+% Returns:
+% alpha - an acceptable step length
+
 	iteration = 1;
+	%we limit the iteration count to prevent a degenracy observed
 	while iteration < 100
 		%find a trial point between al_low and al_high
-		%this uses bisection
+		%this uses bisection, but something else could be used instead
 		a_trial = (al_low + al_high) /2;
 		[f_trial, g_trial] = phi(a_trial);
 		if (f_trial) > (b.f_init +b.mu_1*a_trial*b.g_init) ...
