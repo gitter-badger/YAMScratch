@@ -20,8 +20,8 @@ function [left,right,cost_data] = mdoGoldenSection(obj,a,b,epsilon)
 	c = NaN;
 	d = NaN;
 	iteration = 1;
-	%fake a do while loop with the condition at end
 	cost_data = [];
+	%fake a do while loop with the condition at end
 	while true
 		left = a;
 		right = b;
