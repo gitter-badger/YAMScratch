@@ -17,7 +17,7 @@ hold on
 %this returns [f, f'] of the simple function above
 objective = @(x)(deal((x^2-x),(2*x-1))) 
 %configure the linesearch parameters here
-x_prev = 2;
+x_prev = -1;
 mu_1 = 1e-4;
 mu_2 = 0.9;
 alpha_init = .9;
@@ -60,14 +60,17 @@ x_metric = abs(x_metric - 0.5);
 %%%%%%%%%%%%%%%%%% GOLDEN SECTION BEGIN %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fig_gold1 = figure;
 figure(fig_gold1);
-a = -2;
-b = 4;
+a = -1;
+b = 2;
 epsilon = 1e-7;
 [left,right,cost_data] = mdoGoldenSection(objective,a,b,epsilon);
 tolerance = (b-a)*1e-3; %visable convergence intervals
-x_vals = [a-.5:0.01:b+.5];
+x_vals = [a-1:0.01:b+1.5];
 y_vals = simple(x_vals);
 plot(x_vals,y_vals)
+hold on
+plot(0.5,simple(0.5),'k*')
+
 legend('f(x)')
 xlabel('x')
 bat2 = ylabel('f(x)','Rotation',0);
@@ -141,10 +144,10 @@ foo2 = ylabel('C_d','Rotation',0);
 set(foo2,'Units','Normalized','Position',[-0.1 0.55 0]);
 %%%%%%%%%%%%%%%%%% LINESEARCH BEGIN %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 this_obj = @(A) (deal(Cd(A),Cd_prime(A)));
-x_prev = 4;
+x_prev = 1;
 mu_1 = 1e-4;
 mu_2 = 0.9;
-alpha_init = 3;
+alpha_init = 1;
 %alpha_init = input('Enter inital step length: ');
 alpha_max = 3;
 hold on
@@ -172,7 +175,7 @@ while counter < 100
 	%test if the gradient has been reduced enough to quit
 	[f_curr, g_curr] = this_obj(x_curr);
 	%exit condition is hidden just below
-	if (norm(g_curr) < norm(g_init)*1e-6)
+	if (norm(g_curr) < norm(g_init)*1e-25)
 		sec_g_metric(end+1) = (norm(g_curr)/norm(g_init));
 		break;
 	else
@@ -184,14 +187,14 @@ end
 %calculate the difference from actual point
 x_metric = abs(x_metric - 28.39424799779898);
 %%%%%%%%%%%%%%%%%% GOLDEN SECTION BEGIN %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-a = 3;
+a = 1;
 b = 50;
 epsilon = 1e-7;
 [left,right,sec_cost_data] = mdoGoldenSection(this_obj,a,b,epsilon);
 tolerance = (b-a)*1e-6; %visable convergence intervals
 %figure out the relative error metric
 gold_metric = abs(sec_cost_data(:,1) - sec_cost_data(:,3));
-mdoPlotGoldenSectionData(sec_cost_data, fig_gold2, tolerance, 0.001) % using specialized plotting function
+mdoPlotGoldenSectionData(sec_cost_data, fig_gold2, tolerance, 0.002) % using specialized plotting function
 %plotting the function values
 x_vals = [a-.5:0.01:b+.5];
 y_vals = zeros(length(x_vals),1);
@@ -199,6 +202,8 @@ for index = 1:length(x_vals)
 	y_vals(index) = Cd(x_vals(index));
 end
 plot(x_vals,y_vals)
+hold on
+plot(28.39424799779898,Cd(28.39424799779898),'k*')
 
 %compare the results from the line search
 r_fig_metric = figure;
