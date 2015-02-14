@@ -103,7 +103,9 @@ legend('|g_k|/|g_0|','|x_k - x.|', '\delta_k');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %							QUESTION 2 									%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-this_obj = @mdoDragCoefficient;
+num_evals = mdoCounter;
+
+this_obj = mdoEvalCounter(@mdoDragCoefficient,num_evals);
 
 Aspect_ratios = [1:0.001:50];
 drag_co = zeros(length(Aspect_ratios),1);
@@ -139,6 +141,7 @@ hold on
 sec_g_metric = [];
 x_metric = [x_prev];
 counter = 1;
+func_evals = [0];
 %do a bad thing and have while loop to simulate do while
 while counter < 100
 	%compute the descent direction of the objective function
@@ -146,6 +149,8 @@ while counter < 100
 	[f_this,g_this] = this_obj(x_prev);
 	p = -g_this./norm(g_this);
 	step = mdoLineSearch(this_obj, p, x_prev, mu_1, mu_2, alpha_init, alpha_max);
+	%update the function evaluations counter
+	func_evals(end+1) = num_evals.count;
 	%jump to this point
 	x_curr = x_prev + p*step;
 	x_metric(end+1) = x_curr;
@@ -171,7 +176,11 @@ x_metric = abs(x_metric - 28.39424799779898);
 a = 1;
 b = 50;
 epsilon = 1e-7;
+%rezero the counter
+num_evals.count = 0;
+
 [left,right,sec_cost_data] = mdoGoldenSection(this_obj,a,b,epsilon);
+disp(num_evals.count)
 tolerance = (b-a)*1e-6; %visable convergence intervals
 %figure out the relative error metric
 gold_metric = abs(sec_cost_data(:,1) - sec_cost_data(:,3));
