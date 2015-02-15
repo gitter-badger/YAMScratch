@@ -23,7 +23,8 @@ function [alpha] = mdoZoomStage(phi,al_low,al_high,b)
 		%this uses bisection, but something else could be used instead
 		a_trial = (al_low + al_high) /2;
 		[f_trial, g_trial] = phi(a_trial);
-		if (f_trial) > (b.f_init +b.mu_1*a_trial*b.g_init) ...
+		%this comparsion only works for scalar valued functions
+		if (f_trial) > (b.f_init +b.mu_1*a_trial*b.g_init.'*b.p) ...
 			|| (f_trial > b.f_low)
 			%make interval smaller
 			al_high = a_trial;
