@@ -7,8 +7,8 @@ mu_1 = 1e-4;
 mu_2 = 0.9;
 alpha_init = .9;
 alpha_max = 3;
-num_evals = mdoCounter
-obj = mdoEvalCounter(@func3,num_evals)
+num_evals = mdoCounter;
+obj = mdoEvalCounter(@func3,num_evals);
 %%%%%%%%%%%%%%%%%% LINESEARCH BEGIN %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [f_init,g_init] = obj(x_prev);
 %store each run of function for plotting convergence
@@ -16,11 +16,16 @@ g_metric = [];
 x_metric(1,:) = [x_prev];
 %do a bad thing and have infinite while loop to simulate do while
 [f_curr,g_curr] = obj(x_prev);
+format_grad_norm = '\t[f, norm(g)] = %10.5g , %10.5g \n';
+format_func_evals = '\tTotal function evaluations: %d \n';
+iteration = 1;
 while true
 	%compute the descent direction of the objective function
 	%in this case we directly evaluate the gradient and then normalize
-	disp(norm(g_curr))
-	disp(num_evals.count)
+	fprintf('Iteration: %d\n',iteration );
+	fprintf(format_grad_norm, f_curr, norm(g_curr));
+	output_count = num_evals.count;
+	fprintf(format_func_evals,output_count );
 	p = -g_curr./norm(g_curr);
 	step = mdoLineSearch(obj, p, x_prev, mu_1, mu_2, alpha_init, alpha_max);
 	%jump to this point
@@ -35,4 +40,5 @@ while true
 		g_metric(end+1) = (norm(g_curr)/norm(g_init));
 	end
 	x_prev = x_curr;
+	iteration = iteration + 1;
 end
