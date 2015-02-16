@@ -74,7 +74,8 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 			return
 		else
 			%do a binary search for an acceptable step
-			alpha_this = (alpha_this + alpha_max)/2;
+			alpha_this = (alpha_this+1);
+			disp(alpha_this);
 			index = index + 1;
 			%remember to swap over values so that subscripts work properly
 			f_prev = f_this;
