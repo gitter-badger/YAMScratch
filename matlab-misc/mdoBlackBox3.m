@@ -5,6 +5,8 @@ close all;
 x_prev = ones(128,1)*-5;
 x_prev(37) = 3;
 x_prev(75) = 0;
+x_prev(13) = -1;
+x_prev(25) = 2.6;
 mu_1 = 1e-4;
 mu_2 = 0.9;
 alpha_init = 1;
