@@ -18,7 +18,7 @@ function [alpha] = mdoZoomStage(phi,al_low,al_high,b)
 
 	iteration = 1;
 	%we limit the iteration count to prevent a degenracy observed
-	while iteration < 100
+	while iteration < 30
 		%find a trial point between al_low and al_high
 		%this uses bisection, but something else could be used instead
 		a_trial = (al_low + al_high) /2;
