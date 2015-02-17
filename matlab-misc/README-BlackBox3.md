@@ -24,9 +24,9 @@ counter = mdoCounter();
 %then replace your objective handle
 obj = mdoEvalCounter(@my_objective_function, counter);
 %mdoEvalCounter requires you to pass in a function handle
-```Matlab
-Then to see how many time the function has been evaluated.
 ```
+Then to see how many time the function has been evaluated.
+```Matlab
 disp(counter.count)
 ```
 
