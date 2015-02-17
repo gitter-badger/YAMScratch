@@ -14,6 +14,7 @@ alpha_max = 3;
 num_evals = mdoCounter;
 obj = mdoEvalCounter(@func3,num_evals);
 %%%%%%%%%%%%%%%%%% LINESEARCH BEGIN %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+tic
 [f_init,g_init] = obj(x_prev);
 %store each run of function for plotting convergence
 g_metric = [];
@@ -48,3 +49,4 @@ while true
 	x_prev = x_curr;
 	iteration = iteration + 1;
 end
+toc
