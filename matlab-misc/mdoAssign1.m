@@ -9,13 +9,13 @@ figure(fig1);
 %setup test function
 simple = @(x) (x.^2-x);
 %prepare plotting the function
-test_x = [-2:0.01:3];
+test_x = -2:0.01:3;
 simple_y = simple(test_x);
 plot(test_x,simple_y)
 hold on
 %create an objective function handle to pass around
 %this returns [f, f'] of the simple function above
-objective = @(x)(deal((x^2-x),(2*x-1))) 
+objective = @(x)(deal((x^2-x),(2*x-1)));
 %configure the linesearch parameters here
 x_prev = -1;
 mu_1 = 1e-4;
@@ -29,7 +29,7 @@ hold on
 [f_init,g_init] = objective(x_prev);
 %store each run of function for plotting convergence
 g_metric = [];
-x_metric = [x_prev];
+x_metric = x_prev;
 %do a bad thing and have infinite while loop to simulate do while
 while true
 	%compute the descent direction of the objective function
@@ -65,7 +65,7 @@ b = 2;
 epsilon = 1e-7;
 [left,right,cost_data] = mdoGoldenSection(objective,a,b,epsilon);
 tolerance = (b-a)*1e-3; %visable convergence intervals
-x_vals = [a-1:0.01:b+1.5];
+x_vals = a-1:0.01:b+1.5;
 y_vals = simple(x_vals);
 plot(x_vals,y_vals)
 hold on
@@ -107,7 +107,7 @@ num_evals = mdoCounter;
 
 this_obj = mdoEvalCounter(@mdoDragCoefficient,num_evals);
 
-Aspect_ratios = [1:0.001:50];
+Aspect_ratios = 1:0.001:50;
 drag_co = zeros(length(Aspect_ratios),1);
 for index = 1:length(Aspect_ratios)
 	drag_co(index) = mdoDragCoefficient(Aspect_ratios(index));
@@ -139,9 +139,9 @@ hold on
 [f_init,g_init] = this_obj(x_prev);
 %store each run of function for plotting convergence
 sec_g_metric = [];
-x_metric = [x_prev];
+x_metric = x_prev;
 counter = 1;
-func_evals = [0];
+func_evals = 0;
 %do a bad thing and have while loop to simulate do while
 while counter < 100
 	%compute the descent direction of the objective function
@@ -186,7 +186,7 @@ tolerance = (b-a)*1e-6; %visable convergence intervals
 gold_metric = abs(sec_cost_data(:,1) - sec_cost_data(:,3));
 mdoPlotGoldenSectionData(sec_cost_data, fig_gold2, tolerance, 0.002) % using specialized plotting function
 %plotting the function values
-x_vals = [a-.5:0.01:b+.5];
+x_vals = a-.5:0.01:b+.5;
 y_vals = zeros(length(x_vals),1);
 for index = 1:length(x_vals)
 	y_vals(index) = this_obj(x_vals(index));
