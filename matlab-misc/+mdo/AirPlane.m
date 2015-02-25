@@ -16,9 +16,6 @@ classdef AirPlane
 		chord;
 	end
 	methods
-
-	end
-	methods
 		function obj = AirPlane(A,S)
 			assert(isscalar(S));
 			assert(isscalar(A));
