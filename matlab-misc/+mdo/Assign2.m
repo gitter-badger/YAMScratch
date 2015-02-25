@@ -9,8 +9,8 @@ S = 20;
 cs_h = 1e-60;
 reg_drag = mdo.DragTotal(A,S);
 
-cs_partials = [imag(mdo.DragTotal(A+cs_h*i, S)), ...
-				imag(mdo.DragTotal(A, S+cs_h*i))];
+cs_partials = [imag(mdo.DragTotal(A+1i*cs_h, S)), ...
+				imag(mdo.DragTotal(A, S+1i*cs_h)];
 cs_partials = cs_partials / cs_h;
 
 %%Finite difference
