@@ -15,6 +15,9 @@ c-misc/DS\ projects/*.txt
 PracticeInput*
 out.txt
 
+#paths for windows
+*+wing*
+
 main3.cpp
 *.jar
 #ignore archives

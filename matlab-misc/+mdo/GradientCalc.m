@@ -1,4 +1,4 @@
-function [f_prime] = mdoGradientCalc(fhandle,varargin)
+function [f_prime] = GradientCalc(fhandle,varargin)
 	p = inputParser;
 	VECTOR_SIZE = 128; 
 	defaultStep = 37;

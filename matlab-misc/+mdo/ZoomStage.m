@@ -1,5 +1,5 @@
-function [alpha] = mdoZoomStage(phi,al_low,al_high,b)
-%% [alpha] = mdoZoomStage(phi,al_low,al_high,b)
+function [alpha] = ZoomStage(phi,al_low,al_high,b)
+%% [alpha] = ZoomStage(phi,al_low,al_high,b)
 %Purpose: returns an acceptable step size
 % al_low - the step size for which phi is smaller
 % al_high - the step size for which phi is larger

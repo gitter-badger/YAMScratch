@@ -1,5 +1,5 @@
-function [left,right,cost_data] = mdoGoldenSection(obj,a,b,epsilon)
-%% [left,right,cost_data] = mdoGoldenSection(obj,a,b,epsilon)
+function [left,right,cost_data] = GoldenSection(obj,a,b,epsilon)
+%% [left,right,cost_data] = GoldenSection(obj,a,b,epsilon)
 % Purpose: returns the location of a point that is in the neighborhood of a stationary point
 % Inputs:
 % obj - function handle which returns [f,f']

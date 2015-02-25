@@ -1,4 +1,4 @@
-function [fhandle] = mdoEvalCounter(func_handle,counter)
+function [fhandle] = EvalCounter(func_handle,counter)
 	counter.count = 0;
 	function varargout = wrapper(varargin)
 		counter.increment();

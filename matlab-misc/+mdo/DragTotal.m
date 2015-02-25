@@ -1,4 +1,4 @@
-function [drag_total] = mdoDragTotal(Aspect,Surface)
+function [drag_total] = DragTotal(Aspect,Surface)
 	validateattributes(Aspect,{'scalar','double'},{'positive'})
 	validateattributes(Surface,{'scalar','double'},{'positive'})
 	chord = sqrt(Surface/Aspect);

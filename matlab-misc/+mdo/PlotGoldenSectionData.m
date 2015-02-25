@@ -1,5 +1,5 @@
-function [] = mdoPlotGoldenSectionData(cost_data, fig, tolerance, z_space)
-%% mdoPlotGoldenSectionData(cost_data, fig, tolerance, z_space)
+function [] = PlotGoldenSectionData(cost_data, fig, tolerance, z_space)
+%% PlotGoldenSectionData(cost_data, fig, tolerance, z_space)
 % Purpose: Create the nice convergance ticks on plot for Golden Section Method
 % Inputs:
 % cost_data - the cost_data matrix produced by the mdoGoldenSection

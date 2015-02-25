@@ -1,4 +1,4 @@
-function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
+function [alpha] = LineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 % Purpose: returns a step length that satisfies the strong-Wolfe conditions
 % Inputs:
 % obj - a function handle for the objective that returns [f, f']
@@ -50,7 +50,7 @@ function [alpha] = mdoLineSearch(obj, p, x0, mu_1, mu_2, alpha_init, alpha_max)
 			end
 			bound_cond.f_high = f_this; 
 			bound_cond.g_high = g_this;
-			alpha = mdoZoomStage(phi, alpha_prev, alpha_this, bound_cond);
+			alpha = mdo.ZoomStage(phi, alpha_prev, alpha_this, bound_cond);
 			return
 		end
 		%with expensive derivatives we would evaluate the derivative only if necessary
