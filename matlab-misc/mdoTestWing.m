@@ -30,7 +30,7 @@ cs.Dc(1) = cs.Dc(1) +  1i*cs.h;
 [tipc_u,uc_u] = wing(cs.Dc);
 cs.du = imag(uc_u) ./ cs.h;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%				Finite difference method			 %%
+%%              Finite difference method             %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %test different step sizes
 n_steps = 300;
@@ -38,20 +38,20 @@ fd.h = logspace(-1,-35,n_steps);
 fd.dtip = [];
 %the sensitivities for varying step size with finite difference
 for iteration = 1:n_steps
-	for index = 1:size(D,1)
-		Df = D;
-		Df(index) = Df(index) + fd.h(iteration);
-		[tiptwist, u] = wing(Df);
-		fd.dtip(iteration,index) = (tiptwist - first_tiptwist) / fd.h(iteration);
-	end
+    for index = 1:size(D,1)
+        Df = D;
+        Df(index) = Df(index) + fd.h(iteration);
+        [tiptwist, u] = wing(Df);
+        fd.dtip(iteration,index) = (tiptwist - first_tiptwist) / fd.h(iteration);
+    end
 end
 
 %%the senstivities with respect to the first diameter
 for iteration = 1:n_steps
-	Df = D;
-	Df(1) = Df(1) + fd.h(iteration);
-	[tiptwist, u] = wing(Df);
-	fd.du(iteration,:) = (u - first_u)./fd.h(iteration);
+    Df = D;
+    Df(1) = Df(1) + fd.h(iteration);
+    [tiptwist, u] = wing(Df);
+    fd.du(iteration,:) = (u - first_u)./fd.h(iteration);
 end
 
 %compute the errors of the finite difference
@@ -59,21 +59,21 @@ end
 tip_error = [];
 selector = 1;
 for index = 1:size(fd.dtip,1)
-	if(fd.dtip(index,selector))
-		%accumulate in the error vector
-		tip_error(end+1,1) = fd.h(index);
-		tip_error(end,2) = abs(fd.dtip(index,selector) - cs.dtip(selector));
-	end
+    if(fd.dtip(index,selector))
+        %accumulate in the error vector
+        tip_error(end+1,1) = fd.h(index);
+        tip_error(end,2) = abs(fd.dtip(index,selector) - cs.dtip(selector));
+    end
 end
 u_error = [];
 
 u_selector = 4;
 for index = 1:size(fd.du,1)
-	if(fd.du(index,u_selector))
-		%accumulate in the error vector
-		u_error(end+1,1) = fd.h(index);
-		u_error(end,2) = abs(fd.du(index,u_selector) - cs.du(u_selector));
-	end
+    if(fd.du(index,u_selector))
+        %accumulate in the error vector
+        u_error(end+1,1) = fd.h(index);
+        u_error(end,2) = abs(fd.du(index,u_selector) - cs.du(u_selector));
+    end
 end
 
 figure(1)
@@ -85,7 +85,7 @@ xlabel('Finite Difference Step Size')
 ylabel('Absolute Numerical Error')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%				Analytic Direct Method 				 %%
+%%              Analytic Direct Method               %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %get the original wing deflections
 [tiptwist_0, u_0] = wing(D);
@@ -98,44 +98,45 @@ cs_h = 1e-20;
 %one column at time using the complex step
 A = [];
 for index = 1:ndof
-	uc = u_0;
-	uc(index) = uc(index) + 1i*cs_h;
-	A(:,index) = imag(wing2(D,uc)) ./ cs_h;
+    uc = u_0;
+    uc(index) = uc(index) + 1i*cs_h;
+    A(:,index) = imag(wing2(D,uc)) ./ cs_h;
 end
 %next get the partials of the residuals with respect to the design variable
 selector = 1;
 Dc = D;
 Dc(selector) = Dc(selector) + 1i*cs_h;
 drdx = imag(wing2(Dc,u_0)) ./ cs_h;
-%%remove the all zero rows and columns
-% Apply BCs (reduce stiffness matrix)
-
-i2 = 1;
-j2 = 1;
-for i = 1 : ndof,
-    if BC(i) == 0,
-        for j = 1 : ndof,
-            if BC(j) == 0,
-                AA(i2,j2) = A(i,j);
-                j2 = j2 +1;   
+%%remove the all zero rows and columns using professors code
+    % Apply BCs (reduce stiffness matrix)
+    i2 = 1;
+    j2 = 1;
+    for i = 1 : ndof,
+        if BC(i) == 0,
+            for j = 1 : ndof,
+                if BC(j) == 0,
+                    AA(i2,j2) = A(i,j);
+                    j2 = j2 +1;   
+                end
             end
+            i2 = i2 + 1;
+            j2 = 1;
         end
-        i2 = i2 + 1;
-        j2 = 1;
     end
-end
+%%end professor code
 B = drdx(4:9);
 B = [B drdx(13:ndof)];
 dydx = AA\B.';
 
 i2 = 1;
-for i = 1 : ndof,
-    if BC(i) == 1,
-        direct_du(i) = 0;
-    else
-    	%correct for the sign
-        direct_du(i) = -dydx(i2);
-        i2 = i2 + 1;
+%%more professor code
+    for i = 1 : ndof,
+        if BC(i) == 1,
+            direct_du(i) = 0;
+        else
+            %correct for the sign
+            direct_du(i) = -dydx(i2);
+            i2 = i2 + 1;
+        end
     end
-end
-
+%end professor code
