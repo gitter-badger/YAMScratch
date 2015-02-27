@@ -53,33 +53,57 @@ for iteration = 1:n_steps
 	[tiptwist, u] = wing(Df);
 	fd.du(iteration,:) = (u - first_u)./fd.h(iteration);
 end
-%compute the errors of the finite difference
-% A_error = [step_size, numerical partial error]
-% A_error = [];
-% index = 1;
-% for A_partial = f_partials(:,1)'
-% 	if(A_partial)
-% 		%accumulate in the error vector
-% 		A_error(end+1,1) = f_h(index);
-% 		A_error(end,2) = abs(A_partial - cs_partials(1));
-% 	end
-% 	index = index + 1;
-% end
-% S_error = [];
-% index = 1;
-% for S_partial = f_partials(:,2)'
-% 	if(S_partial)
-% 		%accumulate in the error vector
-% 		S_error(end+1,1) = f_h(index);
-% 		S_error(end,2) = abs(S_partial - cs_partials(2));
-% 	end
-% 	index = index + 1;
-% end
 
-% figure(1)
-% loglog(A_error(:,1), A_error(:,2),'r')
-% hold on
-% loglog(S_error(:,1), S_error(:,2), 'b-.')
-% legend('\deltaD/\deltaA | A = 10', '\deltaD/\deltaS | S = 20')
-% xlabel('Finite Difference Step Size')
-% ylabel('Absolute Numerical Error')
+%compute the errors of the finite difference
+%A_error = [step_size, numerical partial error]
+tip_error = [];
+selector = 1;
+for index = 1:size(fd.dtip,1)
+	if(fd.dtip(index,selector))
+		%accumulate in the error vector
+		tip_error(end+1,1) = fd.h(index);
+		tip_error(end,2) = abs(fd.dtip(index,selector) - cs.dtip(selector));
+	end
+end
+u_error = [];
+
+u_selector = 4;
+for index = 1:size(fd.du,1)
+	if(fd.du(index,u_selector))
+		%accumulate in the error vector
+		u_error(end+1,1) = fd.h(index);
+		u_error(end,2) = abs(fd.du(index,u_selector) - cs.du(u_selector));
+	end
+end
+
+figure(1)
+loglog(tip_error(:,1), tip_error(:,2),'r')
+hold on
+loglog(u_error(:,1), u_error(:,2), 'b-.')
+legend('\delta\gamma_{tip}/\deltaD_1', '\deltau_i/\deltaD_1')
+xlabel('Finite Difference Step Size')
+ylabel('Absolute Numerical Error')
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%				Analytic Direct Method 				 %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%get the original wing deflections
+[tiptwist_0, u_0] = wing(D);
+ndof = size(u_0,2);
+cs_h = 1e-20;
+%compute the jacobian of the Residual with respect to y
+%one column at time using the complex step
+A = [];
+for index = 1:ndof
+	uc = u_0;
+	uc(index) = uc(index) + 1i*cs_h;
+	A(:,index) = imag(wing2(D,uc)) ./ cs_h;
+end
+%next get the partials of the residuals with respect to the design variable
+selector = 1;
+Dc = D;
+Dc(selector) = Dc(selector) + 1i*cs_h;
+drdx = imag(wing2(Dc,u_0)) ./ cs_h;
+%compute the solution
+
+result = A\drdx.';
