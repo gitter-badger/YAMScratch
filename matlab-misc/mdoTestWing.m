@@ -90,6 +90,9 @@ ylabel('Absolute Numerical Error')
 %get the original wing deflections
 [tiptwist_0, u_0] = wing(D);
 ndof = size(u_0,2);
+BC = zeros(ndof,1);
+BC(1:3) = 1;
+BC(10:12) = 1;
 cs_h = 1e-20;
 %compute the jacobian of the Residual with respect to y
 %one column at time using the complex step
@@ -104,6 +107,35 @@ selector = 1;
 Dc = D;
 Dc(selector) = Dc(selector) + 1i*cs_h;
 drdx = imag(wing2(Dc,u_0)) ./ cs_h;
-%compute the solution
+%%remove the all zero rows and columns
+% Apply BCs (reduce stiffness matrix)
 
-result = A\drdx.';
+i2 = 1;
+j2 = 1;
+for i = 1 : ndof,
+    if BC(i) == 0,
+        for j = 1 : ndof,
+            if BC(j) == 0,
+                AA(i2,j2) = A(i,j);
+                j2 = j2 +1;   
+            end
+        end
+        i2 = i2 + 1;
+        j2 = 1;
+    end
+end
+B = drdx(4:9);
+B = [B drdx(13:ndof)];
+dydx = AA\B.';
+
+i2 = 1;
+for i = 1 : ndof,
+    if BC(i) == 1,
+        direct_du(i) = 0;
+    else
+    	%correct for the sign
+        direct_du(i) = -dydx(i2);
+        i2 = i2 + 1;
+    end
+end
+
