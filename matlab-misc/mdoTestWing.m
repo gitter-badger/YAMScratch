@@ -88,37 +88,12 @@ ylabel('Absolute Numerical Error')
 %%              Analytic Direct Method               %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %get the original wing deflections
-[tiptwist_0, u_0] = wing(D);
+[tiptwist_0, u_0,K] = wing(D);
 ndof = size(u_0,2);
 BC = zeros(ndof,1);
 BC(1:3) = 1;
 BC(10:12) = 1;
 cs_h = 1e-20;
-%compute the jacobian of the Residual with respect to y
-%one column at time using the complex step
-A = [];
-for index = 1:ndof
-    uc = u_0;
-    uc(index) = uc(index) + 1i*cs_h;
-    A(:,index) = imag(wing2(D,uc)) ./ cs_h;
-end
-%%remove the all zero rows and columns using professors code
-    % Apply BCs (reduce stiffness matrix)
-    i2 = 1;
-    j2 = 1;
-    for i = 1 : ndof,
-        if BC(i) == 0,
-            for j = 1 : ndof,
-                if BC(j) == 0,
-                    AA(i2,j2) = A(i,j);
-                    j2 = j2 +1;   
-                end
-            end
-            i2 = i2 + 1;
-            j2 = 1;
-        end
-    end
-%%end professor code
 %next get the partials of the residuals with respect to the design variable
 all_dydx = zeros(size(D,1),ndof);
 for selector = 1:size(D,1)
@@ -130,7 +105,7 @@ for selector = 1:size(D,1)
     B = drdx(selector,4:9);
     B = [B drdx(selector,13:ndof)];
 
-    dydx = -(AA\B.');
+    dydx = (K\B.');
 
     i2 = 1;
     %%more professor code to expand again
