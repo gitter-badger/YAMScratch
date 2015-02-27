@@ -186,7 +186,7 @@ hold on
 semilogy([1:ndof], abs(all_dydx(1,:) - cs.du), 'bd')
 hold on
 
-l3 = legend('Finite Difference', 'Analytic Methods h = 1e-20');
+l3 = legend('Finite Difference', 'Analytic Direct Method h = 1e-20');
 legend('Location','east')
 xlabel('Index (i) of \deltau_i /\delta D_1')
 ylabel('Absolute Difference')
