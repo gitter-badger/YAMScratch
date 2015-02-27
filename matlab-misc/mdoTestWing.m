@@ -1,6 +1,7 @@
 % test the call to wing.m
 
 clear all;
+close all;
 format compact;
 format long e;
 
@@ -15,7 +16,7 @@ fd = struct; %namespace for finite difference
 
 cs.dtip = zeros(size(D,1),1);
 
-cs.h = 1e-20;
+cs.h = 1e-60;
 for index = 1:size(D,1)
     cs.Dc = D; %this is a copy of the diamenter
     cs.Dc(index) = cs.Dc(index) + 1i*cs.h;
@@ -80,9 +81,10 @@ figure(1)
 loglog(tip_error(:,1), tip_error(:,2),'r')
 hold on
 loglog(u_error(:,1), u_error(:,2), 'b-.')
-legend('\delta\gamma_{tip}/\deltaD_1', '\deltau_i/\deltaD_1')
+legend('\delta\gamma_{tip}/ \deltaD_1', '\delta u_i /\delta D_1')
 xlabel('Finite Difference Step Size')
 ylabel('Absolute Numerical Error')
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%              Analytic Direct Method               %%
@@ -133,14 +135,14 @@ end
 %%              Analytic Adjoint Method              %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %we reuse many variables from the direct method
-%use the stiffness matrix as the Jacobian
-[~,~,K] = wing(D)
 %solve for psi
 BB = dfdy(4:9);
 BB = [BB; dfdy(13:ndof)];
+%solving for non zero elements of psi
 part_psi = -K.'\BB;
 
-i2 = 1
+%begin professor code to expand
+i2 = 1;
 for i = 1 : ndof,
         if BC(i) == 1,
             psi(i) = 0;
@@ -154,3 +156,38 @@ for i = 1 : ndof,
 for selector = 1:size(D,1)
     aj_dfdx(selector) = 0 + -psi * drdx(selector,:).';
 end
+%the state vector sensitivites are computed in the same manner as in direct method
+
+%plot the tip sensitivities
+figure(2)
+%we find that fd.h(60) is a good step size for the displacements sensitivies
+%and fd.h(53) is a good step size for tip sensitivities
+fd_du = fd.du(60,:);
+fd_dtip = fd.dtip(52,:);
+
+semilogy([1:6], abs(fd_dtip - cs.dtip.'), 'bd')
+xlim([0, 7])
+hold on
+semilogy([1:6], abs(dfdx - cs.dtip.'), 'r+')
+hold on
+semilogy([1:6], abs(aj_dfdx - cs.dtip.'), 'kd')
+
+l2 = legend('Finite Difference h = 1.5873e-07', 'Analytic Direct Method h = 1e-20', ...
+    'Analytic Adjoint Method h = 1e-20');
+legend('Location','east')
+xlabel('Index (i) of \delta\gamma_{tip} /\delta D_i')
+ylabel('Absolute Difference')
+title('Comparison of Numerical Gradients to Complex Step Method with h = 10^{-60}')
+
+figure(3)
+semilogy([1:ndof], abs(fd_du - cs.du), 'rd')
+xlim([1 19])
+hold on
+semilogy([1:ndof], abs(all_dydx(1,:) - cs.du), 'bd')
+hold on
+
+l3 = legend('Finite Difference', 'Analytic Methods h = 1e-20');
+legend('Location','east')
+xlabel('Index (i) of \deltau_i /\delta D_1')
+ylabel('Absolute Difference')
+title('Comparison of Numerical Gradients to Complex Step Method with h = 10^{-60}')
