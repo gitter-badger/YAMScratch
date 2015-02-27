@@ -102,11 +102,6 @@ for index = 1:ndof
     uc(index) = uc(index) + 1i*cs_h;
     A(:,index) = imag(wing2(D,uc)) ./ cs_h;
 end
-%next get the partials of the residuals with respect to the design variable
-selector = 1;
-Dc = D;
-Dc(selector) = Dc(selector) + 1i*cs_h;
-drdx = imag(wing2(Dc,u_0)) ./ cs_h;
 %%remove the all zero rows and columns using professors code
     % Apply BCs (reduce stiffness matrix)
     i2 = 1;
@@ -124,19 +119,43 @@ drdx = imag(wing2(Dc,u_0)) ./ cs_h;
         end
     end
 %%end professor code
-B = drdx(4:9);
-B = [B drdx(13:ndof)];
-dydx = AA\B.';
+%next get the partials of the residuals with respect to the design variable
+all_dydx = zeros(size(D,1),ndof);
+for selector = 1:size(D,1)
+    Dc = D;
+    Dc(selector) = Dc(selector) + 1i*cs_h;
+    drdx = imag(wing2(Dc,u_0)) ./ cs_h;
 
-i2 = 1;
-%%more professor code
-    for i = 1 : ndof,
-        if BC(i) == 1,
-            direct_du(i) = 0;
-        else
-            %correct for the sign
-            direct_du(i) = -dydx(i2);
-            i2 = i2 + 1;
+    %now that the Jac matrix is reduced, solve the linear system
+    B = drdx(4:9);
+    B = [B drdx(13:ndof)];
+
+    dydx = -(AA\B.');
+
+
+    i2 = 1;
+    %%more professor code
+        for i = 1 : ndof,
+            if BC(i) == 1,
+                direct_du(i) = 0;
+            else
+                direct_du(i) = dydx(i2);
+                i2 = i2 + 1;
+            end
         end
-    end
-%end professor code
+    %end professor code
+    all_dydx(selector,:) = direct_du;
+end
+%the tip twist partial is just a function of the state variables
+[~,dfdy] = wing2(D,u_0);
+
+dfdx = zeros(1,size(D,1));
+for index = 1:size(D,1)
+    row = all_dydx(index,:);
+    dfdx(index) = dfdy.'*all_dydx(index,:).';
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%              Analytic Adjoint Method              %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
