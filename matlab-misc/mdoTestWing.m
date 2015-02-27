@@ -124,17 +124,16 @@ all_dydx = zeros(size(D,1),ndof);
 for selector = 1:size(D,1)
     Dc = D;
     Dc(selector) = Dc(selector) + 1i*cs_h;
-    drdx = imag(wing2(Dc,u_0)) ./ cs_h;
+    drdx(selector,:) = imag(wing2(Dc,u_0)) ./ cs_h;
 
     %now that the Jac matrix is reduced, solve the linear system
-    B = drdx(4:9);
-    B = [B drdx(13:ndof)];
+    B = drdx(selector,4:9);
+    B = [B drdx(selector,13:ndof)];
 
     dydx = -(AA\B.');
 
-
     i2 = 1;
-    %%more professor code
+    %%more professor code to expand again
         for i = 1 : ndof,
             if BC(i) == 1,
                 direct_du(i) = 0;
@@ -152,10 +151,31 @@ end
 dfdx = zeros(1,size(D,1));
 for index = 1:size(D,1)
     row = all_dydx(index,:);
-    dfdx(index) = dfdy.'*all_dydx(index,:).';
+    dfdx(index) = 0 + dfdy.'*all_dydx(index,:).';
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%              Analytic Adjoint Method              %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%we reuse many variables from the direct method
+%use the stiffness matrix as the Jacobian
+[~,~,K] = wing(D)
+%solve for psi
+BB = dfdy(4:9);
+BB = [BB; dfdy(13:ndof)];
+part_psi = -K.'\BB;
 
+i2 = 1
+for i = 1 : ndof,
+        if BC(i) == 1,
+            psi(i) = 0;
+        else
+            psi(i) = part_psi(i2);
+            i2 = i2 + 1;
+        end
+    end
+%end professor code
+
+for selector = 1:size(D,1)
+    aj_dfdx(selector) = 0 + -psi * drdx(selector,:).';
+end
