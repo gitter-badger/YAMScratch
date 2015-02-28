@@ -11,11 +11,14 @@
 #include <unistd.h>
 /*command line argument parsing library*/
 #include <argp.h>
+/*lets us accumulate arguments in struct arguments*/
+#include <argz.h>
 
 #define HEADER_LENGTH 80
 #define BUFFER_MULTIPLE 10
 #define CHAR_PER_EXTENSION 4
-#define MAX_FILE_SIZE_KILOBYTES 1024
+#define MAX_ARGUMENTS 1
+#define MIN_ARGUMENTS 1
 
 struct IntFace {
 	/*solidworks may not fill in normal information */
@@ -34,34 +37,28 @@ struct Face {
 	float v3[3];
 	uint16_t ac;
 };
-static int
-parse_opt(int key, char *arg, struct argp_state *state) {
-	switch(key) {
-		case 'h': {
-			printf("Layer Height%s\n",arg );
-			break;
-		}
-		case 'd': {
-			for(int i = 0; i < atoi(arg); ++i) {
-				printf(">");
-			}
-			printf("\n");
-			break;
-		}
-	}
-	return 0;
-}
+
+/*Hold a variable length of arguments passed to the program
+works kind of like std::vector*/
+struct Arguments {
+	char *argz;
+	size_t argz_len;
+};
+
+/*Forward Function Declarations*/
+static int parse_opt(int key, char *arg, struct argp_state *state);
 
 int main(int argc, char** argv) {
 	struct argp_option options[] = 
 	{
 		{"height", 'h',"NUM", 0, "Set the layer height of each slice"},
-		{0,'d',"NUM", 0, "test things"},
+		{"debug",'d',0 , OPTION_ARG_OPTIONAL, "Display debug output"},
+		{"easter", 0, 0, OPTION_HIDDEN, "Easter egg"},
 		{0}
 	};
-	struct argp argp = {options, parse_opt, 0,0};
-
-	argp_parse(&argp, argc, argv, 0,0,0);
+	struct argp argp = {options, parse_opt,"FILENAME"};
+	struct Arguments arguments;
+	argp_parse(&argp, argc, argv, 0,0, &arguments);
 
 	/*allocate a buffer to read the file
 	this buffer must be a multiple of the face length structure so
@@ -80,23 +77,50 @@ int main(int argc, char** argv) {
 	if(n) {
 		fprintf(stderr, "Problems\n" );
 	}
-	/*test that file size is not too big*/
-	if((stat_info->st_size / 1024) > MAX_FILE_SIZE_KILOBYTES) {
-		fprintf(stderr, "The file is too large: %dkb out of %dkb\n",
-			(int)(stat_info->st_size/ 1024)+1 , MAX_FILE_SIZE_KILOBYTES );
-
-		free(buffer);
-		exit(1);
-	}
-	printf("filesize: %d\n", (int)stat_info->st_size);
-
-	char extension[4];
-	for(int i = 0; i < CHAR_PER_EXTENSION; ++i) {
-		extension[i] = argv[1][fn_len-(CHAR_PER_EXTENSION - i)];
-	}
-	printf("%s\n",extension );
-	/*clean up extension one we are done with it*/
 
 	free(buffer);
+	return 0;
+}
+
+
+
+const char *argp_program_bug_address = "yetanotherminion@gmail.com";
+const char *argp_program_version = 
+"YAM Slicer, version 0.1 -devel (x86_64-redhat-linux-gnu)\n\
+Copyright (C) 2015 Isaiah Bell\n\
+License MIT\n\
+\n\
+This is free software; you are free to change and redistribute it.\n\
+There is NO WARRANTY, to the extent permitted by law.";
+
+static int
+parse_opt(int key, char *arg, struct argp_state *state) {
+	struct Arguments *a = state->input;
+	switch(key) {
+		case 'h': {
+			printf("Layer Height%s\n",arg );
+			break;
+		} case 'd': {
+			
+			break;
+		} case ARGP_KEY_INIT: {
+			a->argz = 0;
+			a->argz_len = 0;
+			break;
+		} case ARGP_KEY_ARG: {
+			/*add to the struct arguments we made earlier*/
+			argz_add(&a->argz, &a->argz_len, arg);
+			break;
+		} case ARGP_KEY_END: {
+			printf("\n");
+			if(a->argz_len > MAX_ARGUMENTS) {
+				argp_failure(state,1, 0, "Too many arguments");
+			} else if(a->argz_len < MIN_ARGUMENTS) {
+				argp_failure(state, 1, 0, "Not enough arguments");
+			}
+			break;
+
+		}
+	}
 	return 0;
 }
