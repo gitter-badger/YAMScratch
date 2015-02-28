@@ -34,21 +34,42 @@ struct Face {
 	float v3[3];
 	uint16_t ac;
 };
-
+static int
+parse_opt(int key, char *arg, struct argp_state *state) {
+	switch(key) {
+		case 'h': {
+			printf("Layer Height%s\n",arg );
+			break;
+		}
+		case 'd': {
+			for(int i = 0; i < atoi(arg); ++i) {
+				printf(">");
+			}
+			printf("\n");
+			break;
+		}
+	}
+	return 0;
+}
 
 int main(int argc, char** argv) {
+	struct argp_option options[] = 
+	{
+		{"height", 'h',"NUM", 0, "Set the layer height of each slice"},
+		{0,'d',"NUM", 0, "test things"},
+		{0}
+	};
+	struct argp argp = {options, parse_opt, 0,0};
+
+	argp_parse(&argp, argc, argv, 0,0,0);
+
 	/*allocate a buffer to read the file
 	this buffer must be a multiple of the face length structure so
 	we can trivially alias*/
-	if(argc != 2) {
-		fprintf(stderr, "Improper number of arguments\n\n" );
-		fprintf(stderr, "Usage: \n\tslicer <filename.stl>\n");
-		exit(1);
-	}
 	size_t buffer_length = sizeof(struct IntFace)* BUFFER_MULTIPLE;
 	uint8_t* buffer = (uint8_t*)malloc(buffer_length);
 	float i = 0;
-	printf("%s %d\n", argv[1], sizeof(i));
+	printf("%s %lu\n", argv[1], sizeof(i));
 	int fn_len = strlen(argv[1]);
 	/*Stat the target file to test permissions are valid before 
 	attempting to open*/
@@ -56,15 +77,18 @@ int main(int argc, char** argv) {
 	struct stat* stat_info = (struct stat*)malloc(sizeof(struct stat));
 	int n;
 	n = stat(argv[1], stat_info);
+	if(n) {
+		fprintf(stderr, "Problems\n" );
+	}
 	/*test that file size is not too big*/
 	if((stat_info->st_size / 1024) > MAX_FILE_SIZE_KILOBYTES) {
 		fprintf(stderr, "The file is too large: %dkb out of %dkb\n",
-			(stat_info->st_size/ 1024)+1 , MAX_FILE_SIZE_KILOBYTES );
+			(int)(stat_info->st_size/ 1024)+1 , MAX_FILE_SIZE_KILOBYTES );
 
 		free(buffer);
 		exit(1);
 	}
-	printf("filesize: %d\n", stat_info->st_size);
+	printf("filesize: %d\n", (int)stat_info->st_size);
 
 	char extension[4];
 	for(int i = 0; i < CHAR_PER_EXTENSION; ++i) {
