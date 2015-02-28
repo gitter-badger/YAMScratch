@@ -30,3 +30,6 @@ main3.cpp
 *.jpg
 *.png
 *.bmp
+
+#ignore CAD files
+*.[sS][tT][lL]
