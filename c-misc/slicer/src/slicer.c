@@ -17,7 +17,7 @@
 #define HEADER_LENGTH 80
 #define BUFFER_MULTIPLE 10
 #define CHAR_PER_EXTENSION 4
-#define MAX_ARGUMENTS 1
+#define MAX_ARGUMENTS 2
 #define MIN_ARGUMENTS 1
 
 struct IntFace {
@@ -45,10 +45,17 @@ struct Arguments {
 	size_t argz_len;
 };
 
+struct Parameters {
+	struct Arguments args;
+	float h;
+	uint8_t debug;
+};
+
 /*Forward Function Declarations*/
 static int parse_opt(int key, char *arg, struct argp_state *state);
 
 int main(int argc, char** argv) {
+	/*This struct is where we define every parameter to the function*/
 	struct argp_option options[] = 
 	{
 		{"height", 'h',"NUM", 0, "Set the layer height of each slice"},
@@ -56,18 +63,33 @@ int main(int argc, char** argv) {
 		{"easter", 0, 0, OPTION_HIDDEN, "Easter egg"},
 		{0}
 	};
-	struct argp argp = {options, parse_opt,"FILENAME"};
-	struct Arguments arguments;
-	argp_parse(&argp, argc, argv, 0,0, &arguments);
+	/*This is where we add the arguments*/
+	struct argp argp = {options, parse_opt,"FILENAME [OUTPUT FILENAME]"};
+	/*Initialize and fill in our callback struct to use instead of globals*/
+	struct Parameters params;
+	params.h = 0;
+	params.debug = 0;
+	/*Check that all of the arguments parsed correctly*/
+	error_t rc;
+	rc = argp_parse(&argp, argc, argv, 0,0, &params);
+	if(rc != 0) {
+		fprintf(stderr, "Argp returned error code: %d\n",rc );
+		exit(1);
+	} else {
+		const char *prev = NULL;
+		char *word;
+		while((word = argz_next(params.args.argz, params.args.argz_len, prev))) {
+			printf("%s\n",word );
+			prev = word;
+		}	
+	}
+
 
 	/*allocate a buffer to read the file
 	this buffer must be a multiple of the face length structure so
 	we can trivially alias*/
 	size_t buffer_length = sizeof(struct IntFace)* BUFFER_MULTIPLE;
 	uint8_t* buffer = (uint8_t*)malloc(buffer_length);
-	float i = 0;
-	printf("%s %lu\n", argv[1], sizeof(i));
-	int fn_len = strlen(argv[1]);
 	/*Stat the target file to test permissions are valid before 
 	attempting to open*/
 
@@ -78,6 +100,7 @@ int main(int argc, char** argv) {
 		fprintf(stderr, "Problems\n" );
 	}
 
+	free(params.args.argz);
 	free(buffer);
 	return 0;
 }
@@ -95,10 +118,12 @@ There is NO WARRANTY, to the extent permitted by law.";
 
 static int
 parse_opt(int key, char *arg, struct argp_state *state) {
-	struct Arguments *a = state->input;
+	struct Parameters *foo = state->input;
+	struct Arguments *a = &(foo->args);
+	float *layer_height = &(foo->h);
 	switch(key) {
 		case 'h': {
-			printf("Layer Height%s\n",arg );
+			*layer_height = atof(arg);
 			break;
 		} case 'd': {
 			
@@ -112,10 +137,10 @@ parse_opt(int key, char *arg, struct argp_state *state) {
 			argz_add(&a->argz, &a->argz_len, arg);
 			break;
 		} case ARGP_KEY_END: {
-			printf("\n");
-			if(a->argz_len > MAX_ARGUMENTS) {
+			size_t count = argz_count(a->argz,a->argz_len);
+			if(count > MAX_ARGUMENTS) {
 				argp_failure(state,1, 0, "Too many arguments");
-			} else if(a->argz_len < MIN_ARGUMENTS) {
+			} else if(count < MIN_ARGUMENTS) {
 				argp_failure(state, 1, 0, "Not enough arguments");
 			}
 			break;
