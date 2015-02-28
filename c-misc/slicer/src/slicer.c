@@ -1,13 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+/*gives strlen*/
 #include <string.h>
 /*convert the endianess of stl to host*/
 #include <endian.h>
-/*test file permissions*/
+/*testing file permissions*/
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+/*command line argument parsing library*/
+#include <argp.h>
 
 #define HEADER_LENGTH 80
 #define BUFFER_MULTIPLE 10
