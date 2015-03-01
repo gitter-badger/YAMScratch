@@ -53,6 +53,9 @@ struct Parameters {
 
 /*Forward Function Declarations*/
 static int parse_opt(int key, char *arg, struct argp_state *state);
+static int verify_extension(const char* filename, const size_t fn_len, \
+							const char* extension, const size_t ex_len);
+
 
 int main(int argc, char** argv) {
 	/*This struct is where we define every parameter to the function*/
@@ -82,16 +85,27 @@ int main(int argc, char** argv) {
 	rc = argp_parse(&argp, argc, argv, 0,0, &params);
 	if(rc != 0) {
 		fprintf(stderr, "Argp returned error code: %d\n",rc );
+		free(params.args.argz);
 		exit(1);
-	} else {
-		const char *prev = NULL;
-		char *word;
-		while((word = argz_next(params.args.argz, params.args.argz_len, prev))) {
-			printf("%s\n",word );
-			prev = word;
-		}	
-	}
+	} 
+	const char *prev = NULL;
+	char *fn;
+	fn = argz_next(params.args.argz, params.args.argz_len, prev);
+	prev = fn;
 
+	char *exten_caps = ".STL";
+	char *exten_lower = ".stl";
+	size_t fn_len = strlen(fn);
+
+	if( verify_extension(fn, fn_len, exten_caps, strlen(exten_caps)) \
+		|| verify_extension(fn, fn_len, exten_lower, strlen(exten_lower))) {
+		/*check the file for permissions*/
+		printf("Its ok\n");
+	} else {
+		fprintf(stderr, "File must be a .STL or .stl\n");
+		free(params.args.argz);
+		exit(1);
+	}
 
 	/*allocate a buffer to read the file
 	this buffer must be a multiple of the face length structure so
@@ -154,4 +168,21 @@ parse_opt(int key, char *arg, struct argp_state *state) {
 		}
 	}
 	return 0;
+}
+
+static int
+verify_extension(const char* filename, const size_t fn_len, \
+	const char* extension, const size_t ex_len) {
+	/*test the end filename for a match with the extension passed in*/
+	if(ex_len > fn_len) {
+		/*we will not bother to check anything for a partial match*/
+		return 0;
+	}
+	unsigned int start_fn_index = fn_len - ex_len;
+	for(int i = 0; i < (int)ex_len; ++i) {
+		if(extension[i] != filename[start_fn_index + i]) {
+			return 0;
+		}
+	}
+	return 1;
 }
