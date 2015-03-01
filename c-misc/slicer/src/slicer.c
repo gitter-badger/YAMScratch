@@ -58,13 +58,21 @@ int main(int argc, char** argv) {
 	/*This struct is where we define every parameter to the function*/
 	struct argp_option options[] = 
 	{
+		/*format is given by:
+		{long option name,short option integer,type of required option
+		for the parameter (0 means not required),(Enum for option visibility), group id}*/
+		{0,0,0,0, "Suggested:", 7},
 		{"height", 'h',"NUM", 0, "Set the layer height of each slice"},
+		{0,0,0,0, "Optional:", -1},
 		{"debug",'d',0 , OPTION_ARG_OPTIONAL, "Display debug output"},
 		{"easter", 0, 0, OPTION_HIDDEN, "Easter egg"},
 		{0}
 	};
 	/*This is where we add the arguments*/
-	struct argp argp = {options, parse_opt,"FILENAME [OUTPUT FILENAME]"};
+	struct argp argp = {options, parse_opt,"FILENAME [OUTPUT FILENAME]", \
+	"Slice the input STL file and output a DXF file for each and every slice. \
+	Output files are named OUTPUT FILENAME_(n).dxf where (n) is the layer.\v \
+	File permissions will be checked."};
 	/*Initialize and fill in our callback struct to use instead of globals*/
 	struct Parameters params;
 	params.h = 0;
@@ -88,7 +96,7 @@ int main(int argc, char** argv) {
 	/*allocate a buffer to read the file
 	this buffer must be a multiple of the face length structure so
 	we can trivially alias*/
-	size_t buffer_length = sizeof(struct IntFace)* BUFFER_MULTIPLE;
+	size_t buffer_length = sizeof(struct IntFace) * BUFFER_MULTIPLE;
 	uint8_t* buffer = (uint8_t*)malloc(buffer_length);
 	/*Stat the target file to test permissions are valid before 
 	attempting to open*/
@@ -100,18 +108,17 @@ int main(int argc, char** argv) {
 		fprintf(stderr, "Problems\n" );
 	}
 
+	/*remember that argz creates something like a std::vector and we must free it*/
 	free(params.args.argz);
 	free(buffer);
 	return 0;
 }
 
-
-
 const char *argp_program_bug_address = "yetanotherminion@gmail.com";
 const char *argp_program_version = 
 "YAM Slicer, version 0.1 -devel (x86_64-redhat-linux-gnu)\n\
 Copyright (C) 2015 Isaiah Bell\n\
-License MIT\n\
+License DWTFYWEFM: Do What The Fuck You Want Except For Microsoft\n\
 \n\
 This is free software; you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.";
@@ -144,7 +151,6 @@ parse_opt(int key, char *arg, struct argp_state *state) {
 				argp_failure(state, 1, 0, "Not enough arguments");
 			}
 			break;
-
 		}
 	}
 	return 0;
