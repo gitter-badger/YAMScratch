@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 	/*Check that all of the arguments parsed correctly*/
 	error_t rc;
 	rc = argp_parse(&argp, argc, argv, 0,0, &params);
-	if(rc != 0) {
+	if(rc < 0) {
 		fprintf(stderr, "Argp returned error code: %d\n",rc );
 		free(params.args.argz);
 		exit(1);
@@ -129,13 +129,13 @@ int main(int argc, char** argv) {
 		n = stat(out_dir, dir_info);
 		if(n < 0) {
 			fprintf(stderr, "Improper output directory");
-			free(out_dir);
+			free(dir_info);
 			free(params.args.argz);
 			exit(1);
 		} else {
 			if(S_ISDIR(dir_info->st_mode) == 0 ) {
 				fprintf(stderr, "ERROR: <%s> is not a directory\n", out_dir);
-				free(out_dir);
+				free(dir_info);
 				free(params.args.argz);
 				exit(1);
 			}
