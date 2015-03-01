@@ -72,9 +72,9 @@ int main(int argc, char** argv) {
 		{0}
 	};
 	/*This is where we add the arguments*/
-	struct argp argp = {options, parse_opt,"FILENAME [OUTPUT FILENAME]", \
+	struct argp argp = {options, parse_opt,"FILENAME [OUTPUT DIR]", \
 	"Slice the input STL file and output a DXF file for each and every slice. \
-	Output files are named OUTPUT FILENAME_(n).dxf where (n) is the layer.\v \
+	Output files are named FILENAME_slice(n).dxf where (n) is the layer.\v \
 	File permissions will be checked."};
 	/*Initialize and fill in our callback struct to use instead of globals*/
 	struct Parameters params;
@@ -92,6 +92,15 @@ int main(int argc, char** argv) {
 	char *fn;
 	fn = argz_next(params.args.argz, params.args.argz_len, prev);
 	prev = fn;
+	char *out_dir;
+	/*test if we had a second argument*/
+	if( 0 == (out_dir = argz_next(params.args.argz, params.args.argz_len, prev))) {
+		out_dir = ".";
+		printf("No second option\n");
+	} else {
+		printf("%s\n", out_dir );
+	}
+	prev = NULL;
 
 	char *exten_caps = ".STL";
 	char *exten_lower = ".stl";
@@ -100,7 +109,23 @@ int main(int argc, char** argv) {
 	if( verify_extension(fn, fn_len, exten_caps, strlen(exten_caps)) \
 		|| verify_extension(fn, fn_len, exten_lower, strlen(exten_lower))) {
 		/*check the file for permissions*/
-		printf("Its ok\n");
+		int n;
+		struct stat *file_info = (struct stat*)malloc(sizeof(struct stat));
+		n = stat(fn, file_info);
+		if(n < 0) {
+			fprintf(stderr, "Improper input filename\n");
+			free(file_info);
+			free(params.args.argz);
+			exit(1);
+		} else {
+
+			free(file_info);
+		}
+
+		//now check
+		/*Now check that the destination is valid*/
+		struct stat *dir_info = (struct stat*) malloc(sizeof(struct stat));
+		free(dir_info);
 	} else {
 		fprintf(stderr, "File must be a .STL or .stl\n");
 		free(params.args.argz);
@@ -112,17 +137,9 @@ int main(int argc, char** argv) {
 	we can trivially alias*/
 	size_t buffer_length = sizeof(struct IntFace) * BUFFER_MULTIPLE;
 	uint8_t* buffer = (uint8_t*)malloc(buffer_length);
-	/*Stat the target file to test permissions are valid before 
-	attempting to open*/
-
-	struct stat* stat_info = (struct stat*)malloc(sizeof(struct stat));
-	int n;
-	n = stat(argv[1], stat_info);
-	if(n) {
-		fprintf(stderr, "Problems\n" );
-	}
 
 	/*remember that argz creates something like a std::vector and we must free it*/
+	
 	free(params.args.argz);
 	free(buffer);
 	return 0;
