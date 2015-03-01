@@ -19,6 +19,7 @@
 #define CHAR_PER_EXTENSION 4
 #define MAX_ARGUMENTS 2
 #define MIN_ARGUMENTS 1
+#define BYTES_PER_ELEMENT 50
 
 struct IntTriangle {
     /*solidworks may not fill in normal information */
@@ -32,11 +33,18 @@ struct IntTriangle {
 /*Alias type to interpret stl format*/
 struct Triangle {
     float n[3];
-    float v1[3];
-    float v2[3];
-    float v3[3];
+    struct Vertex v[3];
     uint16_t ac;
+    uint32_t id;
 };
+
+struct Vertex {
+    float x;
+    float y;
+    float z;
+    uint32_t id;
+};
+
 
 /*Hold a variable length of arguments passed to the program
 works kind of like std::vector*/
@@ -159,8 +167,13 @@ int main(int argc, char** argv) {
     size_t buffer_length = sizeof(struct IntTriangle) * BUFFER_MULTIPLE;
     uint8_t* buffer = (uint8_t*)malloc(buffer_length);
 
+    /*Create a node to node table as we parse*/
+
+    while(there are faces left) {
+
+    }
+
     /*remember that argz creates something like a std::vector and we must free it*/
-    
     free(params.args.argz);
     free(buffer);
     return 0;

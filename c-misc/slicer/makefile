@@ -4,8 +4,8 @@ SOURCE = ./src/
 IDIR = ./inc/
 
 LIST=$(BIN)slicer
-CC = gcc
-CFLAGS= -Wall -I$(IDIR) --pedantic-errors -std=c99
+CC = g++
+CFLAGS= -Wall -I$(IDIR) --pedantic-errors
 
 all: $(LIST)
 
