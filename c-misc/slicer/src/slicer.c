@@ -49,6 +49,7 @@ struct Parameters {
 	struct Arguments args;
 	float h;
 	uint8_t debug;
+	uint8_t force;
 };
 
 /*Forward Function Declarations*/
@@ -66,6 +67,7 @@ int main(int argc, char** argv) {
 		for the parameter (0 means not required),(Enum for option visibility), group id}*/
 		{0,0,0,0, "Suggested:", 7},
 		{"height", 'h',"NUM", 0, "Set the layer height of each slice"},
+		{"force", 'f', 0, 0, "Force overwriting of output files if they exist"},
 		{0,0,0,0, "Optional:", -1},
 		{"debug",'d',0 , OPTION_ARG_OPTIONAL, "Display debug output"},
 		{"easter", 0, 0, OPTION_HIDDEN, "Easter egg"},
@@ -93,13 +95,10 @@ int main(int argc, char** argv) {
 	fn = argz_next(params.args.argz, params.args.argz_len, prev);
 	prev = fn;
 	char *out_dir;
-	/*test if we had a second argument*/
+	/*create the default directory as the current directory*/
 	if( 0 == (out_dir = argz_next(params.args.argz, params.args.argz_len, prev))) {
 		out_dir = ".";
-		printf("No second option\n");
-	} else {
-		printf("%s\n", out_dir );
-	}
+	} 
 	prev = NULL;
 
 	char *exten_caps = ".STL";
@@ -119,13 +118,31 @@ int main(int argc, char** argv) {
 			exit(1);
 		} else {
 
+
 			free(file_info);
+			file_info = NULL;
 		}
 
 		//now check
 		/*Now check that the destination is valid*/
 		struct stat *dir_info = (struct stat*) malloc(sizeof(struct stat));
-		free(dir_info);
+		n = stat(out_dir, dir_info);
+		if(n < 0) {
+			fprintf(stderr, "Improper output directory");
+			free(out_dir);
+			free(params.args.argz);
+			exit(1);
+		} else {
+			if(S_ISDIR(dir_info->st_mode) == 0 ) {
+				fprintf(stderr, "ERROR: <%s> is not a directory\n", out_dir);
+				free(out_dir);
+				free(params.args.argz);
+				exit(1);
+			}
+
+			free(dir_info);
+			dir_info = NULL;
+		}
 	} else {
 		fprintf(stderr, "File must be a .STL or .stl\n");
 		free(params.args.argz);
@@ -156,16 +173,18 @@ There is NO WARRANTY, to the extent permitted by law.";
 
 static int
 parse_opt(int key, char *arg, struct argp_state *state) {
-	struct Parameters *foo = state->input;
-	struct Arguments *a = &(foo->args);
-	float *layer_height = &(foo->h);
+	struct Parameters *par = state->input;
+	struct Arguments *a = &(par->args);
+	float *layer_height = &(par->h);
 	switch(key) {
 		case 'h': {
 			*layer_height = atof(arg);
 			break;
 		} case 'd': {
-			
+			par->debug = 1;
 			break;
+		} case 'f': {
+			par->force = 1;
 		} case ARGP_KEY_INIT: {
 			a->argz = 0;
 			a->argz_len = 0;
