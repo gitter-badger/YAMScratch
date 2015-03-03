@@ -8,9 +8,7 @@
 #include "slicerBinaryReader.h"
 #include "slicerConstants.h"
 
-int bat(){return 6;}
-
-int parseBinary(char* fn) {
+int parseBinarySTL(char* fn, uint8_t debug) {
 	/*allocate a buffer to read the file
 	this buffer must be a multiple of the face length structure so
 	we can trivially alias*/
@@ -58,7 +56,7 @@ int parseBinary(char* fn) {
 	/*printf("bytes read: %d\n", rc );*/
 	while(rc >= buffer_length) {
 		
-		if(1) {
+		if(debug) {
 			printf("Debug\n");
 		}
 		bzero(buffer, buffer_length);

@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-int parseBinary(char *fn);
-
-int bat();
+int parseBinarySTL(char *fn, uint8_t debug);
 
 #endif

@@ -16,10 +16,11 @@
 /*gives bzero*/
 #include <strings.h>
 
+#include "slicerBinaryReader.h"
 #include "slicerConstants.h"
 #include "slicerTypes.h"
 #include "badVertexVector.h"
-#include "slicerBinaryReader.h"
+
 
 /*Hold a variable length of arguments passed to the program
 works kind of like std::vector*/
@@ -128,9 +129,9 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-	//rc = parseBinary(fn, (uint8_t) params.debug);
+	rc = parseBinarySTL(fn, (uint8_t) params.debug);
 
-	rc = bat();
+	//rc = foo();
 	
 	printf("%d\n",rc );
 	/*remember that argz creates something like a std::vector and we must free it*/

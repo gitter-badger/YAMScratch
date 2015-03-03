@@ -4,7 +4,6 @@ SDIR = ./src/
 IDIR = ./inc/
 ODIR = ./src/obj/
 
-LIST=$(BIN)slicer
 CC = gcc
 CFLAGS= -Wall -I$(IDIR) --pedantic-errors --std=gnu99
 
@@ -14,16 +13,19 @@ DEPS = $(patsubst %, $(IDIR)%, $(_DEPS))
 _OBJ = slicerBinaryReader.o
 OBJ = $(patsubst %, $(ODIR)%, $(_OBJ))
 
-all: $(LIST)
+all: $(BIN)slicer
 
-$(BIN)slicer : $(ODIR)slicer.o $(OBJ)
-	$(CC) $< $(CFLAGS) -o $@ $(LIBS)
+$(BIN)slicer : ./src/obj/slicer.o $(OBJ)
+	$(CC) $< $(OBJ) -o $@ $(CFLAGS) 
 
-$(ODIR)slicer.o : $(SDIR)slicer.c $(DEPS) $(OBJ)
+$(ODIR)slicer.o : $(SDIR)slicer.c $(DEPS)
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(ODIR)slicerBinaryReader.o : $(SDIR)slicerBinaryReader.c $(DEPS)
 	$(CC) -c $(CFLAGS) $< -o $@
 
+#prevent anything from happening to a file named clean
+.FAKE : clean
+
 clean:
-	$(RM) $(LIST) $(ODIR)*.o
+	$(RM) $(BIN)slicer $(ODIR)*.o
