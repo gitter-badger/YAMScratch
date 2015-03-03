@@ -117,13 +117,10 @@ int main(int argc, char** argv) {
 			free(params.args.argz);
 			exit(1);
 		} else {
-
-
+			/*Nothing here for now*/
 			free(file_info);
 			file_info = NULL;
 		}
-
-		//now check
 		/*Now check that the destination is valid*/
 		struct stat *dir_info = (struct stat*) malloc(sizeof(struct stat));
 		n = stat(out_dir, dir_info);
@@ -139,7 +136,6 @@ int main(int argc, char** argv) {
 				free(params.args.argz);
 				exit(1);
 			}
-
 			free(dir_info);
 			dir_info = NULL;
 		}
@@ -155,8 +151,8 @@ int main(int argc, char** argv) {
 	size_t buffer_length = sizeof(struct IntFace) * BUFFER_MULTIPLE;
 	uint8_t* buffer = (uint8_t*)malloc(buffer_length);
 
+
 	/*remember that argz creates something like a std::vector and we must free it*/
-	
 	free(params.args.argz);
 	free(buffer);
 	return 0;
