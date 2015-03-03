@@ -23,23 +23,8 @@
 #define MIN_ARGUMENTS 1
 #define BYTES_PER_FACET 50
 
-struct IntFace {
-	/*solidworks may not fill in normal information */
-	uint32_t n[3];  	/*Normal vector*/
-	uint32_t v1[3]; 	/*vertex 1 */
-	uint32_t v2[3]; 	/*vertex 2*/
-	uint32_t v3[3];		/*vertex 3*/
-	uint16_t ac;		/*Attribute counter*/ 
-};
-
-/*Alias type to interpret stl format*/
-struct Face {
-	float n[3];
-	float v1[3];
-	float v2[3];
-	float v3[3];
-	uint16_t ac;
-};
+#include "slicerTypes.h"
+#include "badVertexVector.h"
 
 /*Hold a variable length of arguments passed to the program
 works kind of like std::vector*/
