@@ -195,16 +195,15 @@ int main(int argc, char** argv) {
 	}
 	/*Now start reading the rest of the stl into the buffer*/
 	rc = fread(buffer, 1, buffer_length, file_ptr);
-	printf("bytes read%d\n", rc );
-	while(rc > 0) {
+	/*printf("bytes read: %d\n", rc );*/
+	while(rc >= buffer_length) {
+		
 		if(params.debug) {
-			
+			printf("Debug\n");
 		}
 		bzero(buffer, buffer_length);
 		rc = fread(buffer, 1, buffer_length, file_ptr);
 	}
-	printf("bytes read%d\n", rc );
-
 
 	/*remember that argz creates something like a std::vector and we must free it*/
 	free(params.args.argz);
