@@ -16,15 +16,10 @@
 /*gives bzero*/
 #include <strings.h>
 
-#define HEADER_LENGTH 80
-#define BUFFER_MULTIPLE 1024 /*give BYTES_PER_FACET kB of buffer*/
-#define CHAR_PER_EXTENSION 4
-#define MAX_ARGUMENTS 2
-#define MIN_ARGUMENTS 1
-#define BYTES_PER_FACET 50
-
+#include "slicerConstants.h"
 #include "slicerTypes.h"
 #include "badVertexVector.h"
+#include "slicerBinaryReader.h"
 
 /*Hold a variable length of arguments passed to the program
 works kind of like std::vector*/
@@ -133,66 +128,13 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-	/*allocate a buffer to read the file
-	this buffer must be a multiple of the face length structure so
-	we can trivially alias*/
-	const size_t buffer_length = (size_t)(BYTES_PER_FACET * BUFFER_MULTIPLE);
-	uint8_t* buffer = (uint8_t*)malloc(buffer_length);
-	FILE *file_ptr;
-	file_ptr = fopen(fn, "rb");
-	if(file_ptr == NULL) {
-		fprintf(stderr, "File failed to open\n" );
-		free(params.args.argz);
-		free(buffer);
-	}
-	rc = fread(buffer, 1, HEADER_LENGTH, file_ptr);
-	if (rc != HEADER_LENGTH)
-	{
-		fprintf(stderr, "STL header not found\n");
-		free(params.args.argz);
-		free(buffer);
-		exit(1);
-	} else {
-		/*turn the buffer into a string by null terminating*/
-		for(int i = 0; i < HEADER_LENGTH; ++i) {
-			if(buffer[i] == 32) {
-				buffer[i] = '_';
-			}
-		}
-		buffer[HEADER_LENGTH] = 0;
-		printf("Header\n%s\n", buffer);
-	}
+	//rc = parseBinary(fn, (uint8_t) params.debug);
 
-	/*now get the number of triangles*/
-	bzero(buffer, HEADER_LENGTH);
-	rc = fread(buffer, 1, 4, file_ptr);
-	if(rc != 4) {
-		fprintf(stderr, "Read failed\n");
-		free(params.args.argz);
-		free(buffer);
-		exit(1);
-	} else {
-		uint32_t* four_byte;
-		four_byte = (uint32_t*) buffer;
-		uint32_t triangle_num = le32toh((*four_byte));
-		printf("Number of triangles is: %d\n",triangle_num );
-		bzero(buffer, 4);
-	}
-	/*Now start reading the rest of the stl into the buffer*/
-	rc = fread(buffer, 1, buffer_length, file_ptr);
-	/*printf("bytes read: %d\n", rc );*/
-	while(rc >= buffer_length) {
-		
-		if(params.debug) {
-			printf("Debug\n");
-		}
-		bzero(buffer, buffer_length);
-		rc = fread(buffer, 1, buffer_length, file_ptr);
-	}
-
+	rc = bat();
+	
+	printf("%d\n",rc );
 	/*remember that argz creates something like a std::vector and we must free it*/
 	free(params.args.argz);
-	free(buffer);
 	return 0;
 }
 

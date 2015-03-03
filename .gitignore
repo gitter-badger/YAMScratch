@@ -33,3 +33,4 @@ main3.cpp
 
 #ignore CAD files
 *.[sS][tT][lL]
+*.[dD][xX][fF]

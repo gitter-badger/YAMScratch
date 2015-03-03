@@ -1,0 +1,11 @@
+#ifndef SLICER_CONSTANTS_
+#define SLICER_CONSTANTS_
+
+#define HEADER_LENGTH 80
+#define BUFFER_MULTIPLE 1024 /*give BYTES_PER_FACET kB of buffer*/
+#define CHAR_PER_EXTENSION 4
+#define MAX_ARGUMENTS 2
+#define MIN_ARGUMENTS 1
+#define BYTES_PER_FACET 50
+
+#endif
