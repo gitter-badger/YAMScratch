@@ -14,7 +14,9 @@ c-misc/DS\ projects/*.txt
 #ignore test input files
 PracticeInput*
 out.txt
+#ignore python stuff
 ezdxf-0.6.2
+*.pyc
 
 #paths for windows
 *+wing*

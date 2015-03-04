@@ -2,13 +2,15 @@ import sys
 import os
 import argparse
 import struct
+import re
 
 import ezdxf
+import VectorMath
 
 class Mesh(object):
 	"""docstring for Mesh"""
 	def __init__(self):
-		print "mesh created"
+		#print "mesh created"
 		#use integer keys
 		self.faces = {}
 		self.edges = {}
@@ -19,6 +21,8 @@ class Mesh(object):
 		self.faces_index = 0
 		self.vert_view = self.vertices.viewkeys()
 		self.edge_view = self.edges.viewkeys()
+		self.min_coord = [0,0,0]
+		self.max_coord = [0,0,0]
 
 	def addFace(self, normal, vert1, vert2, vert3, attr_code):
 		#create a face with a normal
@@ -34,6 +38,19 @@ class Mesh(object):
 				#add the vertex to the face
 				temp_face.vertices.append(this_vert_key)
 			else:
+				if(c_vert[0] < self.min_coord[0]):
+					self.min_coord[0] = c_vert[0]
+				elif(c_vert[0] > self.max_coord[0]):
+					self.max_coord[0] = c_vert[0]
+				if(c_vert[1] < self.min_coord[1]):
+					self.min_coord[1] = c_vert[1]
+				elif(c_vert[1] > self.max_coord[1]):
+					self.max_coord[1] = c_vert[1] 
+				if(c_vert[2] < self.min_coord[2]):
+					self.min_coord[2] = c_vert[2]
+				elif(c_vert[2] > self.max_coord[2]):
+					self.max_coord[2] = c_vert[2]
+
 				#create a new vertex object
 				v = Vertex(c_vert,self.verts_index)
 				self.vertices[c_vert] = (self.verts_index, v)
@@ -151,7 +168,7 @@ def parseBinarySTL(filename):
 		try:
 			f = open(fn, "rb")
 			buff = f.read(80)
-			print buff
+			#print buff
 			break
 		except IOError as e:
 			print e
@@ -196,15 +213,33 @@ if __name__ == '__main__':
 
 	parser.add_argument('filename',metavar = 'FILENAME', type=str, nargs = '+',
 		help = 'Source stl file' )
+	parser.add_argument('-n','--normal', help = 'Comma separated normal vector',
+		action = 'store')
+	parser.add_argument('-l','--layer-height', help = 'Layer height in stl file units',
+		default = 0.5)
 
 	args = parser.parse_args()
-	print args.filename
+	#get the normal vector
+	norm_vec = tuple(args.normal.split(","))
+	assert( len(norm_vec) == 3)
+	#set default
+	layer_height = args.layer_height
+	#check that the file name is stl
 	fn = args.filename[0]
+	stl_regex = re.compile("(\.STL)|(\.stl)$")
+	if(re.search(stl_regex, fn) is not None):
+		out_name = re.split(stl_regex, fn)[0]
+	else:
+		print "Exiting: invalid filename is not a .stl or .STL"
+		print "\t"+fn
+		exit(1)
 
 	mesh = parseBinarySTL(fn)
-	print mesh.verts_index
-	print mesh.edges_index
-	print mesh.faces_index
+	print "Min",mesh.min_coord
+	print "Max",mesh.max_coord
+
+	#we assume we are always slicing along z axis
+
 
 	# dwg = ezdxf.new("AC1015")
 	# msp = dwg.modelspace()
