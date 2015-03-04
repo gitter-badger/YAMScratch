@@ -14,6 +14,7 @@ c-misc/DS\ projects/*.txt
 #ignore test input files
 PracticeInput*
 out.txt
+ezdxf-0.6.2
 
 #paths for windows
 *+wing*

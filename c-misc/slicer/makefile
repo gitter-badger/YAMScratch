@@ -4,8 +4,8 @@ SDIR = ./src/
 IDIR = ./inc/
 ODIR = ./src/obj/
 
-CC = gcc
-CFLAGS= -Wall -I$(IDIR) --pedantic-errors --std=gnu99
+CC = g++
+CFLAGS= -Wall -I$(IDIR) --pedantic-errors 
 
 _DEPS = badVertexVector.h slicerBinaryReader.h slicerConstants.h slicerTypes.h
 DEPS = $(patsubst %, $(IDIR)%, $(_DEPS))

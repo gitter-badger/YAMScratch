@@ -150,7 +150,7 @@ There is NO WARRANTY, to the extent permitted by law.";
 
 static int
 parse_opt(int key, char *arg, struct argp_state *state) {
-	struct Parameters *par = state->input;
+	struct Parameters *par = static_cast<struct Parameters*>(state->input);
 	struct Arguments *a = &(par->args);
 	float *layer_height = &(par->h);
 	switch(key) {

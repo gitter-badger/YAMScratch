@@ -39,15 +39,14 @@ int parseBinarySTL(char* fn, uint8_t debug) {
 
 	/*now get the number of triangles*/
 	bzero(buffer, HEADER_LENGTH);
+	uint32_t triangle_num;
 	rc = fread(buffer, 1, 4, file_ptr);
 	if(rc != 4) {
 		fprintf(stderr, "Read failed\n");
 		free(buffer);
 		exit(1);
 	} else {
-		uint32_t* four_byte;
-		four_byte = (uint32_t*) buffer;
-		uint32_t triangle_num = le32toh((*four_byte));
+		triangle_num = le32toh(*((uint32_t*)buffer));
 		printf("Number of triangles is: %d\n",triangle_num );
 		bzero(buffer, 4);
 	}

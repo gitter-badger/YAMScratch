@@ -202,23 +202,9 @@ if __name__ == '__main__':
 	fn = args.filename[0]
 
 	mesh = parseBinarySTL(fn)
-
-	for value in mesh.vertices.values():
-		print value.faces
-		print value.edges, '\n'
-
-	print '====================================='
-	for value in mesh.edges.values():
-		assert(len(value.faces) == 2)
-		print value.faces
-		print value.vertices, '\n'
-
-	print '====================================='
-	for value in mesh.faces.values():
-		assert(len(value.edges) == 3)
-		assert(len(value.vertices) == 3)
-		print value.edges
-		print value.vertices
+	print mesh.verts_index
+	print mesh.edges_index
+	print mesh.faces_index
 
 	# dwg = ezdxf.new("AC1015")
 	# msp = dwg.modelspace()
