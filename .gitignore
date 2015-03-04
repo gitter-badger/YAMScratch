@@ -24,6 +24,7 @@ ezdxf-0.6.2
 
 main3.cpp
 *.jar
+
 #ignore archives
 *.tgz
 *.zip
@@ -37,3 +38,7 @@ main3.cpp
 #ignore CAD files
 *.[sS][tT][lL]
 *.[dD][xX][fF]
+
+#ignore MatLab specific files
+*.p
+*.mat
