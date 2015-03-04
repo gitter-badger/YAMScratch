@@ -86,6 +86,25 @@ class Mesh(object):
 		self.faces_index += 1
 
 	def acceptChanges(self):
+		#First swap the edges key value pairs in mesh.edges dict
+		#we still need vertex loop up by edge
+		for old_key in self.edges.keys():
+			if len(old_key) > 1:
+				#unpack the tuple objects
+				(new_key, Edge_object) = self.edges[old_key]
+				#make sure that old edge is the same
+				assert(makeEdgeKey(Edge_object.vertices[0], Edge_object.vertices[1]) == old_key)
+				a_vert = Edge_object.vertices[0]
+				b_vert = Edge_object.vertices[1]
+				a_vert_key = self.vertices[a_vert][0]
+				b_vert_key = self.vertices[b_vert][0]
+				#clear the old vert tuples and add keys
+				Edge_object.vertices[0] = a_vert_key
+				Edge_object.vertices[1] = b_vert_key
+				self.edges[new_key] = Edge_object
+				del self.edges[old_key]
+			else:
+				pass
 		#now go and swap the key value pairs in the mesh.vertices dict
 		for old_key in self.vertices.keys():
 			if len(self.vertices[old_key]) > 1:
@@ -98,17 +117,7 @@ class Mesh(object):
 			else:
 				pass
 
-		#now swap the edges key value pairs in mesh.edges dict
-		for old_key in self.edges.keys():
-			if len(old_key) > 1:
-				#unpack the tuple objects
-				(new_key, Edge_object) = self.edges[old_key]
-				#make sure that old edge is the same
-				assert(makeEdgeKey(Edge_object.vertices[0], Edge_object.vertices[1]) == old_key)
-				self.edges[new_key] = Edge_object
-				del self.edges[old_key]
-			else:
-				pass
+
 
 class Face(object):
 	def __init__(self,normal,id):
@@ -205,7 +214,6 @@ def parseBinarySTL(filename):
 	assert(num_faces == len(m.faces))
 	return m
 
-
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description = '''Slice the input STL file 
 		and output a DXF file for each and every slice.	Output files are 
@@ -234,11 +242,46 @@ if __name__ == '__main__':
 		print "\t"+fn
 		exit(1)
 
+	#try to create a dir for output
+	out_dir = "./out"
+	try:
+		os.mkdir(out_dir)
+	except OSError:
+		print "dir already exists"
+
+
 	mesh = parseBinarySTL(fn)
+	for value in mesh.edges.values():
+		print value.vertices
 	print "Min",mesh.min_coord
 	print "Max",mesh.max_coord
+	#we assume we are always slicing along positive z axis
+	#start at an offset of half layer height and move until out of shape
+	z_offset = 0.5*layer_height
+	layer_index = 0
+	section_criteria = mesh.min_coord[2] + z_offset
+	while(section_criteria < mesh.max_coord[2]):
+		this_layer_name = out_name + "_" + str(layer_index) + ".dxf"
+		this_layer_path = os.path.join(out_dir,this_layer_name)
+		print this_layer_path
+		#open the new dxf
+		dwg = ezdxf.new("AC1015")
+		msp = dwg.modelspace()
+		#begin bad algorithm
+		#iterate over every face
+		intersections_count = 0
+		for face in mesh.faces.values():
+			#test each edge for intersection
+			for edge_key in face.edges:
+				a_vert_key = mesh.edges[edge_key].vertices[0]
+				b_vert_key = mesh.edges[edge_key].vertices[1]
+		
 
-	#we assume we are always slicing along z axis
+		msp.add_line((0,0), (1,1))
+		dwg.saveas(this_layer_path)
+		print intersections_count
+		section_criteria += layer_height
+		layer_index += 1
 
 
 	# dwg = ezdxf.new("AC1015")
