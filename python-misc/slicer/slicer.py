@@ -70,7 +70,7 @@ class Mesh(object):
 				self.edges[c_edge_key][1].faces.add(self.faces_index)
 				#add this key to the face
 				temp_face.edges.add(this_edge_key)
-				#add this edge to the two verticies
+				#add this edge to the two vertices
 				self.vertices[c_edge_key[0]][1].edges.add(this_edge_key)
 				self.vertices[c_edge_key[1]][1].edges.add(this_edge_key)
 			else:
@@ -214,6 +214,16 @@ def parseBinarySTL(filename):
 	assert(num_faces == len(m.faces))
 	return m
 
+def lineInterpolate(vec1, vec2, z_value):
+	assert(len(vec1) == 3)
+	assert(len(vec2) == 3)
+	t = float(z_value - vec1[2]) / float(vec2[2] - vec1[2])
+	assert(t >= 0.0)
+	point_x = vec1[0] + t * (vec2[0] - vec1[0])
+	point_y = vec1[1] + t * (vec2[1] - vec1[1])
+	#we only need the x and y component
+	return (point_x, point_y)
+
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description = '''Slice the input STL file 
 		and output a DXF file for each and every slice.	Output files are 
@@ -222,7 +232,7 @@ if __name__ == '__main__':
 	parser.add_argument('filename',metavar = 'FILENAME', type=str, nargs = '+',
 		help = 'Source stl file' )
 	parser.add_argument('-n','--normal', help = 'Comma separated normal vector',
-		action = 'store')
+		action = 'store', default = '0,0,1')
 	parser.add_argument('-l','--layer-height', help = 'Layer height in stl file units',
 		default = 0.5)
 
@@ -260,6 +270,10 @@ if __name__ == '__main__':
 	z_offset = 0.5*layer_height
 	layer_index = 0
 	section_criteria = mesh.min_coord[2] + z_offset
+	all_dwg = ezdxf.new("AC1015")
+	all_msp = all_dwg.modelspace()
+	all_layer_name = out_name + "_all.dxf"
+
 	while(section_criteria < mesh.max_coord[2]):
 		this_layer_name = out_name + "_" + str(layer_index) + ".dxf"
 		this_layer_path = os.path.join(out_dir,this_layer_name)
@@ -269,21 +283,94 @@ if __name__ == '__main__':
 		msp = dwg.modelspace()
 		#begin bad algorithm
 		#iterate over every face
-		intersections_count = 0
+		loop_count = 0
 		for face in mesh.faces.values():
 			#test each edge for intersection
+			vert_intersection = False
+			point_a = None
+			point_b = None
+
 			for edge_key in face.edges:
 				a_vert_key = mesh.edges[edge_key].vertices[0]
 				b_vert_key = mesh.edges[edge_key].vertices[1]
-		
+				a_z = mesh.vertices[a_vert_key].coord[2]
+				b_z = mesh.vertices[b_vert_key].coord[2]
+				#first case, we intersect a vertex and a edge
+				#we will hit this case twice for two edges if so
+				#the second time will just overwrite the coord
+				face_inter_count = 0
+				if a_z != b_z:
+					if a_z == section_criteria:
+						assert(point_a == None)
+						point_a = (mesh.vertices[a_vert_key].coord[0], mesh.vertices[a_vert_key].coord[1])
+						#if we already have found intersection, then quit
+						if point_b != None:
+							break
+						else:
+							vert_intersection = True
 
-		msp.add_line((0,0), (1,1))
+					elif b_z == section_criteria:
+						assert(point_a == None)
+						point_a = (mesh.vertices[b_vert_key].coord[0], mesh.vertices[b_vert_key].coord[1])
+						#if we already have found intersection, then quit
+						if point_b != None:
+							break
+						else:
+							vert_intersection = True
+					
+					#second case, we might intersect a edge
+					if a_z > b_z:
+						if b_z < section_criteria < a_z:
+							inter_test = True
+						else:
+							inter_test = False
+					elif a_z < b_z:
+						if a_z < section_criteria < b_z:
+							inter_test = True
+						else:
+							inter_test = False
+
+					#now we know if the edge is an intersection
+					#this is if we have point_a and we can then calculate point_b
+					if inter_test and point_b == None:
+						point_b = lineInterpolate(mesh.vertices[a_vert_key].coord, 
+												  mesh.vertices[b_vert_key].coord,
+												  section_criteria)
+						if vert_intersection:
+							assert(point_a is not None)
+							break
+					#point_b is if we get here filled
+					elif inter_test:
+						point_a = lineInterpolate(mesh.vertices[a_vert_key].coord, 
+												  mesh.vertices[b_vert_key].coord,
+												  section_criteria)
+						assert(point_b is not None)
+						break
+
+				else:
+					#the points are on the same z
+					if a_z == section_criteria:
+						#then return the line
+						point_a = (mesh.vertices[a_vert_key].coord[0], mesh.vertices[a_vert_key].coord[1])
+						point_b = (mesh.vertices[b_vert_key].coord[0], mesh.vertices[b_vert_key].coord[1])
+						break
+
+			#if none of the points
+			#we must have two disimilar points
+			if(point_a and point_b):
+				msp.add_line(point_a, point_b)
+				three_a = (point_a[0], point_a[1], section_criteria)
+				three_b = (point_b[0], point_b[1], section_criteria)
+				all_msp.add_line(three_a, three_b)
+				loop_count += 1
+
 		dwg.saveas(this_layer_path)
-		print intersections_count
+		print loop_count
 		section_criteria += layer_height
 		layer_index += 1
 
-
+	#save the composite dxf to top level dir
+	all_dwg.saveas(all_layer_name)
 	# dwg = ezdxf.new("AC1015")
 	# msp = dwg.modelspace()
 
