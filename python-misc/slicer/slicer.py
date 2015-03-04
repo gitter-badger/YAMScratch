@@ -18,6 +18,7 @@ class Mesh(object):
 		self.edges_index = 0
 		self.faces_index = 0
 		self.vert_view = self.vertices.viewkeys()
+		self.edge_view = self.edges.viewkeys()
 
 	def addFace(self, normal, vert1, vert2, vert3, attr_code):
 		#create a face with a normal
@@ -30,18 +31,44 @@ class Mesh(object):
 				this_vert_key = self.vertices[c_vert][0]
 				#add this face to the vertex
 				self.vertices[c_vert][1].faces.add(self.faces_index)
-				#add the key to the face
+				#add the vertex to the face
 				temp_face.vertices.append(this_vert_key)
 			else:
 				#create a new vertex object
 				v = Vertex(c_vert,self.verts_index)
-				self.vertices[c_vert] = tuple([self.verts_index, v])
+				self.vertices[c_vert] = (self.verts_index, v)
 				temp_face.vertices.append(self.verts_index)
 				self.verts_index += 1
 
+		#create the edge keys
+		e1 = makeEdgeKey(vert1, vert2)
+		e2 = makeEdgeKey(vert2, vert3)
+		e3 = makeEdgeKey(vert1, vert3)
+
+		for c_edge_key in (e1, e2, e3):
+			if c_edge_key in self.edge_view:
+				#get the edge in the keys
+				this_edge_key = self.edges[c_edge_key][0]
+				#add this face to the edge
+				self.edges[c_edge_key][1].faces.add(self.faces_index)
+				#add this key to the face
+				temp_face.edges.add(this_edge_key)
+				#add this edge to the two verticies
+				self.vertices[c_edge_key[0]][1].edges.add(this_edge_key)
+				self.vertices[c_edge_key[1]][1].edges.add(this_edge_key)
+			else:
+				#create new edge
+				e = Edge(c_edge_key[0], c_edge_key[1], self.faces_index)
+				self.edges[c_edge_key] = (self.edges_index, e)
+				temp_face.edges.add(self.edges_index)
+				#add this edge to the two vertices
+				self.vertices[c_edge_key[0]][1].edges.add(self.edges_index)
+				self.vertices[c_edge_key[1]][1].edges.add(self.edges_index)
+				self.edges_index += 1
+
 		self.faces_index += 1
 
-	def acceptFaces(self):
+	def acceptChanges(self):
 		#now go and swap the key value pairs in the mesh.vertices dict
 		for old_key in self.vertices.keys():
 			if len(self.vertices[old_key]) > 1:
@@ -54,6 +81,17 @@ class Mesh(object):
 			else:
 				pass
 
+		#now swap the edges key value pairs in mesh.edges dict
+		for old_key in self.edges.keys():
+			if len(old_key) > 1:
+				#unpack the tuple objects
+				(new_key, Edge_object) = self.edges[old_key]
+				#make sure that old edge is the same
+				assert(makeEdgeKey(Edge_object.vertices[0], Edge_object.vertices[1]) == old_key)
+				self.edges[new_key] = Edge_object
+				del self.edges[old_key]
+			else:
+				pass
 
 class Face(object):
 	def __init__(self,normal,id):
@@ -65,10 +103,13 @@ class Face(object):
 		self.normal = normal
 
 class Edge(object):
-	def __init__(self):
+	def __init__(self,vert1, vert2, face):
 		self.faces = set()
-		self.vertices = set()
-		self.intersections = set()
+		self.faces.add(face)
+		#this will be ordered according to makeEdgeKey
+		self.vertices = [vert1, vert2]
+		#the keys will be the layer ids
+		self.intersections = {}
 
 class Vertex(object):
 	def __init__(self,coord, id):
@@ -84,6 +125,7 @@ class Layer(object):
 
 def makeEdgeKey(a,b):
 	smallest = a
+	largest = b
 	#sort by z value first
 	if a[2] > b[2]:
 		smallest = b
@@ -99,7 +141,7 @@ def makeEdgeKey(a,b):
 			elif a[0] == b[0]:
 				#if they are the same then
 				return False
-	return tuple(smallest,largest)
+	return (smallest,largest)
 
 
 
@@ -141,7 +183,7 @@ def parseBinarySTL(filename):
 	#We are done parsing the file
 	f.close()
 	#=============================================
-	m.acceptFaces()
+	m.acceptChanges()
 	#finish up and return the mesh
 	assert(num_faces == len(m.faces))
 	return m
