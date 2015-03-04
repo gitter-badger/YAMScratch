@@ -14,6 +14,47 @@ class Mesh(object):
 		self.edges = {}
 		self.vertices = {}
 
+		self.verts_index = 0
+		self.edges_index = 0
+		self.faces_index = 0
+		self.vert_view = self.vertices.viewkeys()
+
+	def addFace(self, normal, vert1, vert2, vert3, attr_code):
+		#create a face with a normal
+		temp_face = Face(normal, self.faces_index)
+		self.faces[self.faces_index] = temp_face
+		#determine the numbering of the vertex
+		for c_vert in (vert1, vert2, vert3):
+			if c_vert in self.vert_view:
+				#the vertex is in the keys
+				this_vert_key = self.vertices[c_vert][0]
+				#add this face to the vertex
+				self.vertices[c_vert][1].faces.add(self.faces_index)
+				#add the key to the face
+				temp_face.vertices.append(this_vert_key)
+			else:
+				#create a new vertex object
+				v = Vertex(c_vert,self.verts_index)
+				self.vertices[c_vert] = tuple([self.verts_index, v])
+				temp_face.vertices.append(self.verts_index)
+				self.verts_index += 1
+
+		self.faces_index += 1
+
+	def acceptFaces(self):
+		#now go and swap the key value pairs in the mesh.vertices dict
+		for old_key in self.vertices.keys():
+			if len(self.vertices[old_key]) > 1:
+				#unpacke the tuple object
+				(new_key, Vert_object) = self.vertices[old_key]
+				#make sure that the old position is the same
+				assert(Vert_object.coord == old_key)
+				self.vertices[new_key] = Vert_object
+				del self.vertices[old_key]
+			else:
+				pass
+
+
 class Face(object):
 	def __init__(self,normal,id):
 		self.id = id
@@ -61,6 +102,7 @@ def makeEdgeKey(a,b):
 	return tuple(smallest,largest)
 
 
+
 def parseBinarySTL(filename):
 	#retry 3 times
 	for i in range(0,3):
@@ -75,70 +117,33 @@ def parseBinarySTL(filename):
 	#create a mesh object to hold our entire system
 	m = Mesh()
 	vert_view = m.vertices.viewkeys()
-
+	#find and store the number of faces
 	buff = f.read(4)
 	num_faces = struct.unpack_from("<i",buff)[0]
-	print num_faces
-
+	#start reading the faces in
 	buff = f.read(50)
 	face_index = 0
 	vert_index = 0
 	while(buff):
 		face = struct.unpack_from("<ffffffffffffH",buff)
 		normal = tuple([face[i] for i in range(0,3)])
-		#create a face with a normal
-		temp_face = Face(normal, face_index)
-		m.faces[face_index] = temp_face
-		
 		#now get each vertex for the face
 		vert1 = tuple([face[i] for i in range(3,6)])
 		vert2 = tuple([face[i] for i in range(6,9)])
 		vert3 = tuple([face[i] for i in range(9,12)])
+		#now get the attribute
+		attribute_code = face[12]
 
-		all_verts = (vert1, vert2, vert3)
-		#determine the numbering of the vertex
-		for candidate_vert in all_verts:
-			if candidate_vert in vert_view:
-				#the vertex is in the keys
-				this_vert_key = m.vertices[candidate_vert][0]
-				#add this face to the vertex
-				m.vertices[candidate_vert][1].faces.add(face_index)
-				#add the key to the face
-				temp_face.vertices.append(this_vert_key)
-			else:
-				#create a new vertex object
-				v = Vertex(candidate_vert,vert_index)
-				m.vertices[candidate_vert] = tuple([vert_index, v])
-				temp_face.vertices.append(vert_index)
-				vert_index += 1
-
-		face_index += 1
+		m.addFace(normal, vert1, vert2, vert3, attribute_code)
 
 		buff = f.read(50)
 	#=============================================
 	#We are done parsing the file
 	f.close()
 	#=============================================
-	#now go and swap the key value pairs in the mesh.vertices dict
-	for old_key in m.vertices.keys():
-		#unpacke the tuple object
-		(new_key, Vert_object) = m.vertices[old_key]
-		#make sure that the old position is the same
-		assert(Vert_object.coord == old_key)
-		m.vertices[new_key] = Vert_object
-		del m.vertices[old_key]
-
-
-
-	print face_index
-	print vert_index
-	print '---------------------'
-	for value in m.vertices.values():
-		print value.faces
-		print value.edges
-		print '\n'
-	print '---------------------'
-	print m.edges
+	m.acceptFaces()
+	#finish up and return the mesh
+	assert(num_faces == len(m.faces))
 	return m
 
 
@@ -155,6 +160,10 @@ if __name__ == '__main__':
 	fn = args.filename[0]
 
 	mesh = parseBinarySTL(fn)
+
+	for value in mesh.vertices.values():
+		print value.faces
+		print value.edges, '\n'
 
 	# dwg = ezdxf.new("AC1015")
 	# msp = dwg.modelspace()
