@@ -1,11 +1,11 @@
 clear
 clc
 
-a = 10;
-x_step = 1;
+a = 1.5;
+x_step = 0.1*a;
 x_lim = -a:x_step:a;
-b = 10;
-y_step = 1;
+b = 1.5;
+y_step = 0.1*b;
 y_lim = -b:y_step:b;
 
 C = [];
@@ -16,5 +16,18 @@ for indexx = 1:size(x_lim,2)
    end
 end
 
-figure(1)
+figure
 mesh(x_lim,y_lim, C)
+xlabel('X')
+ylabel('Y')
+
+flat_z = zeros(size(x_lim,2),size(y_lim,2));
+zdiff = C - flat_z;
+
+hold on
+[Contour,h] = contour(x_lim,y_lim, C, [0,0],'Color', 'k', 'LineWidth', 3);
+
+xL = Contour(1, 2:end);
+yL = Contour(1, 2:end);
+
+zL = interp2(x_lim, y_lim, C, xL, yL);
