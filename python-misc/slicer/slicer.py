@@ -171,7 +171,7 @@ def makeEdgeKey(a,b):
 
 
 
-def parseBinarySTL(filename):
+def parseBinarySTL(filename, quaternion = None):
 	#retry 3 times
 	for i in range(0,3):
 		try:
@@ -201,6 +201,12 @@ def parseBinarySTL(filename):
 		vert3 = tuple([face[i] for i in range(9,12)])
 		#now get the attribute
 		attribute_code = face[12]
+		#rotate the coordinates by quaternion if present
+		if quaternion:
+			normal = VectorMath.Quaternion.rotation(normal, quaternion)
+			vert1 =  tuple(VectorMath.Quaternion.rotation(vert1, quaternion))
+			vert2 =  tuple(VectorMath.Quaternion.rotation(vert2, quaternion))
+			vert3 =  tuple(VectorMath.Quaternion.rotation(vert3, quaternion))
 
 		m.addFace(normal, vert1, vert2, vert3, attribute_code)
 
@@ -238,7 +244,7 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()
 	#get the normal vector
-	norm_vec = tuple(args.normal.split(","))
+	norm_vec = tuple([int(comp) for comp in args.normal.split(",")])
 	assert( len(norm_vec) == 3)
 	#set default
 	layer_height = args.layer_height
@@ -259,10 +265,19 @@ if __name__ == '__main__':
 	except OSError:
 		print "dir already exists"
 
+	magnitude = VectorMath.magnitude(norm_vec)
+	norm_vec = tuple([norm_vec[i]/magnitude for i in range(0, len(norm_vec))])
 
-	mesh = parseBinarySTL(fn)
-	for value in mesh.edges.values():
-		print value.vertices
+	if norm_vec != (0,0,1):
+
+		print norm_vec
+		print VectorMath.magnitude(norm_vec)
+
+		(basis, rot_quaternion) = VectorMath.generate_basis(norm_vec)
+		mesh = parseBinarySTL(fn, quaternion = rot_quaternion )
+	else:
+		mesh = parseBinarySTL(fn)
+
 	print "Min",mesh.min_coord
 	print "Max",mesh.max_coord
 	#we assume we are always slicing along positive z axis
