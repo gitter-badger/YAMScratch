@@ -42,4 +42,3 @@ main3.cpp
 #ignore MatLab specific files
 *.p
 *.mat
-*/+mdo/ProfLinesearch.m
