@@ -247,7 +247,7 @@ if __name__ == '__main__':
 	norm_vec = tuple([int(comp) for comp in args.normal.split(",")])
 	assert( len(norm_vec) == 3)
 	#set default
-	layer_height = args.layer_height
+	layer_height = float(args.layer_height)
 	#check that the file name is stl
 	fn = args.filename[0]
 	stl_regex = re.compile("(\.STL)|(\.stl)$")
