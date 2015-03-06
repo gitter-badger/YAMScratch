@@ -4,6 +4,7 @@
 clear
 clc
 close all;
+import mdo.*;
 fig1 = figure;
 figure(fig1);
 %setup test function
@@ -30,13 +31,14 @@ hold on
 %store each run of function for plotting convergence
 g_metric = [];
 x_metric = x_prev;
+
 %do a bad thing and have infinite while loop to simulate do while
 while true
 	%compute the descent direction of the objective function
 	%in this case we directly evaluate the gradient and then normalize
 	[f_this,g_this] = objective(x_prev);
 	p = -g_this./norm(g_this);
-	step = mdoLineSearch(objective, p, x_prev, mu_1, mu_2, alpha_init, alpha_max);
+	step = LineSearch(objective, p, x_prev, mu_1, mu_2, alpha_init, alpha_max);
 	%jump to this point
 	x_curr = x_prev + p*step;
 	x_metric(end+1) = x_curr;
@@ -63,7 +65,7 @@ figure(fig_gold1);
 a = -1;
 b = 2;
 epsilon = 1e-7;
-[left,right,cost_data] = mdoGoldenSection(objective,a,b,epsilon);
+[left,right,cost_data] = GoldenSection(objective,a,b,epsilon);
 tolerance = (b-a)*1e-3; %visable convergence intervals
 x_vals = a-1:0.01:b+1.5;
 y_vals = simple(x_vals);
@@ -77,7 +79,7 @@ bat2 = ylabel('f(x)','Rotation',0);
 set(bat2,'Units','Normalized','Position',[-0.07 0.5 0]);
 %figure out the relative error metric
 gold_metric = abs(cost_data(:,1) - cost_data(:,3));
-mdoPlotGoldenSectionData(cost_data, fig_gold1, tolerance, 0.5) % using specialized plotting function
+PlotGoldenSectionData(cost_data, fig_gold1, tolerance, 0.5) % using specialized plotting function
 %plotting the function values
 
 
@@ -103,14 +105,14 @@ legend('|g_k|/|g_0|','|x_k - x.|', '\delta_k');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %							QUESTION 2 									%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-num_evals = mdoCounter;
+num_evals = Counter();
 
-this_obj = mdoEvalCounter(@mdoDragCoefficient,num_evals);
+this_obj = EvalCounter(@DragCoefficient,num_evals);
 
 Aspect_ratios = 1:0.001:50;
 drag_co = zeros(length(Aspect_ratios),1);
 for index = 1:length(Aspect_ratios)
-	drag_co(index) = mdoDragCoefficient(Aspect_ratios(index));
+	drag_co(index) = DragCoefficient(Aspect_ratios(index));
 end
 %get one figure for golden section
 fig_gold2 = figure;
@@ -148,7 +150,7 @@ while counter < 100
 	%in this case we directly evaluate the gradient and then normalize
 	[f_this,g_this] = this_obj(x_prev);
 	p = -g_this./norm(g_this);
-	step = mdoLineSearch(this_obj, p, x_prev, mu_1, mu_2, alpha_init, alpha_max);
+	step = LineSearch(this_obj, p, x_prev, mu_1, mu_2, alpha_init, alpha_max);
 	%update the function evaluations counter
 	func_evals(end+1) = num_evals.count;
 	%jump to this point
@@ -179,12 +181,12 @@ epsilon = 1e-7;
 %rezero the counter
 num_evals.count = 0;
 
-[left,right,sec_cost_data] = mdoGoldenSection(this_obj,a,b,epsilon);
+[left,right,sec_cost_data] = GoldenSection(this_obj,a,b,epsilon);
 disp(num_evals.count)
 tolerance = (b-a)*1e-6; %visable convergence intervals
 %figure out the relative error metric
 gold_metric = abs(sec_cost_data(:,1) - sec_cost_data(:,3));
-mdoPlotGoldenSectionData(sec_cost_data, fig_gold2, tolerance, 0.002) % using specialized plotting function
+PlotGoldenSectionData(sec_cost_data, fig_gold2, tolerance, 0.002) % using specialized plotting function
 %plotting the function values
 x_vals = a-.5:0.01:b+.5;
 y_vals = zeros(length(x_vals),1);

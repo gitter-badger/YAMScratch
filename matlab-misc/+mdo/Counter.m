@@ -1,4 +1,4 @@
-classdef mdoCounter < handle
+classdef Counter < handle
 	%is a communicator with closures
 	properties
 		count
