@@ -237,6 +237,31 @@ def lineInterpolate(vec1, vec2, z_value):
 	#we only need the x and y component
 	return (point_x, point_y)
 
+class SingleLayer(object):
+	def __init__(self, dimension):
+		self.dimension = dimension
+		self.min_coord = [0 for x in range(0,dimension)]
+		self.max_coord = [0 for x in range(0,dimension)]
+		self.lines = []
+
+	def addLineSegment(self, point_a, point_b):
+		together = tuple([point_a, point_b])
+		self.lines.append(together)
+		for test_point in together:
+			for index in range(0, self.dimension):
+				if test_point[index] < self.min_coord[index]:
+					self.min_coord[index] = test_point[index]
+				if test_point[index] > self.max_coord[index]:
+					self.max_coord[index] = test_point[index]
+
+class LayerHolder(object):
+	def __init__(self):
+		self.layers = []
+
+	def addLayer(self, layer_obj):
+		self.layers.append(layer_obj)
+
+
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description = '''Slice the input STL file 
 		and output a DXF file for each and every slice.	Output files are 
@@ -250,6 +275,8 @@ if __name__ == '__main__':
 		default = 0.5)
 	parser.add_argument('-s', '--scale', help = 'Scaling factor, does not effect layer height',
 			default = '1')
+	parser.add_argument('--packed', help = 'Packs the shapes into a sheet of size M by N',
+		default = False)
 
 	args = parser.parse_args()
 	#get the normal vector
@@ -258,6 +285,10 @@ if __name__ == '__main__':
 	#set default
 	layer_height = float(args.layer_height)
 	global_scale = float(args.scale)
+	#choose to pack the objects into a size buffer
+	if args.packed:
+		layer_holder = LayerHolder()
+
 	#check that the file name is stl
 	fn = args.filename[0]
 	stl_regex = re.compile("(\.STL)|(\.stl)$")
@@ -302,10 +333,15 @@ if __name__ == '__main__':
 	while(section_criteria < mesh.max_coord[2]):
 		this_layer_name = out_name + "_" + str(layer_index) + ".dxf"
 		this_layer_path = os.path.join(out_dir,this_layer_name)
+		print "z_level:", section_criteria
 		print this_layer_path
 		#open the new dxf
-		dwg = ezdxf.new("AC1015")
-		msp = dwg.modelspace()
+		if not args.packed:
+			dwg = ezdxf.new("AC1015")
+			msp = dwg.modelspace()
+		else:
+			this_single_layer = SingleLayer(2)
+			layer_holder.addLayer(this_single_layer)
 		#begin bad algorithm
 		#iterate over every face
 		loop_count = 0
@@ -383,19 +419,32 @@ if __name__ == '__main__':
 			#if none of the points
 			#we must have two disimilar points
 			if(point_a and point_b):
-				msp.add_line(point_a, point_b)
+				if not args.packed:
+					msp.add_line(point_a, point_b)
+				else:
+					this_single_layer.addLineSegment(point_a, point_b)
+
 				three_a = (point_a[0], point_a[1], section_criteria)
 				three_b = (point_b[0], point_b[1], section_criteria)
 				all_msp.add_line(three_a, three_b)
 				loop_count += 1
 
-		dwg.saveas(this_layer_path)
+		if not args.packed:
+			dwg.saveas(this_layer_path)
+		else:
+			pass
+
 		print loop_count
 		section_criteria += layer_height
 		layer_index += 1
 
 	#save the composite dxf to top level dir
 	all_dwg.saveas(all_layer_name)
+	#if we are packinng, do it here
+	if args.packed:
+		"print begining packing"
+		for layer in layer_holder.layers:
+			print layer.min_coord, layer.max_coord
 	# dwg = ezdxf.new("AC1015")
 	# msp = dwg.modelspace()
 
