@@ -171,7 +171,7 @@ def makeEdgeKey(a,b):
 
 
 
-def parseBinarySTL(filename, quaternion = None):
+def parseBinarySTL(filename, quaternion = None, scale = 1):
 	#retry 3 times
 	for i in range(0,3):
 		try:
@@ -201,7 +201,14 @@ def parseBinarySTL(filename, quaternion = None):
 		vert3 = tuple([face[i] for i in range(9,12)])
 		#now get the attribute
 		attribute_code = face[12]
-		#rotate the coordinates by quaternion if present
+		
+				#scale the objects up
+		if scale:
+			vert1 = tuple([vert1[i]*scale for i in range(0, len(vert1))])
+			vert2 = tuple([vert2[i]*scale for i in range(0, len(vert2))])
+			vert3 = tuple([vert3[i]*scale for i in range(0, len(vert3))])
+
+		#rotate the coordinates by quaternion if present 
 		if quaternion:
 			normal = VectorMath.Quaternion.rotation(normal, quaternion)
 			vert1 =  tuple(VectorMath.Quaternion.rotation(vert1, quaternion))
@@ -241,6 +248,8 @@ if __name__ == '__main__':
 		action = 'store', default = '0,0,1')
 	parser.add_argument('-l','--layer-height', help = 'Layer height in stl file units',
 		default = 0.5)
+	parser.add_argument('-s', '--scale', help = 'Scaling factor, does not effect layer height',
+			default = '1')
 
 	args = parser.parse_args()
 	#get the normal vector
@@ -248,6 +257,7 @@ if __name__ == '__main__':
 	assert( len(norm_vec) == 3)
 	#set default
 	layer_height = float(args.layer_height)
+	global_scale = float(args.scale)
 	#check that the file name is stl
 	fn = args.filename[0]
 	stl_regex = re.compile("(\.STL)|(\.stl)$")
@@ -274,7 +284,7 @@ if __name__ == '__main__':
 		print VectorMath.magnitude(norm_vec)
 
 		(basis, rot_quaternion) = VectorMath.generate_basis(norm_vec)
-		mesh = parseBinarySTL(fn, quaternion = rot_quaternion )
+		mesh = parseBinarySTL(fn, quaternion = rot_quaternion, scale = global_scale )
 	else:
 		mesh = parseBinarySTL(fn)
 
