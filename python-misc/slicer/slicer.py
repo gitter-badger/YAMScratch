@@ -243,6 +243,7 @@ class SingleLayer(object):
 		self.min_coord = [0 for x in range(0,dimension)]
 		self.max_coord = [0 for x in range(0,dimension)]
 		self.lines = []
+		self.recompute_size_flag = True
 
 	def addLineSegment(self, point_a, point_b):
 		together = tuple([point_a, point_b])
@@ -253,6 +254,41 @@ class SingleLayer(object):
 					self.min_coord[index] = test_point[index]
 				if test_point[index] > self.max_coord[index]:
 					self.max_coord[index] = test_point[index]
+		#reset the flag so the method knows when to recompute
+		self.recompute_size_flag = True
+
+	def width():
+	    doc = "The width property."
+	    def fget(self):
+	    	if self.recompute_size_flag:
+	    		self._width = abs(self.max_coord[0] - self.min_coord[0])
+	    		self._height = abs(self.max_coord[1] - self.min_coord[1])
+	    		self.recompute_size_flag = False
+	        return self._width
+	    def fset(self, value):
+	        self._width = value
+	    def fdel(self):
+	        del self._width
+	    return locals()
+	width = property(**width())
+
+	def height():
+	    doc = "The height property."
+	    def fget(self):
+	    	if self.recompute_size_flag:
+	    		self._width = abs(self.max_coord[0] - self.min_coord[0])
+	    		self._height = abs(self.max_coord[1] - self.min_coord[1])
+	    		self.recompute_size_flag = False
+	        return self._height
+	    def fset(self, value):
+	        self._height = value
+	    def fdel(self):
+	        del self._height
+	    return locals()
+	height = property(**height())
+
+	def area(self):
+		return self.width*self.height
 
 class LayerHolder(object):
 	def __init__(self):
@@ -442,15 +478,10 @@ if __name__ == '__main__':
 	#if we are packinng, do it here
 	if args.packed:
 		"print begining packing"
-		def layerArea(x):
-			x_size = abs(x.max_coord[0] - x.min_coord[0])
-			y_size = abs(x.max_coord[1] - x.min_coord[1])
-			return (x_size* y_size)
-
-		layer_holder.layers.sort(key = layerArea, reverse = True)
+		layer_holder.layers.sort(key = lambda x: x.area(), reverse = True)
 		for layer in layer_holder.layers:
-			if layerArea(layer) != 0:
-				print layerArea(layer)
+			if layer.area() != 0:
+				print layer.area()
 
 	# dwg = ezdxf.new("AC1015")
 	# msp = dwg.modelspace()
