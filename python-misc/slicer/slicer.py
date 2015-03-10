@@ -117,8 +117,6 @@ class Mesh(object):
 			else:
 				pass
 
-
-
 class Face(object):
 	def __init__(self,normal,id):
 		self.id = id
@@ -169,8 +167,6 @@ def makeEdgeKey(a,b):
 				return False
 	return (smallest,largest)
 
-
-
 def parseBinarySTL(filename, quaternion = None, scale = 1):
 	#retry 3 times
 	for i in range(0,3):
@@ -181,7 +177,6 @@ def parseBinarySTL(filename, quaternion = None, scale = 1):
 			break
 		except IOError as e:
 			print e
-
 	#create a mesh object to hold our entire system
 	m = Mesh()
 	vert_view = m.vertices.viewkeys()
@@ -201,13 +196,11 @@ def parseBinarySTL(filename, quaternion = None, scale = 1):
 		vert3 = tuple([face[i] for i in range(9,12)])
 		#now get the attribute
 		attribute_code = face[12]
-		
-				#scale the objects up
+		#scale the objects up
 		if scale:
 			vert1 = tuple([vert1[i]*scale for i in range(0, len(vert1))])
 			vert2 = tuple([vert2[i]*scale for i in range(0, len(vert2))])
 			vert3 = tuple([vert3[i]*scale for i in range(0, len(vert3))])
-
 		#rotate the coordinates by quaternion if present 
 		if quaternion:
 			normal = VectorMath.Quaternion.rotation(normal, quaternion)
@@ -367,11 +360,11 @@ if __name__ == '__main__':
 	all_layer_name = out_name + "_all.dxf"
 
 	while(section_criteria < mesh.max_coord[2]):
-		this_layer_name = out_name + "_" + str(layer_index) + ".dxf"
-		this_layer_path = os.path.join(out_dir,this_layer_name)
-		print this_layer_path
-		#open the new dxf
 		if not args.packed:
+			this_layer_name = out_name + "_" + str(layer_index) + ".dxf"
+			this_layer_path = os.path.join(out_dir,this_layer_name)
+			print this_layer_path
+			#open the new DXF
 			dwg = ezdxf.new("AC1015")
 			msp = dwg.modelspace()
 		else:
@@ -479,10 +472,14 @@ if __name__ == '__main__':
 	if args.packed:
 		"print begining packing"
 		layer_holder.layers.sort(key = lambda x: x.area(), reverse = True)
+		current_layer_count = 1
 		for layer in layer_holder.layers:
 			if len(layer.lines):
 				print layer.area()
 				print '\t',layer.width, layer.height
+				this_layer_name = out_name + "_" + str(current_layer_count) + ".dxf"
+				this_layer_path = os.path.join(out_dir,this_layer_name)
+				print this_layer_path
 
 	# dwg = ezdxf.new("AC1015")
 	# msp = dwg.modelspace()
@@ -492,3 +489,5 @@ if __name__ == '__main__':
 	# msp.add_lwpolyline(points)
 
 	# dwg.saveas("test.dxf")
+
+	#must fit 30by18 rectangle
