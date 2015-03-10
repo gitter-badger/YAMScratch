@@ -333,7 +333,6 @@ if __name__ == '__main__':
 	while(section_criteria < mesh.max_coord[2]):
 		this_layer_name = out_name + "_" + str(layer_index) + ".dxf"
 		this_layer_path = os.path.join(out_dir,this_layer_name)
-		print "z_level:", section_criteria
 		print this_layer_path
 		#open the new dxf
 		if not args.packed:
@@ -443,8 +442,16 @@ if __name__ == '__main__':
 	#if we are packinng, do it here
 	if args.packed:
 		"print begining packing"
+		def layerArea(x):
+			x_size = abs(x.max_coord[0] - x.min_coord[0])
+			y_size = abs(x.max_coord[1] - x.min_coord[1])
+			return (x_size* y_size)
+
+		layer_holder.layers.sort(key = layerArea, reverse = True)
 		for layer in layer_holder.layers:
-			print layer.min_coord, layer.max_coord
+			if layerArea(layer) != 0:
+				print layerArea(layer)
+
 	# dwg = ezdxf.new("AC1015")
 	# msp = dwg.modelspace()
 
