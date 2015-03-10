@@ -480,8 +480,9 @@ if __name__ == '__main__':
 		"print begining packing"
 		layer_holder.layers.sort(key = lambda x: x.area(), reverse = True)
 		for layer in layer_holder.layers:
-			if layer.area() != 0:
+			if len(layer.lines):
 				print layer.area()
+				print '\t',layer.width, layer.height
 
 	# dwg = ezdxf.new("AC1015")
 	# msp = dwg.modelspace()
