@@ -353,16 +353,9 @@ class GuillotineNode(object):
         when a box is inserted into the root. The root node becomes the
         same size as the box going in
         '''
-        print "#"*50
-        print self
         #create the two child nodes
         self.up = GuillotineNode(self.x0, (self.y0 + h_box), self.width, (self.height - h_box))
-        print "UP:"
-        print self.up
         self.right = GuillotineNode(self.x0 + w_box, self.y0, (self.width - w_box), h_box)
-        print "RIGHT:"
-        print self.right
-        print "#"*50
         self.used = True
         #we return self so the layer object can store a reference to it
         return self
@@ -567,7 +560,6 @@ if __name__ == '__main__':
             #move on to next layer if this one is empty
             if len(layer.lines) == 0:
                 continue
-
             #try to place the block in the root node. if we cannot
             #then we must start a new sheet
             found_node = GuillotineNode.findNode(root_node, 
@@ -594,7 +586,6 @@ if __name__ == '__main__':
             layer.fit = found_node.splitNode(layer.width + border_spacing, 
                                             layer.height + border_spacing)
 
-            print layer.fit.x0, layer.fit.y0
             #add the layer lines to the sheet
             #first determine the x and y offsets for the coordinates
             x_offset = (layer.fit.x0 + border_spacing/2) - layer.min_coord[0]
