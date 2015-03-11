@@ -312,19 +312,21 @@ class GuillotineNode(object):
         self.up = None
         self.right = None
 
+    def __str__(self):
+        result = "x0: " + str(self.x0) + " y0: " + str(self.y0) + '\n'
+        result += (str(self.width) + " " + str(self.height) + '\n')
+        return result
+
     @classmethod
     def findNode(cls ,root, w, h):
         if(root.used):
             found_node = GuillotineNode.findNode(root.right, w, h)
             if found_node:
-                print "choose right node"
                 return found_node
             #try the other node
-            found_node = GuillotineNode.findNode(root.up, w, h)
-            if found_node:
-                print "choose up node"
-                print found_node.x0, found_node.y0
-                return found_node
+            other_node = GuillotineNode.findNode(root.up, w, h)
+            if other_node:
+                return other_node
             #if neither node has room, then return None
             #we coerce the truth value of None a lot in this function
             else:
@@ -351,9 +353,16 @@ class GuillotineNode(object):
         when a box is inserted into the root. The root node becomes the
         same size as the box going in
         '''
+        print "#"*50
+        print self
         #create the two child nodes
-        self.up = GuillotineNode(self.x0, self.y0 + h_box, self.width, self.height - h_box)
-        self.right = GuillotineNode(self.x0 + w_box, self.y0, self.width - w_box, self.height)
+        self.up = GuillotineNode(self.x0, (self.y0 + h_box), self.width, (self.height - h_box))
+        print "UP:"
+        print self.up
+        self.right = GuillotineNode(self.x0 + w_box, self.y0, (self.width - w_box), h_box)
+        print "RIGHT:"
+        print self.right
+        print "#"*50
         self.used = True
         #we return self so the layer object can store a reference to it
         return self
