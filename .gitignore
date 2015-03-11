@@ -6,19 +6,20 @@
 #hide the sublime packages
 *.sublime-package*
 
-
 bin/
 motivator/Matlab/
 Data\ Structures/
 c-misc/DS\ projects/*.txt
+
 #ignore test input files
 PracticeInput*
 out.txt
+
 #ignore python stuff
 ezdxf-0.6.2
 *.pyc
 
-#paths for windows
+#hide certain paths
 *+wing*
 *wing
 
@@ -43,3 +44,4 @@ main3.cpp
 *.p
 *.mat
 */+mdo/ProfLinesearch.m
+pde.m
