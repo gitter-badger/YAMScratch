@@ -312,16 +312,31 @@ class GuillotineNode(object):
         self.up = None
         self.right = None
 
-    def findNode(self, w, h):
-        if(self.used):
-            return self.right
-        elif 1:
-            pass
+    @classmethod
+    def findNode(cls ,root, w, h):
+        if(root.used):
+            found_node = GuillotineNode.findNode(root.right, w, h)
+            if found_node:
+                print "choose right node"
+                return found_node
+            #try the other node
+            found_node = GuillotineNode.findNode(root.up, w, h)
+            if found_node:
+                print "choose up node"
+                print found_node.x0, found_node.y0
+                return found_node
+            #if neither node has room, then return None
+            #we coerce the truth value of None a lot in this function
+            else:
+                return None
+
+        elif (w <= root.width and h <= root.height):
+            return root
         else:
-            #return null
+            #return null if the node is not used but the box does not fit
             return None
 
-    def splitNode(self,obj, w_box, h_box):
+    def splitNode(self, w_box, h_box):
         '''
         depiction below of splitting procedure
         +-----------------------+
@@ -337,9 +352,11 @@ class GuillotineNode(object):
         same size as the box going in
         '''
         #create the two child nodes
-        self.up = GuillotineNode(self.x0, self.y0+ h_box, self.width, self.height - h_box)
-        self.right = GuillotineNode(self.x0 + w_box, y0, self.width - w_box, self.height)
+        self.up = GuillotineNode(self.x0, self.y0 + h_box, self.width, self.height - h_box)
+        self.right = GuillotineNode(self.x0 + w_box, self.y0, self.width - w_box, self.height)
         self.used = True
+        #we return self so the layer object can store a reference to it
+        return self
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = '''Slice the input STL file 
@@ -516,7 +533,7 @@ if __name__ == '__main__':
         else:
             pass
 
-        print loop_count
+        #print loop_count
         section_criteria += layer_height
         layer_index += 1
 
@@ -526,23 +543,70 @@ if __name__ == '__main__':
     if args.packed:
         #sort the layers by total area
         layer_holder.layers.sort(key = lambda x: x.area(), reverse = True)
-        current_layer_count = 1
-        for layer in layer_holder.layers:
-            if len(layer.lines):
-                print layer.area()
-                print '\t',layer.width, layer.height
-                this_layer_name = out_name + "_" + str(current_layer_count) + ".dxf"
-                this_layer_path = os.path.join(out_dir,this_layer_name)
-                
-                dwg = ezdxf.new("AC1015")
-                msp = dwg.modelspace()
-                for segment in layer.lines:
-                    msp.add_line(segment[0], segment[1])
-                    
-                dwg.saveas(this_layer_path)
-                print this_layer_path
-                current_layer_count += 1
+        #set up the first sheet
+        current_sheet_count = 0
+        this_sheet_name = out_name + "_sheet_" + str(current_sheet_count) + ".dxf"
+        this_sheet_path = os.path.join(out_dir,this_sheet_name)
 
+        root_node = GuillotineNode(0, 0, packed_width, packed_height)
+        sheet_dwg = ezdxf.new("AC1015")
+        sheet_msp = sheet_dwg.modelspace()
+        #add a border of space to each layer when placing in sheet
+        border_spacing = 0.05
+
+        for layer in layer_holder.layers:
+            #move on to next layer if this one is empty
+            if len(layer.lines) == 0:
+                continue
+
+            #try to place the block in the root node. if we cannot
+            #then we must start a new sheet
+            found_node = GuillotineNode.findNode(root_node, 
+                                                layer.width + border_spacing, 
+                                                layer.height + border_spacing)
+            if found_node == None:
+                print "new sheet required"
+                sheet_dwg.saveas(this_sheet_path)
+                #replace the thing with a new sheet
+                current_sheet_count += 1
+                this_sheet_name = out_name + "_sheet_" + str(current_sheet_count) + ".dxf"
+                this_sheet_path = os.path.join(out_dir,this_sheet_name)
+
+                root_node = GuillotineNode(0, 0, packed_width, packed_height)
+                #make sure that the new layer will fit into the fresh sheet
+                assert(layer.width + border_spacing <= root_node.width)
+                assert(layer.height + border_spacing <= root_node.height)
+                sheet_dwg = ezdxf.new("AC1015")
+                sheet_msp = sheet_dwg.modelspace()
+                found_node = GuillotineNode.findNode(root_node, 
+                                    layer.width + border_spacing, 
+                                    layer.height + border_spacing)
+            #now continue by plaving each layer into the sheet
+            layer.fit = found_node.splitNode(layer.width + border_spacing, 
+                                            layer.height + border_spacing)
+
+            print layer.fit.x0, layer.fit.y0
+            #add the layer lines to the sheet
+            #first determine the x and y offsets for the coordinates
+            x_offset = (layer.fit.x0 + border_spacing/2) - layer.min_coord[0]
+            y_offset = (layer.fit.y0 + border_spacing/2) - layer.min_coord[1]
+            #print "offset: ", x_offset, y_offset
+            for segment in layer.lines:
+                #translate the segment coordinates to the global coordinates
+                point_a = list(segment[0])
+                point_a[0] += x_offset
+                point_a[1] += y_offset
+
+                point_b = list(segment[1])
+                point_b[0] += x_offset
+                point_b[1] += y_offset
+
+                sheet_msp.add_line(point_a, point_b)
+
+
+        #at the end, write out the final sheet
+        print "done with final sheet"
+        sheet_dwg.saveas(this_sheet_path)
     # dwg = ezdxf.new("AC1015")
     # msp = dwg.modelspace()
 
