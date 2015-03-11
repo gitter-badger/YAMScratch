@@ -301,13 +301,12 @@ class LayerHolder(object):
         self.layers.append(layer_obj)
 
 class GuillotineNode(object):
-    def __init__(self, width, height, x0, y0):
+    def __init__(self, x0, y0, width, height):
         self.width = width
         self.height = height
         #define in global coordinates where this node is
         self.x0 = x0
         self.y0 = y0
-        self.obj = None
         self.used = False
         #tree pointers
         self.up = None
@@ -315,10 +314,32 @@ class GuillotineNode(object):
 
     def findNode(self, w, h):
         if(self.used):
-            return self.righ
-    def splitNode(self,obj):
+            return self.right
+        elif 1:
+            pass
+        else:
+            #return null
+            return None
 
-
+    def splitNode(self,obj, w_box, h_box):
+        '''
+        depiction below of splitting procedure
+        +-----------------------+
+        |                       |
+        |         up            |
+        |                       |
+        +-------+---------------+   
+        |       |               |
+        | root  |     right     |
+        +-------+---------------+
+        the root node is the current node, which creates two child nodes
+        when a box is inserted into the root. The root node becomes the
+        same size as the box going in
+        '''
+        #create the two child nodes
+        self.up = GuillotineNode(self.x0, self.y0+ h_box, self.width, self.height - h_box)
+        self.right = GuillotineNode(self.x0 + w_box, y0, self.width - w_box, self.height)
+        self.used = True
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = '''Slice the input STL file 
@@ -346,7 +367,11 @@ if __name__ == '__main__':
     #choose to pack the objects into a size buffer
     if args.packed:
         layer_holder = LayerHolder()
-
+        temp = tuple([float(comp) for comp in args.packed.split(",")])
+        packed_width = temp[0]
+        packed_height = temp[1]
+        del temp
+        print "Packing:",packed_width, packed_height
     #check that the file name is stl
     fn = args.filename[0]
     stl_regex = re.compile("(\.STL)|(\.stl)$")
@@ -499,7 +524,7 @@ if __name__ == '__main__':
     all_dwg.saveas(all_layer_name)
     #if we are packinng, do it here
     if args.packed:
-        "print begining packing"
+        #sort the layers by total area
         layer_holder.layers.sort(key = lambda x: x.area(), reverse = True)
         current_layer_count = 1
         for layer in layer_holder.layers:
@@ -508,7 +533,15 @@ if __name__ == '__main__':
                 print '\t',layer.width, layer.height
                 this_layer_name = out_name + "_" + str(current_layer_count) + ".dxf"
                 this_layer_path = os.path.join(out_dir,this_layer_name)
+                
+                dwg = ezdxf.new("AC1015")
+                msp = dwg.modelspace()
+                for segment in layer.lines:
+                    msp.add_line(segment[0], segment[1])
+                    
+                dwg.saveas(this_layer_path)
                 print this_layer_path
+                current_layer_count += 1
 
     # dwg = ezdxf.new("AC1015")
     # msp = dwg.modelspace()
