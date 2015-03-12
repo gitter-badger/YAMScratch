@@ -1,9 +1,7 @@
 '''
 Command line based slicer. Outputs DXFs from STLs
 
-
-Copyright (c) 2015 Isaiah Bell attribution required
-
+Copyright (c) 2015 Isaiah Bell all rights reserved
 '''
 
 import sys
