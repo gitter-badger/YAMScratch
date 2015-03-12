@@ -601,17 +601,6 @@ if __name__ == '__main__':
 
                 sheet_msp.add_line(point_a, point_b)
 
-
         #at the end, write out the final sheet
         print "done with final sheet"
         sheet_dwg.saveas(this_sheet_path)
-    # dwg = ezdxf.new("AC1015")
-    # msp = dwg.modelspace()
-
-    # points = [(0,0), (3,0), (6,3), (6,6)]
-    # msp.add_line((0,0), (1,1))
-    # msp.add_lwpolyline(points)
-
-    # dwg.saveas("test.dxf")
-
-    #must fit 30by18 rectangle
