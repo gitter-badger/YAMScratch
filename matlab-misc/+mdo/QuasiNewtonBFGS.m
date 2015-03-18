@@ -1,5 +1,4 @@
-%% ConjugateGradient: function description
-function [x_star, logObj] = ConjugateGradient(linesearch, obj, grad, x0, e_g, e_a, e_r, logObj)
+function [x_star, logObj] = QuasiNewtonBFGS(linesearch, obj, grad, x0, e_g, e_a, e_r, logObj)
 %Purpose: returns the location of a local minimum and a history object
 %Inputs:
 %	obj - a function handle for the objective
@@ -13,46 +12,27 @@ function [x_star, logObj] = ConjugateGradient(linesearch, obj, grad, x0, e_g, e_
 	
 	%sanity checks
 	assert(isvector(x0));
+	%get the dimensionality
+	[r,c] = size(x0);
+	N = max(r,c);
 
 	mu_1 = 1e-4;
 	mu_2 = 0.9;
 	max_iter = 500;
 	alpha_init = 1;
 	alpha_max = 1000000;
-	f_prev = obj(x0);
-	gk = grad(x0);
+
+	f_prev = obj(x0)
+	Vk = eye(N)
 	%store the very first gradient in local memory
 	grad_init = gk;
 	%start off
 	xk = x0;
-	%log the very first time
-	k = 1;
+	k = 1
 	logObj.editIteration(k, f_prev, xk, gk, 1, 1);
-	x_prev = x0;
-	xk = x0;
-	
-	%figure out the size of the input vector to determine how often to restart
-	[r,c] = size(x0);
-	N = max(r,c);
 
 	while true
-		%we reset every N iterations using steepest descent
-		if mod(k, N) == 1
-			%start out by computing the steepest descent direction
-			pk = -gk./norm(gk);
-		else
-			B = (gk.' * gk)/(g_prev.' * g_prev);
-			pk = -gk + B*p_prev;
-			%there is a weird bug where this is not a descent direction
 
-			if( (gk.' * pk) > 0)
-
-				disp(gk')
-				disp(pk')
-				%so we force it to be a descent direction
-				pk = - gk./norm(gk);
-			end
-		end
 		%perform a line search
 		[step, fnew, num_f_evals, num_df_evals] = linesearch(obj, grad, xk, pk, ...
 		 	mu_1, mu_2, alpha_init, alpha_max, max_iter);
@@ -92,8 +72,8 @@ function [x_star, logObj] = ConjugateGradient(linesearch, obj, grad, x0, e_g, e_
 		end
 		%update the previous f value after we use it
 		f_prev = fnew;
-	end
 
-    x_star = xk; 
-    return
+	end
+	x_star = xk;
+	return
 end
