@@ -9,18 +9,24 @@ mu_2 = 0.9;
 alpha_init = 1;
 alpha_max = 3;
 %create the objective function and the gradient
-obj = @(X) (DragTotal(X(1), X(2)))
+obj = @(X) (mdo.DragTotal(X(1), X(2)).')
+grad = @GradientDragTotal;
+X_0 = [10;
+		20]
 
 %===============================================
 %			Steepest Descent
 %===============================================
+steep_log = MajorIterationHistory();
+x_star = SteepestDescent(linesearch, obj, grad, X_0, steep_log, 1e-6);
+
 
 %plot the objective function
 a = [5:1e0:30]; % A
 s = [5:1e0:40]; % S
 [A,S] = meshgrid(a,s);
 Drag = arrayfun(@mdo.DragTotal,A,S);
-CG_fig = figure();
+SD_fig = figure();
 contour(A,S,Drag,100);
 %mesh(a,s,Drag);
 xlabel('A');
@@ -51,7 +57,7 @@ a = [5:1e0:30]; % A
 s = [5:1e0:40]; % S
 [A,S] = meshgrid(a,s);
 Drag = arrayfun(@mdo.DragTotal,A,S);
-CG_fig = figure();
+QN_fig = figure();
 contour(A,S,Drag,100);
 %mesh(a,s,Drag);
 xlabel('A');
@@ -65,7 +71,7 @@ a = [5:1e0:30]; % A
 s = [5:1e0:40]; % S
 [A,S] = meshgrid(a,s);
 Drag = arrayfun(@mdo.DragTotal,A,S);
-CG_fig = figure();
+NCG_fig = figure();
 contour(A,S,Drag,100);
 %mesh(a,s,Drag);
 xlabel('A');
