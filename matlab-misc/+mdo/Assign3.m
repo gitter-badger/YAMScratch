@@ -11,8 +11,8 @@ alpha_max = 3;
 %create the objective function and the gradient
 obj = @(X) (mdo.DragTotal(X(1), X(2)).');
 grad = @GradientDragTotal;
-X_0 = [10;
-		20];
+X_0 = [25;
+		35];
 
 %===============================================
 %			Steepest Descent
@@ -22,62 +22,41 @@ x_star = SteepestDescent(linesearch, obj, grad, X_0, steep_log, 1e-6);
 
 
 %plot the objective function
-a = [5:1e0:30]; % A
-s = [5:1e0:40]; % S
-[A,S] = meshgrid(a,s);
-Drag = arrayfun(@mdo.DragTotal,A,S);
 SD_fig = figure();
-contour(A,S,Drag,100);
-%mesh(a,s,Drag);
-xlabel('A');
-ylabel('S');
-hold on;
-plot(steep_log.x(:,1), steep_log.x(:,2), 'kd-')
-plot(x_star(1), x_star(2), 'k*')
+ContourDragTotal(SD_fig, x_star, steep_log);
+figure(SD_fig);
 
 %===============================================
 %			Conjugate gradient method
 %===============================================
+e_g = 1e-6;
+e_a = 1e-6;
+e_r = 1e-6;
+disp('Flat')
+congj_log = MajorIterationHistory();
+x_star = ConjugateGradient(obj, grad, linesearch, X_0, e_g, e_a, e_r, congj_log)
 
 %plot the objective function
-a = [5:1e0:30]; % A
-s = [5:1e0:40]; % S
-[A,S] = meshgrid(a,s);
-Drag = arrayfun(@mdo.DragTotal,A,S);
 CG_fig = figure();
-contour(A,S,Drag,100);
-%mesh(a,s,Drag);
-xlabel('A');
-ylabel('S');
+ContourDragTotal(CG_fig, x_star, congj_log);
+figure(CG_fig);
 %===============================================
 %			    Quasi Newton Method
 %===============================================
 
 
 %plot the objective function
-a = [5:1e0:30]; % A
-s = [5:1e0:40]; % S
-[A,S] = meshgrid(a,s);
-Drag = arrayfun(@mdo.DragTotal,A,S);
+qn_log = MajorIterationHistory();
+
 QN_fig = figure();
-contour(A,S,Drag,100);
-%mesh(a,s,Drag);
-xlabel('A');
-ylabel('S');
+%ContourDragTotal(QN_fig, x_star, qn_log)
+
 %===============================================
 %			Newton Conjugate Gradient
 %===============================================
 
 %plot the objective function
-a = [5:1e0:30]; % A
-s = [5:1e0:40]; % S
-[A,S] = meshgrid(a,s);
-Drag = arrayfun(@mdo.DragTotal,A,S);
 NCG_fig = figure();
-contour(A,S,Drag,100);
-%mesh(a,s,Drag);
-xlabel('A');
-ylabel('S');
 
 %IMPORTANT: must pass in a column vector for X
 quad_obj_factory = @(n) (@(X) (sum((X.^2)./[1:n].') ));
