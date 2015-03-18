@@ -11,7 +11,7 @@ alpha_max = 3;
 %create the objective function and the gradient
 obj = @(X) (mdo.DragTotal(X(1), X(2)).');
 grad = @GradientDragTotal;
-X_0 = [25;
+X_0 = [10;
 		35];
 
 %===============================================
@@ -40,6 +40,7 @@ x_star = ConjugateGradient(linesearch, obj, grad, X_0, e_g, e_a, e_r, congj_log)
 CG_fig = figure();
 ContourDragTotal(CG_fig, x_star, congj_log);
 figure(CG_fig);
+error('here')
 %===============================================
 %			    Quasi Newton Method
 %===============================================

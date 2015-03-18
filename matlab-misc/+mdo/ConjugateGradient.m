@@ -17,7 +17,7 @@ function [x_star, logObj] = ConjugateGradient(linesearch, obj, grad, x0, e_g, e_
 	mu_2 = 0.9;
 	max_iter = 500;
 	alpha_init = 1;
-	alpha_max = 5;
+	alpha_max = 1000000;
 	f_prev = obj(x0);
 	gk = grad(x0);
 	%store the very first gradient in local memory
@@ -38,15 +38,15 @@ function [x_star, logObj] = ConjugateGradient(linesearch, obj, grad, x0, e_g, e_
 		%we reset every N iterations using steepest descent
 		if mod(k, N) == 1
 			%start out by computing the steepest descent direction
-			gk = grad(xk);
 			pk = -gk./norm(gk);
-			extra_grad_eval = 1;
 		else
 			B = (gk.' * gk)/(g_prev.' * g_prev);
 			pk = -gk + B*p_prev;
-			extra_grad_eval = 0;
+			disp(B)
 			%there is a wierd bug where this is not a descent direction
 			if( (gk.' * pk) > 0)
+				disp(gk')
+				disp(pk')
 				%so we force it to be a descent direction
 				pk = - gk./norm(gk);
 			end
@@ -63,7 +63,7 @@ function [x_star, logObj] = ConjugateGradient(linesearch, obj, grad, x0, e_g, e_
 		xk = xk + step*pk;
 		gk = grad(xk);
 
-		logObj.editIteration(k, fnew, xk, gk, num_f_evals, num_df_evals+1 + extra_grad_eval);
+		logObj.editIteration(k, fnew, xk, gk, num_f_evals, num_df_evals+1);
 
 		%sprintf('Loop iteration %d', k)
 		%This condition from the slide and scales input

@@ -4,7 +4,7 @@ function [x_star, logObj] = SteepestDescent(linesearch, obj, grad, x0, logObj, t
 	mu_2 = 0.9;
 	max_iter = 500;
 	alpha_init = 1;
-	alpha_max = 5;
+	alpha_max = 1000000;
 	obj0 = obj(x0);
 	grad0 = grad(x0);
 	%store the very first gradient in local memory
