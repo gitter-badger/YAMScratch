@@ -24,7 +24,7 @@ function [x_star, logObj] = SteepestDescent(linesearch, obj, grad, x0, logObj, t
 		iteration = iteration + 1;
 		xk = xk + step*pk;
 		grad0 = grad(xk);
-		logObj.editIteration(iteration, fnew, xk, grad0, num_f_evals, num_df_evals);
+		logObj.editIteration(iteration, fnew, xk, grad0, num_f_evals, num_df_evals+1);
 		%check the gradient condition at this point
 		if (norm(grad0) < norm(grad_init)*tol)
 			break;
