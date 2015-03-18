@@ -88,3 +88,24 @@ quad2_CG_log = MajorIterationHistory();
 x_star_CG = ConjugateGradient(linesearch, quad_obj_2, quad_grad_2, x_0, e_g, e_a, e_r, quad2_CG_log);
 hold on
 plot(quad2_CG_log.x(:, 1), quad2_CG_log.x(:, 2), 'gd-')
+
+
+
+%===============================================
+% 		Computation for Higher Dimensions
+%===============================================
+x_0 = ones(10,1);
+
+quad10_SD_log = MajorIterationHistory();
+x_star_SD_10 = SteepestDescent(linesearch, quad_obj_10, quad_grad_10, x_0, quad10_SD_log, 1e-6);
+
+quad10_CG_log = MajorIterationHistory();
+x_star_CG_10 = ConjugateGradient(linesearch, quad_obj_10, quad_grad_10, x_0, e_g, e_a, e_r, quad10_CG_log);
+
+%Dimension R50
+x_0 = ones(50,1);
+quad50_SD_log = MajorIterationHistory();
+x_star_SD_50 = SteepestDescent(linesearch, quad_obj_50, quad_grad_50, x_0, quad50_SD_log, 1e-6);
+
+quad50_CG_log = MajorIterationHistory();
+x_star_CG_50 = ConjugateGradient(linesearch, quad_obj_50, quad_grad_50, x_0, e_g, e_a, e_r, quad50_CG_log);
