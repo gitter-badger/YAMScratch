@@ -1,5 +1,5 @@
 %% ConjugateGradient: function description
-function [x_star, logObj] = ConjugateGradient(obj, grad, linesearch, x0, e_g, e_a, e_r, logObj)
+function [x_star, logObj] = ConjugateGradient(linesearch, obj, grad, x0, e_g, e_a, e_r, logObj)
 %Purpose: returns the location of a local minimum and a history object
 %Inputs:
 %	obj - a function handle for the objective
@@ -84,7 +84,7 @@ function [x_star, logObj] = ConjugateGradient(obj, grad, linesearch, x0, e_g, e_
 		else
 			r = false;
 		end
-		
+
 		if r
 			break;
 		end

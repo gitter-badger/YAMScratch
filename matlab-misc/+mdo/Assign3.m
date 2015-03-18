@@ -34,7 +34,7 @@ e_a = 1e-6;
 e_r = 1e-6;
 disp('Flat')
 congj_log = MajorIterationHistory();
-x_star = ConjugateGradient(obj, grad, linesearch, X_0, e_g, e_a, e_r, congj_log)
+x_star = ConjugateGradient(linesearch, obj, grad, X_0, e_g, e_a, e_r, congj_log)
 
 %plot the objective function
 CG_fig = figure();
@@ -71,8 +71,8 @@ quad_grad_50 = quad_grad_factory(50);
 %now test the three algorithms
 
 x_0 = ones(2,1);
-quad2_log = MajorIterationHistory();
-x_star = SteepestDescent(linesearch, quad_obj_2, quad_grad_2, x_0, quad2_log, 1e-6 );
+quad2_SD_log = MajorIterationHistory();
+x_star = SteepestDescent(linesearch, quad_obj_2, quad_grad_2, x_0, quad2_SD_log, 1e-6 );
 x1 = [-2:1e-1:2];
 x2 = [-2:1e-1:2];
 [X1, X2] = meshgrid(x1,x2);
@@ -80,6 +80,11 @@ temp_fun = @(x,y) (quad_obj_2([x; y]));
 quad_out = arrayfun(temp_fun ,X1, X2);
 contour(x1, x2, quad_out, 30);
 hold on
-plot(quad2_log.x(:, 1), quad2_log.x(:, 2), 'kd-')
+plot(quad2_SD_log.x(:, 1), quad2_SD_log.x(:, 2), 'kd-')
 hold on
 plot(x_star(1), x_star(2), 'k*')
+
+quad2_CG_log = MajorIterationHistory();
+x_star_CG = ConjugateGradient(linesearch, quad_obj_2, quad_grad_2, x_0, e_g, e_a, e_r, quad2_CG_log);
+hold on
+plot(quad2_CG_log.x(:, 1), quad2_CG_log.x(:, 2), 'gd-')
