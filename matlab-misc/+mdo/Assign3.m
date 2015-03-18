@@ -31,7 +31,9 @@ contour(A,S,Drag,100);
 %mesh(a,s,Drag);
 xlabel('A');
 ylabel('S');
-
+hold on;
+plot(steep_log.x(:,1), steep_log.x(:,2), 'kd-')
+plot(x_star(1), x_star(2), 'k*')
 
 %===============================================
 %			Conjugate gradient method
