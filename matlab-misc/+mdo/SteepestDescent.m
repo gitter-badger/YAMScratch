@@ -10,9 +10,9 @@ function [x_star, logObj] = SteepestDescent(linesearch, obj, grad, x0, logObj, t
 	%store the very first gradient in local memory
 	grad_init = grad0;
 	%start off
-	xk = x0
+	xk = x0;
 	%log the very first time
-	iteration = 1
+	iteration = 1;
 	logObj.editIteration(iteration, obj0, xk, grad0, 1, 1)
 	%do a bad thing and have infinite while loop to simulate do while
 	while true

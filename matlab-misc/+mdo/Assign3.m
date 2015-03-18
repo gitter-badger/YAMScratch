@@ -9,10 +9,10 @@ mu_2 = 0.9;
 alpha_init = 1;
 alpha_max = 3;
 %create the objective function and the gradient
-obj = @(X) (mdo.DragTotal(X(1), X(2)).')
+obj = @(X) (mdo.DragTotal(X(1), X(2)).');
 grad = @GradientDragTotal;
 X_0 = [10;
-		20]
+		20];
 
 %===============================================
 %			Steepest Descent
@@ -90,3 +90,17 @@ quad_grad_10 = quad_grad_factory(10);
 quad_obj_50 = quad_obj_factory(50);
 quad_grad_50 = quad_grad_factory(50);
 %now test the three algorithms
+
+x_0 = ones(2,1);
+quad2_log = MajorIterationHistory();
+x_star = SteepestDescent(linesearch, quad_obj_2, quad_grad_2, x_0, quad2_log, 1e-6 );
+x1 = [-2:1e-1:2];
+x2 = [-2:1e-1:2];
+[X1, X2] = meshgrid(x1,x2);
+temp_fun = @(x,y) (quad_obj_2([x; y]));
+quad_out = arrayfun(temp_fun ,X1, X2);
+contour(x1, x2, quad_out, 30);
+hold on
+plot(quad2_log.x(:, 1), quad2_log.x(:, 2), 'kd-')
+hold on
+plot(x_star(1), x_star(2), 'k*')
