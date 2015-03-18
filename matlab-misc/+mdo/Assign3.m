@@ -32,15 +32,13 @@ figure(SD_fig);
 e_g = 1e-6;
 e_a = 1e-6;
 e_r = 1e-6;
-disp('Flat')
 congj_log = MajorIterationHistory();
-x_star = ConjugateGradient(linesearch, obj, grad, X_0, e_g, e_a, e_r, congj_log)
+x_star = ConjugateGradient(linesearch, obj, grad, X_0, e_g, e_a, e_r, congj_log);
 
 %plot the objective function
 CG_fig = figure();
 ContourDragTotal(CG_fig, x_star, congj_log);
 figure(CG_fig);
-error('here')
 %===============================================
 %			    Quasi Newton Method
 %===============================================

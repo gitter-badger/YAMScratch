@@ -42,9 +42,10 @@ function [x_star, logObj] = ConjugateGradient(linesearch, obj, grad, x0, e_g, e_
 		else
 			B = (gk.' * gk)/(g_prev.' * g_prev);
 			pk = -gk + B*p_prev;
-			disp(B)
-			%there is a wierd bug where this is not a descent direction
+			%there is a weird bug where this is not a descent direction
+
 			if( (gk.' * pk) > 0)
+
 				disp(gk')
 				disp(pk')
 				%so we force it to be a descent direction
