@@ -1,32 +1,34 @@
-function [x_star, logObj] = SteepestDescent(linesearch, obj, grad, x0, logObj, tol)
+function [x_star, logObj] = SteepestDescent(linesearch, obj, grad, x0, logObj, ls_parameters)
 
-	mu_1 = 1e-4;
-	mu_2 = 0.9;
+	mu_1 = ls_parameters(1);
+	mu_2 = ls_parameters(2);
 	max_iter = 500;
-	alpha_init = 1;
-	alpha_max = 1000000;
+	alpha_init = ls_parameters(3);
+	alpha_max = ls_parameters(4);
+	tol = ls_parameters(5);
+
 	obj0 = obj(x0);
-	grad0 = grad(x0);
+	gk = grad(x0);
 	%store the very first gradient in local memory
-	grad_init = grad0;
+	grad_init = gk;
 	%start off
 	xk = x0;
 	%log the very first time
 	iteration = 1;
-	logObj.editIteration(iteration, obj0, xk, grad0, 1, 1)
+	logObj.editIteration(iteration, obj0, xk, gk, 1, 1)
 	%do a bad thing and have infinite while loop to simulate do while
 	while true
-		pk = -grad0./norm(grad0);
+		pk = -gk;
 		%note that we are converting to column vector
 		[step, fnew, num_f_evals, num_df_evals] = linesearch(obj, grad, xk, pk, ...
-		 	mu_1, mu_2, alpha_init, alpha_max, max_iter);
+		 	mu_1, mu_2, (alpha_init / (2*norm(pk))) , (alpha_max / norm(pk)), max_iter);
 		%update for the next iteration and log
 		iteration = iteration + 1;
 		xk = xk + step*pk;
-		grad0 = grad(xk);
-		logObj.editIteration(iteration, fnew, xk, grad0, num_f_evals, num_df_evals+1);
+		gk = grad(xk);
+		logObj.editIteration(iteration, fnew, xk, gk, num_f_evals, num_df_evals+1);
 		%check the gradient condition at this point
-		if (norm(grad0) < norm(grad_init)*tol)
+		if (norm(gk) < norm(grad_init)*tol)
 			break;
 		end
 	end
