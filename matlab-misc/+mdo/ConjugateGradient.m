@@ -29,7 +29,6 @@ function [x_star, logObj] = ConjugateGradient(linesearch, obj, grad, x0, e_g, e_
 	k = 1;
 	logObj.editIteration(k, f_prev, xk, gk, 1, 1);
 	x_prev = x0;
-	xk = x0;
 	
 	%figure out the size of the input vector to determine how often to restart
 	[r,c] = size(x0);

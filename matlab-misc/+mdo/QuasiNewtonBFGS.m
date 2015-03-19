@@ -22,17 +22,19 @@ function [x_star, logObj] = QuasiNewtonBFGS(linesearch, obj, grad, x0, e_g, e_a,
 	alpha_init = 1;
 	alpha_max = 1000000;
 
-	f_prev = obj(x0)
-	Vk = eye(N)
+	f_prev = obj(x0);
+	gk = grad(x0);
 	%store the very first gradient in local memory
 	grad_init = gk;
+	Vk = eye(N);
 	%start off
 	xk = x0;
-	k = 1
+	k = 1;
 	logObj.editIteration(k, f_prev, xk, gk, 1, 1);
-
+	Vk = Vk * 1;
 	while true
-
+		pk = -(Vk * gk);
+		pk = pk./norm(pk);
 		%perform a line search
 		[step, fnew, num_f_evals, num_df_evals] = linesearch(obj, grad, xk, pk, ...
 		 	mu_1, mu_2, alpha_init, alpha_max, max_iter);
@@ -41,9 +43,15 @@ function [x_star, logObj] = QuasiNewtonBFGS(linesearch, obj, grad, x0, e_g, e_a,
 		p_prev = pk;
 		x_prev = xk;
 		g_prev = gk;
+
 		%update the x position and gradient
 		xk = xk + step*pk;
 		gk = grad(xk);
+		sk = step*pk;
+		yk = gk - g_prev;
+		A = eye(N) - (sk * yk.')/(sk.' * yk);
+		B = (eye(N) - (yk * sk.')/(sk.' * yk));
+		Vk = (A * Vk * B) + (sk * sk.')/(sk.' * yk);
 
 		logObj.editIteration(k, fnew, xk, gk, num_f_evals, num_df_evals+1);
 

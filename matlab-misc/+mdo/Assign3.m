@@ -11,7 +11,7 @@ alpha_max = 3;
 %create the objective function and the gradient
 obj = @(X) (mdo.DragTotal(X(1), X(2)).');
 grad = @GradientDragTotal;
-X_0 = [10;
+X_0 = [25;
 		35];
 
 %===============================================
@@ -29,9 +29,9 @@ figure(SD_fig);
 %===============================================
 %			Conjugate gradient method
 %===============================================
-e_g = 1e-6;
-e_a = 1e-6;
-e_r = 1e-6;
+ e_g = 1e-6;
+ e_a = 1e-6;
+ e_r = 1e-6;
 congj_log = MajorIterationHistory();
 x_star = ConjugateGradient(linesearch, obj, grad, X_0, e_g, e_a, e_r, congj_log);
 
@@ -46,9 +46,10 @@ figure(CG_fig);
 
 %plot the objective function
 qn_log = MajorIterationHistory();
-
+x_star = QuasiNewtonBFGS(linesearch, obj, grad, X_0, e_g, e_a, e_r, qn_log);
 QN_fig = figure();
-%ContourDragTotal(QN_fig, x_star, qn_log)
+ContourDragTotal(QN_fig, x_star, qn_log);
+figure(QN_fig);
 
 %===============================================
 %			Newton Conjugate Gradient
@@ -88,7 +89,10 @@ x_star_CG = ConjugateGradient(linesearch, quad_obj_2, quad_grad_2, x_0, e_g, e_a
 hold on
 plot(quad2_CG_log.x(:, 1), quad2_CG_log.x(:, 2), 'gd-')
 
-
+quad2_QN_log = MajorIterationHistory();
+x_star_QN = QuasiNewtonBFGS(linesearch, quad_obj_2, quad_grad_2, x_0, e_g, e_a, e_r, quad2_QN_log);
+hold on
+plot(quad2_QN_log.x(:, 1), quad2_QN_log.x(:, 2), 'rd-')
 
 %===============================================
 % 		Computation for Higher Dimensions
@@ -101,6 +105,10 @@ x_star_SD_10 = SteepestDescent(linesearch, quad_obj_10, quad_grad_10, x_0, quad1
 quad10_CG_log = MajorIterationHistory();
 x_star_CG_10 = ConjugateGradient(linesearch, quad_obj_10, quad_grad_10, x_0, e_g, e_a, e_r, quad10_CG_log);
 
+quad10_QN_log = MajorIterationHistory();
+x_star_QN_10 = QuasiNewtonBFGS(linesearch, quad_obj_10, quad_grad_10, x_0, e_g, e_a, e_r, quad10_QN_log);
+
+
 %Dimension R50
 x_0 = ones(50,1);
 quad50_SD_log = MajorIterationHistory();
@@ -108,3 +116,6 @@ x_star_SD_50 = SteepestDescent(linesearch, quad_obj_50, quad_grad_50, x_0, quad5
 
 quad50_CG_log = MajorIterationHistory();
 x_star_CG_50 = ConjugateGradient(linesearch, quad_obj_50, quad_grad_50, x_0, e_g, e_a, e_r, quad50_CG_log);
+
+quad50_QN_log = MajorIterationHistory();
+x_star_QN_50 = QuasiNewtonBFGS(linesearch, quad_obj_50, quad_grad_50, x_0, e_g, e_a, e_r, quad50_QN_log);
