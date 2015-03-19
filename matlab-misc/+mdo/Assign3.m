@@ -5,7 +5,7 @@ import mdo.*
 linesearch = @mdo.ProfLinesearch;
 %configure the linesearch parameters here
 mu_1 = 1e-4;
-mu_2 = 0.4;
+mu_2 = 0.3;
 alpha_init = 1;
 alpha_max = 20;
 tolerance = 1e-6;
@@ -65,12 +65,26 @@ figure(QN_fig);
 % 			Plotting all together
 %===============================================
 all_algs_fig = figure;
+figure(all_algs_fig)
 ContourDragTotal(all_algs_fig, steep_log, 'kd-', x_star);
 ContourDragTotal(all_algs_fig, congj_log, 'ko-.');
 ContourDragTotal(all_algs_fig, qn_log, 'k<--');
 
 figure(all_algs_fig);
 title('All methods side by side');
+
+gradients_fig = figure;
+semilogy(1,1)
+PlotMajorIterationConvergance(gradients_fig, steep_log, 'kd-');
+PlotMajorIterationConvergance(gradients_fig, congj_log, 'ko-.');
+PlotMajorIterationConvergance(gradients_fig, qn_log, 'k<--');
+figure(gradients_fig);
+xlabel('Major Iterations');
+ylabel('Batman')
+
+minor_fig = figure;
+PlotMinorIterationConvergance(minor_fig)
+
 
 
 %===============================================
@@ -115,6 +129,16 @@ x_star_QN = QuasiNewtonBFGS(linesearch, quad_obj_2, quad_grad_2, x_0, e_g, e_a, 
 hold on
 plot(quad2_QN_log.x(:, 1), quad2_QN_log.x(:, 2), 'rd-')
 
+quad2_gradients_fig = figure;
+semilogy(1,1)
+PlotMajorIterationConvergance(quad2_gradients_fig, quad2_SD_log, 'kd-');
+PlotMajorIterationConvergance(quad2_gradients_fig, quad2_CG_log, 'ko-.');
+PlotMajorIterationConvergance(quad2_gradients_fig, quad2_QN_log, 'k<--');
+figure(quad2_gradients_fig);
+xlabel('Major Iterations');
+ylabel('Batman')
+title('Quadratic Function in \Re^{2}')
+
 %===============================================
 % 		Computation for Higher Dimensions
 %===============================================
@@ -133,6 +157,15 @@ x_star_QN_10 = QuasiNewtonBFGS(linesearch, quad_obj_10, quad_grad_10, ...
  								x_0, e_g, e_a, e_r, quad10_QN_log, ls_parameters);
 
 
+quad10_gradients_fig = figure;
+semilogy(1,1)
+PlotMajorIterationConvergance(quad10_gradients_fig, quad10_SD_log, 'kd-');
+PlotMajorIterationConvergance(quad10_gradients_fig, quad10_CG_log, 'ko-.');
+PlotMajorIterationConvergance(quad10_gradients_fig, quad10_QN_log, 'k<--');
+figure(quad10_gradients_fig);
+xlabel('Major Iterations');
+ylabel('Batman')
+title('Quadratic Function in \Re^{10}')
 %Dimension R50
 x_0 = ones(50,1);
 quad50_SD_log = MajorIterationHistory();
@@ -146,3 +179,14 @@ x_star_CG_50 = ConjugateGradient(linesearch, quad_obj_50, quad_grad_50, ...
 quad50_QN_log = MajorIterationHistory();
 x_star_QN_50 = QuasiNewtonBFGS(linesearch, quad_obj_50, quad_grad_50, ...
 								 x_0, e_g, e_a, e_r, quad50_QN_log, ls_parameters);
+
+
+quad50_gradients_fig = figure;
+semilogy(1,1)
+PlotMajorIterationConvergance(quad50_gradients_fig, quad50_SD_log, 'kd-');
+PlotMajorIterationConvergance(quad50_gradients_fig, quad50_CG_log, 'ko-.');
+PlotMajorIterationConvergance(quad50_gradients_fig, quad50_QN_log, 'k<--');
+figure(quad50_gradients_fig);
+xlabel('Major Iterations');
+ylabel('Batman')
+title('Quadratic Function in \Re^{50}')
