@@ -32,7 +32,7 @@ function [x_star, logObj] = SteepestDescent(linesearch, obj, grad, x0, logObj, l
 		pk = -gk;
 		%note that we are converting to column vector
 		[step, fnew, num_f_evals, num_df_evals] = linesearch(obj, grad, xk, pk, ...
-		 	mu_1, mu_2, (alpha_init / (2*norm(pk))) , (alpha_max / norm(pk)), max_iter);
+		 	mu_1, mu_2, (alpha_init / (norm(pk))) , (alpha_max / norm(pk)), max_iter);
 		%update for the next iteration and log
 		iteration = iteration + 1;
 		xk = xk + step*pk;

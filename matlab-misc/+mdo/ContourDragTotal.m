@@ -10,7 +10,7 @@ function ContourDragTotal(fig, logObj, format_string, varargin)
 		%mesh(a,s,Drag);
 		xlabel('A');
 		ylab = ylabel('S','Rotation',0);
-		set(ylab,'Units','Normalized','Position',[-0.7 0.5 0]);
+		set(ylab,'Units','Normalized','Position',[-0.07 0.5 0]);
 		x_star = varargin{1};
 		plot(x_star(1), x_star(2), 'k*');
 	end

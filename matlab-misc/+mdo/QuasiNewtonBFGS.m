@@ -39,7 +39,7 @@ function [x_star, logObj] = QuasiNewtonBFGS(linesearch, obj, grad, x0, e_g, e_a,
 	while true
 		pk = -(Vk * gk);
 		%perform a line search
-		[step, fnew, num_f_evals, num_df_evals] = linesearch(obj, grad, xk, pk, mu_1, mu_2, (alpha_init / (2*norm(pk))), (alpha_max / norm(pk)), max_iter);
+		[step, fnew, num_f_evals, num_df_evals] = linesearch(obj, grad, xk, pk, mu_1, mu_2, (alpha_init / (norm(pk))), (alpha_max / norm(pk)), max_iter);
 		%update for next iteration and log
 		k = k + 1;
 		p_prev = pk;

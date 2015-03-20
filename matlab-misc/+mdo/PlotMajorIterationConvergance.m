@@ -1,4 +1,4 @@
-function PlotMinorIterationConvergance(fig, logObj, format_spec, varargin)
+function PlotMajorIterationConvergance(fig, logObj, format_spec, varargin)
 	figure(fig)
 	hold on
 	%check if we are just appending

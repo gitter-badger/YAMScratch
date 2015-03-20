@@ -5,7 +5,7 @@ import mdo.*
 linesearch = @mdo.ProfLinesearch;
 %configure the linesearch parameters here
 mu_1 = 1e-4;
-mu_2 = 0.3;
+mu_2 = 0.6;
 alpha_init = 1;
 alpha_max = 20;
 tolerance = 1e-6;
@@ -13,7 +13,7 @@ ls_parameters = [mu_1, mu_2, alpha_init, alpha_max, tolerance];
 %create the objective function and the gradient
 obj = @(X) (mdo.DragTotal(X(1), X(2)).');
 grad = @GradientDragTotal;
-X_0 = [25;
+X_0 = [15;
 		35];
 
 %===============================================
@@ -68,10 +68,9 @@ all_algs_fig = figure;
 
 figure(all_algs_fig)
 ContourDragTotal(all_algs_fig, steep_log, 'kd-', x_star);
-ContourDragTotal(all_algs_fig, congj_log, 'ko-.');
-ContourDragTotal(all_algs_fig, qn_log, 'k<--');
+ContourDragTotal(all_algs_fig, congj_log, 'ro-.');
+ContourDragTotal(all_algs_fig, qn_log, 'b<--');
 figure(all_algs_fig);
-title('Comparison');
 legend1 = legend('Drag = f(S,A)', 'x_{*}','Steepest descent', 'Conjugate gradient', 'Quasi Newton BFGS');
 set(legend1, 'Position',[0.7 0.5 0.15 0.067]);
 
@@ -79,22 +78,25 @@ both_gradients_fig = figure;
 gradients_fig = subplot(1,2,1);
 semilogy(1,1)
 PlotMajorIterationConvergance(both_gradients_fig, steep_log, 'kd-');
-PlotMajorIterationConvergance(both_gradients_fig, congj_log, 'ko-.');
-PlotMajorIterationConvergance(both_gradients_fig, qn_log, 'k<--');
+PlotMajorIterationConvergance(both_gradients_fig, congj_log, 'ro-.');
+PlotMajorIterationConvergance(both_gradients_fig, qn_log, 'b<--');
 subplot(gradients_fig);
 xlabel('Major Iterations');
 ya1 = ylabel('|g_k|/|g_0|','Rotation',0);
 set(ya1,'Units','Normalized','Position',[-0.17 0.5 0]);
 
 minor_fig = subplot(1,2,2);
-semilogy(1,1)
+semi_hand = semilogy(1,1);
 PlotMinorIterationConvergance(both_gradients_fig, steep_log, 'kd-', minor_fig);
-PlotMinorIterationConvergance(both_gradients_fig, congj_log, 'ko-.', minor_fig);
-PlotMinorIterationConvergance(both_gradients_fig, qn_log, 'k<--', minor_fig);
+PlotMinorIterationConvergance(both_gradients_fig, congj_log, 'ro-.', minor_fig);
+PlotMinorIterationConvergance(both_gradients_fig, qn_log, 'b<--', minor_fig);
 subplot(minor_fig);
+delete(semi_hand)
 xlabel('Function Evaluations')
 ya2 = ylabel('|g_k|/|g_0|','Rotation',0);
 set(ya2,'Units','Normalized','Position',[-0.17 0.5 0]);
+legend1 = legend('Steepest descent', 'Conjugate gradient', 'Quasi Newton BFGS');
+set(legend1, 'Position',[0.592125803489439 0.171707822533567 0.164370982552801 0.106246351430239]);
 
 
 %===============================================
@@ -115,6 +117,7 @@ quad_grad_50 = quad_grad_factory(50);
 %         now test the three algorithms
 %===============================================
 simple_quad = figure();
+figure(simple_quad)
 x_0 = ones(2,1);
 quad2_SD_log = MajorIterationHistory();
 x_star = SteepestDescent(linesearch, quad_obj_2, quad_grad_2, x_0, quad2_SD_log, ls_parameters );
@@ -128,9 +131,10 @@ hold on
 plot(quad2_SD_log.x(:, 1), quad2_SD_log.x(:, 2), 'kd-')
 hold on
 plot(x_star(1), x_star(2), 'k*')
-xlabel('X_1')
-y2_all = ylabel('X_2','Rotation',0);
+xlabel('X_1','FontSize', 14)
+y2_all = ylabel('X_2','Rotation',0,'FontSize', 14);
 set(y2_all,'Units','Normalized','Position',[-0.07 0.5 0]);
+
 
 
 quad2_CG_log = MajorIterationHistory();
@@ -142,6 +146,8 @@ quad2_QN_log = MajorIterationHistory();
 x_star_QN = QuasiNewtonBFGS(linesearch, quad_obj_2, quad_grad_2, x_0, e_g, e_a, e_r, quad2_QN_log, ls_parameters);
 hold on
 plot(quad2_QN_log.x(:, 1), quad2_QN_log.x(:, 2), 'b<--')
+legend2 = legend('f(x_1,x_2)' ,'X_*','Steepest descent', 'Conjugate gradient', 'Quasi Newton BFGS');
+set(legend2, 'Position',[0.68 0.322 0.2 0.15]);
 
 quad_converge = figure();
 
@@ -160,9 +166,9 @@ title('Quadratic objective in \Re^{2}', 'FontSize', 14)
 
 quad2_minor_fig = subplot(3,2,2);
 semilogy(1,1)
-PlotMinorIterationConvergance(quad_converge, steep_log, 'kd-',quad2_minor_fig);
-PlotMinorIterationConvergance(quad_converge, congj_log, 'ro-.', quad2_minor_fig);
-PlotMinorIterationConvergance(quad_converge, qn_log, 'b<--',quad2_minor_fig);
+PlotMinorIterationConvergance(quad_converge, quad2_SD_log, 'kd-',quad2_minor_fig);
+PlotMinorIterationConvergance(quad_converge, quad2_CG_log, 'ro-.', quad2_minor_fig);
+PlotMinorIterationConvergance(quad_converge, quad2_QN_log, 'b<--',quad2_minor_fig);
 subplot(quad2_minor_fig);
 xlabel('Function Evaluations')
 yqM2 = ylabel('|g_k|/|g_0|','Rotation',0);
@@ -209,10 +215,10 @@ subplot(quad10_minor_fig);
 delete(semi_handle);
 yqM10 = ylabel('|g_k|/|g_0|','Rotation',0);
 set(yqM10,'Units','Normalized','Position',[-0.17 0.55 0]);
-xlabel('Major Iterations');
+xlabel('Function Evaluations');
 legend1 = legend('Steepest descent', 'Conjugate gradient', 'Quasi Newton BFGS');
 set(legend1,...
-    'Position',[0.768665231431643 0.541726037195995 0.192680301399354 0.0650929899856939]);
+    'Position',[0.768665231431643 0.45 0.192680301399354 0.0650929899856939]);
 title('Quadratic objective in \Re^{10}', 'FontSize', 14)
 
 
