@@ -65,6 +65,7 @@ figure(QN_fig);
 % 			Plotting all together
 %===============================================
 all_algs_fig = figure;
+
 figure(all_algs_fig)
 ContourDragTotal(all_algs_fig, steep_log, 'kd-', x_star);
 ContourDragTotal(all_algs_fig, congj_log, 'ko-.');
@@ -73,18 +74,24 @@ ContourDragTotal(all_algs_fig, qn_log, 'k<--');
 figure(all_algs_fig);
 title('All methods side by side');
 
-gradients_fig = figure;
+both_gradients_fig = figure;
+gradients_fig = subplot(1,2,1);
 semilogy(1,1)
-PlotMajorIterationConvergance(gradients_fig, steep_log, 'kd-');
-PlotMajorIterationConvergance(gradients_fig, congj_log, 'ko-.');
-PlotMajorIterationConvergance(gradients_fig, qn_log, 'k<--');
-figure(gradients_fig);
+PlotMajorIterationConvergance(both_gradients_fig, steep_log, 'kd-');
+PlotMajorIterationConvergance(both_gradients_fig, congj_log, 'ko-.');
+PlotMajorIterationConvergance(both_gradients_fig, qn_log, 'k<--');
+subplot(gradients_fig);
 xlabel('Major Iterations');
 ylabel('Batman')
 
-minor_fig = figure;
-PlotMinorIterationConvergance(minor_fig)
-
+minor_fig = subplot(1,2,2);
+semilogy(1,1)
+PlotMinorIterationConvergance(both_gradients_fig, steep_log, 'kd-', minor_fig);
+PlotMinorIterationConvergance(both_gradients_fig, congj_log, 'ko-.', minor_fig);
+PlotMinorIterationConvergance(both_gradients_fig, qn_log, 'k<--', minor_fig);
+subplot(minor_fig);
+xlabel('Function Evaluations')
+ylabel('Batman')
 
 
 %===============================================
@@ -129,15 +136,26 @@ x_star_QN = QuasiNewtonBFGS(linesearch, quad_obj_2, quad_grad_2, x_0, e_g, e_a, 
 hold on
 plot(quad2_QN_log.x(:, 1), quad2_QN_log.x(:, 2), 'rd-')
 
-quad2_gradients_fig = figure;
+quad2_gradients_fig_all = figure;
+
+quad2_gradients_fig = subplot(1,2,1);
 semilogy(1,1)
-PlotMajorIterationConvergance(quad2_gradients_fig, quad2_SD_log, 'kd-');
-PlotMajorIterationConvergance(quad2_gradients_fig, quad2_CG_log, 'ko-.');
-PlotMajorIterationConvergance(quad2_gradients_fig, quad2_QN_log, 'k<--');
-figure(quad2_gradients_fig);
+PlotMajorIterationConvergance(quad2_gradients_fig_all, quad2_SD_log, 'kd-', quad2_gradients_fig);
+PlotMajorIterationConvergance(quad2_gradients_fig_all, quad2_CG_log, 'ko-.', quad2_gradients_fig);
+PlotMajorIterationConvergance(quad2_gradients_fig_all, quad2_QN_log, 'k<--', quad2_gradients_fig);
+subplot(quad2_gradients_fig);
 xlabel('Major Iterations');
 ylabel('Batman')
-title('Quadratic Function in \Re^{2}')
+
+
+quad2_minor_fig = subplot(1,2,2);
+semilogy(1,1)
+PlotMinorIterationConvergance(quad2_gradients_fig_all, steep_log, 'kd-',quad2_minor_fig);
+PlotMinorIterationConvergance(quad2_gradients_fig_all, congj_log, 'ko-.', quad2_minor_fig);
+PlotMinorIterationConvergance(quad2_gradients_fig_all, qn_log, 'k<--',quad2_minor_fig);
+subplot(quad2_minor_fig);
+xlabel('Function Evaluations')
+ylabel('Batman')
 
 %===============================================
 % 		Computation for Higher Dimensions
@@ -145,16 +163,13 @@ title('Quadratic Function in \Re^{2}')
 x_0 = ones(10,1);
 
 quad10_SD_log = MajorIterationHistory();
-x_star_SD_10 = SteepestDescent(linesearch, quad_obj_10, quad_grad_10, ...
-								x_0, quad10_SD_log, ls_parameters);
+x_star_SD_10 = SteepestDescent(linesearch, quad_obj_10, quad_grad_10, x_0, quad10_SD_log, ls_parameters);
 
 quad10_CG_log = MajorIterationHistory();
-x_star_CG_10 = ConjugateGradient(linesearch, quad_obj_10, quad_grad_10, ...
-								 x_0, e_g, e_a, e_r, quad10_CG_log, ls_parameters);
+x_star_CG_10 = ConjugateGradient(linesearch, quad_obj_10, quad_grad_10, x_0, e_g, e_a, e_r, quad10_CG_log, ls_parameters);
 
 quad10_QN_log = MajorIterationHistory();
-x_star_QN_10 = QuasiNewtonBFGS(linesearch, quad_obj_10, quad_grad_10, ...
- 								x_0, e_g, e_a, e_r, quad10_QN_log, ls_parameters);
+x_star_QN_10 = QuasiNewtonBFGS(linesearch, quad_obj_10, quad_grad_10, x_0, e_g, e_a, e_r, quad10_QN_log, ls_parameters);
 
 
 quad10_gradients_fig = figure;
@@ -169,16 +184,13 @@ title('Quadratic Function in \Re^{10}')
 %Dimension R50
 x_0 = ones(50,1);
 quad50_SD_log = MajorIterationHistory();
-x_star_SD_50 = SteepestDescent(linesearch, quad_obj_50, quad_grad_50, ...
-								 x_0, quad50_SD_log, ls_parameters);
+x_star_SD_50 = SteepestDescent(linesearch, quad_obj_50, quad_grad_50, x_0, quad50_SD_log, ls_parameters);
 
 quad50_CG_log = MajorIterationHistory();
-x_star_CG_50 = ConjugateGradient(linesearch, quad_obj_50, quad_grad_50, ...
-								 x_0, e_g, e_a, e_r, quad50_CG_log, ls_parameters);
+x_star_CG_50 = ConjugateGradient(linesearch, quad_obj_50, quad_grad_50, x_0, e_g, e_a, e_r, quad50_CG_log, ls_parameters);
 
 quad50_QN_log = MajorIterationHistory();
-x_star_QN_50 = QuasiNewtonBFGS(linesearch, quad_obj_50, quad_grad_50, ...
-								 x_0, e_g, e_a, e_r, quad50_QN_log, ls_parameters);
+x_star_QN_50 = QuasiNewtonBFGS(linesearch, quad_obj_50, quad_grad_50, x_0, e_g, e_a, e_r, quad50_QN_log, ls_parameters);
 
 
 quad50_gradients_fig = figure;
