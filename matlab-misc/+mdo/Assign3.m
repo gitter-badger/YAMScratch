@@ -125,6 +125,9 @@ hold on
 plot(quad2_SD_log.x(:, 1), quad2_SD_log.x(:, 2), 'kd-')
 hold on
 plot(x_star(1), x_star(2), 'k*')
+xlabel('X_1')
+y2_all = ylabel('X_2','Rotation',0);
+set(y2_all,'Units','Normalized','Position',[-0.07 0.5 0]);
 
 
 quad2_CG_log = MajorIterationHistory();
@@ -139,24 +142,26 @@ plot(quad2_QN_log.x(:, 1), quad2_QN_log.x(:, 2), 'rd-')
 
 quad_converge = figure();
 
-quad2_gradients_fig = subplot(3,2,1);
+quad2_gradients_fig = subplot(3,3,1);
 semilogy(1,1)
 PlotMajorIterationConvergance(quad_converge, quad2_SD_log, 'kd-', quad2_gradients_fig);
 PlotMajorIterationConvergance(quad_converge, quad2_CG_log, 'ko-.', quad2_gradients_fig);
 PlotMajorIterationConvergance(quad_converge, quad2_QN_log, 'k<--', quad2_gradients_fig);
 subplot(quad2_gradients_fig);
 xlabel('Major Iterations');
-ylabel('Batman')
+yq2 = ylabel('|g_k|/|g_0|','Rotation',0);
+set(yq2,'Units','Normalized','Position',[-0.17 0.5 0]);
 
 
-quad2_minor_fig = subplot(3,2,2);
+quad2_minor_fig = subplot(3,3,2);
 semilogy(1,1)
 PlotMinorIterationConvergance(quad_converge, steep_log, 'kd-',quad2_minor_fig);
 PlotMinorIterationConvergance(quad_converge, congj_log, 'ko-.', quad2_minor_fig);
 PlotMinorIterationConvergance(quad_converge, qn_log, 'k<--',quad2_minor_fig);
 subplot(quad2_minor_fig);
 xlabel('Function Evaluations')
-ylabel('Batman')
+yqM2 = ylabel('|g_k|/|g_0|','Rotation',0);
+set(yqM2,'Units','Normalized','Position',[-0.17 0.5 0]);
 
 %===============================================
 % 		Computation for Higher Dimensions
@@ -173,25 +178,33 @@ quad10_QN_log = MajorIterationHistory();
 x_star_QN_10 = QuasiNewtonBFGS(linesearch, quad_obj_10, quad_grad_10, x_0, e_g, e_a, e_r, quad10_QN_log, ls_parameters);
 
 
-quad10_gradients_fig = subplot(3,2,3);
-semilogy(1,1)
+quad10_gradients_fig = subplot(3,3,4);
+%we have to make this semilog plot so that the plot type will be correct
+%it does not work correctly if we remove this hack
+%therefore we must delete this data series when we want to generate a legend
+%which we do below
+semilogy(1,1);
 PlotMajorIterationConvergance(quad_converge, quad10_SD_log, 'kd-', quad10_gradients_fig);
 PlotMajorIterationConvergance(quad_converge, quad10_CG_log, 'ko-.', quad10_gradients_fig);
 PlotMajorIterationConvergance(quad_converge, quad10_QN_log, 'k<--', quad10_gradients_fig);
 subplot(quad10_gradients_fig);
 xlabel('Major Iterations');
 yq10 = ylabel('|g_k|/|g_0|','Rotation',0);
-set(yq10,'Units','Normalized','Position',[-0.13 0.5 0]);
+set(yq10,'Units','Normalized','Position',[-0.17 0.55 0]);
 title('Quadratic Function in \Re^{10}')
 
-quad10_minor_fig = subplot(3,2,4);
-semilogy(1,1)
+quad10_minor_fig = subplot(3,3,5);
+semi_handle = semilogy(1,1);
 PlotMinorIterationConvergance(quad_converge, quad10_SD_log, 'kd-', quad10_minor_fig);
 PlotMinorIterationConvergance(quad_converge, quad10_CG_log, 'ko-.', quad10_minor_fig);
 PlotMinorIterationConvergance(quad_converge, quad10_QN_log, 'k<--', quad10_minor_fig);
 subplot(quad10_minor_fig);
+delete(semi_handle);
 yqM10 = ylabel('|g_k|/|g_0|','Rotation',0);
-set(yqM10,'Units','Normalized','Position',[-0.13 0.5 0]);
+set(yqM10,'Units','Normalized','Position',[-0.17 0.55 0]);
+legend1 = legend('Steepest descent', 'Conjugate gradient', 'Quasi Newton BFGS');
+set(legend1,...
+    'Position',[0.635 0.5 0.15 0.067]);
 
 %Dimension R50
 x_0 = ones(50,1);
@@ -205,21 +218,23 @@ quad50_QN_log = MajorIterationHistory();
 x_star_QN_50 = QuasiNewtonBFGS(linesearch, quad_obj_50, quad_grad_50, x_0, e_g, e_a, e_r, quad50_QN_log, ls_parameters);
 
 
-quad50_gradients_fig = subplot(3,2,5);
+quad50_gradients_fig = subplot(3,3,7);
 semilogy(1,1)
 PlotMajorIterationConvergance(quad_converge, quad50_SD_log, 'kd-', quad50_gradients_fig);
 PlotMajorIterationConvergance(quad_converge, quad50_CG_log, 'ko-.', quad50_gradients_fig);
 PlotMajorIterationConvergance(quad_converge, quad50_QN_log, 'k<--', quad50_gradients_fig);
 subplot(quad50_gradients_fig);
 xlabel('Major Iterations');
-ylabel('Batman')
+yq50 = ylabel('|g_k|/|g_0|','Rotation',0);
+set(yq50,'Units','Normalized','Position',[-0.17 0.55 0]);
 title('Quadratic Function in \Re^{50}')
 
-quad50_minor_fig = subplot(3,2,6);
+quad50_minor_fig = subplot(3,3,8);
 semilogy(1,1)
 PlotMinorIterationConvergance(quad_converge, quad50_SD_log, 'kd-', quad50_minor_fig);
 PlotMinorIterationConvergance(quad_converge, quad50_CG_log, 'ko-.', quad50_minor_fig);
 PlotMinorIterationConvergance(quad_converge, quad50_QN_log, 'k<--', quad50_minor_fig);
 subplot(quad50_minor_fig);
 xlabel('Function Evaluations')
-ylabel('Batman')
+yqM50 = ylabel('|g_k|/|g_0|','Rotation',0);
+set(yqM50,'Units','Normalized','Position',[-0.17 0.55 0]);
