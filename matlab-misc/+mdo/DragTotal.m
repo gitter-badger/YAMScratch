@@ -41,7 +41,7 @@ function [drag_total] = DragTotal(Aspect,Surface)
 		elseif result(2)
 			valid_weight = test_vec(2);
 		else
-			ME = MException('InvalidWeigh:OutofBounds','Check not satisfied');
+			ME = MException('InvalidWeight:OutofBounds','Check not satisfied');
 			throw(ME)
 		end
 			return

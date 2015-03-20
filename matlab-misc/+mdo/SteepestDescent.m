@@ -1,5 +1,12 @@
 function [x_star, logObj] = SteepestDescent(linesearch, obj, grad, x0, logObj, ls_parameters)
-
+%Purpose: returns the location of a local minimum and a history object
+%Inputs:
+%	obj - a function handle for the objective
+%	grad - a function handle for the objective gradient
+%	LineSearch - a function handle to a line search implementation to specific interface
+%	x_0 - starting point, is a vector
+%	logObj - a MajorInterationHistory object to record each iteration
+%	ls_parameters - five vector containing line search weights
 	mu_1 = ls_parameters(1);
 	mu_2 = ls_parameters(2);
 	max_iter = 500;
