@@ -4,13 +4,16 @@ function [x_star, logObj] = ConjugateGradient(linesearch, obj, grad, x0, e_g, e_
 %Inputs:
 %	obj - a function handle for the objective
 %	grad - a function handle for the objective gradient
-%	LineSearch - a function handle to a line search implementation to specific interface
+%	LineSearch - a function handle to a line search implementation with a specific interface
 %	x_0 - starting point, is a vector
 %	e_g - epsilon tolerance for the gradient
 % 	e_a - epsilon tolerance for the absolute
 %	e_r - epsilon tolerance for the scale factor
 %	logObj - a MajorInterationHistory object to record each iteration
 %	ls_parameters - five vector containing line search weights
+%Ouputs:
+%	x_star - best guess of local minimum meeting the convergence criteria passed in
+%	logObj - used to return the logging object in case a handle subclass is not used
 	
 	%sanity checks
 	assert(isvector(x0));

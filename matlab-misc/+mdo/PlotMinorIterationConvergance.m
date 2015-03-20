@@ -1,4 +1,13 @@
 function PlotMinorIterationConvergance(fig, logObj, format_spec, varargin)
+%Purpose: takes a figure handle to append to and plots the gradient convergence metric
+%Inputs:
+%	fig - figure handle
+%	logObj - a MajorIterationHistory object that has stored the intermediate steps of
+%			an iterative optimization algorithm
+%	format_spec - a string used to control what the data series looks like, passed into plot
+%	varargin{1} - a handle to a specific subplot
+%Outputs:
+%	No return value but has side effects.
 	figure(fig)
 	hold on
 	%check if we are just appending

@@ -3,10 +3,14 @@ function [x_star, logObj] = SteepestDescent(linesearch, obj, grad, x0, logObj, l
 %Inputs:
 %	obj - a function handle for the objective
 %	grad - a function handle for the objective gradient
-%	LineSearch - a function handle to a line search implementation to specific interface
+%	LineSearch - a function handle to a line search implementation with a specific interface
 %	x_0 - starting point, is a vector
 %	logObj - a MajorInterationHistory object to record each iteration
 %	ls_parameters - five vector containing line search weights
+%Ouputs:
+%	x_star - best guess of local minimum meeting the convergence criteria passed in
+%	logObj - used to return the logging object in case a handle subclass is not used
+
 	mu_1 = ls_parameters(1);
 	mu_2 = ls_parameters(2);
 	max_iter = 500;
