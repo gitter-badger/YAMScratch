@@ -1,6 +1,5 @@
 %% ConjugateGradient: function description
-function [x_star, logObj] = ConjugateGradient(linesearch, obj, grad, x0, ...
-								 e_g, e_a, e_r, logObj, ls_parameters)
+function [x_star, logObj] = ConjugateGradient(linesearch, obj, grad, x0, e_g, e_a, e_r, logObj, ls_parameters)
 %Purpose: returns the location of a local minimum and a history object
 %Inputs:
 %	obj - a function handle for the objective
@@ -47,19 +46,6 @@ function [x_star, logObj] = ConjugateGradient(linesearch, obj, grad, x0, ...
 		else
 			B = (gk.' * gk)/(g_prev.' * g_prev);
 			pk = -gk + B*p_prev;
-			%there is a weird bug where this is not a descent direction
-
-			if( (gk.' * pk) > 0)
-				disp(k)
-				disp('===================')
-				disp(gk')
-				disp(pk')
-				disp('===================')
-
-				%so we force it to be a descent direction
-				pk = - gk./norm(gk);
-				%pk = -pk;
-			end
 		end
 		%perform a line search
 		[step, fnew, num_f_evals, num_df_evals] = linesearch(obj, grad, xk, pk, ...
