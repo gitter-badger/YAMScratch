@@ -24,9 +24,9 @@ x_star = SteepestDescent(linesearch, obj, grad, X_0, steep_log, ls_parameters);
 
 
 %plot the objective function
-SD_fig = figure();
-ContourDragTotal(SD_fig, steep_log, 'kd-', x_star);
-figure(SD_fig);
+% SD_fig = figure();
+% ContourDragTotal(SD_fig, steep_log, 'kd-', x_star);
+% figure(SD_fig);
 
 %===============================================
 %			Conjugate gradient method
@@ -38,10 +38,10 @@ congj_log = MajorIterationHistory();
 x_star = ConjugateGradient(linesearch, obj, grad, X_0, e_g, e_a, e_r, congj_log, ls_parameters);
 
 %plot the objective function
-CG_fig = figure();
-ContourDragTotal(CG_fig, congj_log, 'ko-.', x_star);
-figure(CG_fig);
-title('Conjugate Gradient Method')
+% CG_fig = figure();
+% ContourDragTotal(CG_fig, congj_log, 'ko-.', x_star);
+% figure(CG_fig);
+% title('Conjugate Gradient Method')
 %===============================================
 %			    Quasi Newton Method
 %===============================================
@@ -50,9 +50,9 @@ title('Conjugate Gradient Method')
 %plot the objective function
 qn_log = MajorIterationHistory();
 x_star = QuasiNewtonBFGS(linesearch, obj, grad, X_0, e_g, e_a, e_r, qn_log, ls_parameters);
-QN_fig = figure();
-ContourDragTotal(QN_fig, qn_log, 'kd-', x_star);
-figure(QN_fig);
+% QN_fig = figure();
+% ContourDragTotal(QN_fig, qn_log, 'kd-', x_star);
+% figure(QN_fig);
 
 %===============================================
 %			Newton Conjugate Gradient
@@ -126,7 +126,6 @@ plot(quad2_SD_log.x(:, 1), quad2_SD_log.x(:, 2), 'kd-')
 hold on
 plot(x_star(1), x_star(2), 'k*')
 
-quad_converge = figure();
 
 quad2_CG_log = MajorIterationHistory();
 x_star_CG = ConjugateGradient(linesearch, quad_obj_2, quad_grad_2, x_0, e_g, e_a, e_r, quad2_CG_log, ls_parameters);
@@ -138,6 +137,7 @@ x_star_QN = QuasiNewtonBFGS(linesearch, quad_obj_2, quad_grad_2, x_0, e_g, e_a, 
 hold on
 plot(quad2_QN_log.x(:, 1), quad2_QN_log.x(:, 2), 'rd-')
 
+quad_converge = figure();
 
 quad2_gradients_fig = subplot(3,2,1);
 semilogy(1,1)
@@ -180,7 +180,8 @@ PlotMajorIterationConvergance(quad_converge, quad10_CG_log, 'ko-.', quad10_gradi
 PlotMajorIterationConvergance(quad_converge, quad10_QN_log, 'k<--', quad10_gradients_fig);
 subplot(quad10_gradients_fig);
 xlabel('Major Iterations');
-ylabel('Batman')
+yq10 = ylabel('|g_k|/|g_0|','Rotation',0);
+set(yq10,'Units','Normalized','Position',[-0.13 0.5 0]);
 title('Quadratic Function in \Re^{10}')
 
 quad10_minor_fig = subplot(3,2,4);
@@ -189,8 +190,8 @@ PlotMinorIterationConvergance(quad_converge, quad10_SD_log, 'kd-', quad10_minor_
 PlotMinorIterationConvergance(quad_converge, quad10_CG_log, 'ko-.', quad10_minor_fig);
 PlotMinorIterationConvergance(quad_converge, quad10_QN_log, 'k<--', quad10_minor_fig);
 subplot(quad10_minor_fig);
-xlabel('Function Evaluations')
-ylabel('Batman')
+yqM10 = ylabel('|g_k|/|g_0|','Rotation',0);
+set(yqM10,'Units','Normalized','Position',[-0.13 0.5 0]);
 
 %Dimension R50
 x_0 = ones(50,1);
