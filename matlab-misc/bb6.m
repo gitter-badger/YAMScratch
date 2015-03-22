@@ -5,10 +5,7 @@ import mdo.*;
 
 %create the filename to save the figure to
 d = datestr(clock);
-prefix = 'meshplot_';
 filename = regexprep(d, '\s|-|:', '_');
-mesh_filename = strcat(prefix, d);
-
 
 CONTOUR = false;
 if CONTOUR
@@ -26,6 +23,8 @@ if CONTOUR
 
 	mesh_fig = figure;
 	mesh(x, y, out);
+
+	mesh_filename = strcat('meshplot_', filename);
 	saveas(mesh_fig, mesh_filename, 'fig')
 	con_fig = figure;
 	contour(x,y,out,50);
@@ -37,11 +36,11 @@ end
 
 linesearch = @mdo.ProfLinesearch;
 %configure the linesearch parameters here
-mu_1 = 1e-4;
-mu_2 = 0.6;
+mu_1 = 1e-3;
+mu_2 = 0.9;
 alpha_init = 1;
 alpha_max = 20;
-tolerance = 1e-6;
+tolerance = 1e-3;
 ls_parameters = [mu_1, mu_2, alpha_init, alpha_max, tolerance];
 %create the objective function and the gradient
 obj = @func6;
@@ -54,7 +53,7 @@ X_0 = [-.7;
 %===============================================
 disp('======Starting Steepest Descent===========')
 steep_log = MajorIterationHistory();
-x_star = SteepestDescent(linesearch, obj, grad, X_0, steep_log, ls_parameters);
+%x_star = SteepestDescent(linesearch, obj, grad, X_0, steep_log, ls_parameters);
 %===============================================
 %			Conjugate gradient method
 %===============================================
