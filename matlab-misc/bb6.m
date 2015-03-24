@@ -62,7 +62,7 @@ e_a = 1e-6;
 e_r = 1e-6;
 disp('======Conjugate Gradient===========')
 congj_log = MajorIterationHistory();
-x_star = ConjugateGradient(linesearch, obj, grad, X_0, e_g, e_a, e_r, congj_log, ls_parameters);
+%x_star = ConjugateGradient(linesearch, obj, grad, X_0, e_g, e_a, e_r, congj_log, ls_parameters);
 %===============================================
 %			    Quasi Newton Method
 %===============================================
