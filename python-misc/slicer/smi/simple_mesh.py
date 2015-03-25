@@ -8,14 +8,27 @@ class SimpleMesh(mesh.Mesh):
         self.faces = {}
         self.edges = {}
         self.vertices = {}
-
+        self.dimension = 3
         self.verts_index = 0
         self.edges_index = 0
         self.faces_index = 0
         self.vert_view = self.vertices.viewkeys()
         self.edge_view = self.edges.viewkeys()
-        self.min_coord = [0,0,0]
-        self.max_coord = [0,0,0]
+        self.min_coord = None
+        self.max_coord = None
+
+    def updateBoundingBox(self, test_point):
+        #check to see if they are updated yet   
+        if self.max_coord is not None:
+            for index in range(0, self.dimension):
+                if test_point[index] < self.min_coord[index]:
+                    self.min_coord[index] = test_point[index]
+                if test_point[index] > self.max_coord[index]:
+                    self.max_coord[index] = test_point[index]
+        else:
+            self.min_coord = [x for x in test_point]
+            self.max_coord = [x for x in test_point]
+
 
     def addFace(self, normal, vert1, vert2, vert3, attr_code):
         #create a face with a normal
@@ -31,18 +44,7 @@ class SimpleMesh(mesh.Mesh):
                 #add the vertex to the face
                 temp_face.vertices.append(this_vert_key)
             else:
-                if(c_vert[0] < self.min_coord[0]):
-                    self.min_coord[0] = c_vert[0]
-                elif(c_vert[0] > self.max_coord[0]):
-                    self.max_coord[0] = c_vert[0]
-                if(c_vert[1] < self.min_coord[1]):
-                    self.min_coord[1] = c_vert[1]
-                elif(c_vert[1] > self.max_coord[1]):
-                    self.max_coord[1] = c_vert[1] 
-                if(c_vert[2] < self.min_coord[2]):
-                    self.min_coord[2] = c_vert[2]
-                elif(c_vert[2] > self.max_coord[2]):
-                    self.max_coord[2] = c_vert[2]
+                self.updateBoundingBox(c_vert)
 
                 #create a new vertex object
                 v = mesh.Vertex(c_vert,self.verts_index)

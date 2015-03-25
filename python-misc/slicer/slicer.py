@@ -17,13 +17,6 @@ from smi import Face, Edge, Vertex
 from smi import SingleLayer
 from guillotine_node import GuillotineNode
 
-class LayerHolder(object):
-    def __init__(self):
-        self.layers = []
-
-    def addLayer(self, layer_obj):
-        self.layers.append(layer_obj)
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = '''Slice the input STL file 
         and output a DXF file for each and every slice. Output files are 
@@ -49,7 +42,7 @@ if __name__ == '__main__':
     global_scale = float(args.scale)
     #choose to pack the objects into a size buffer
     if args.packed:
-        layer_holder = LayerHolder()
+        layer_holder = []
         temp = tuple([float(comp) for comp in args.packed.split(",")])
         packed_width = temp[0]
         packed_height = temp[1]
@@ -107,7 +100,7 @@ if __name__ == '__main__':
             #now save the filename out
             dwg.saveas(this_layer_path)
         else:
-            layer_holder.addLayer(layer)
+            layer_holder.append(layer)
 
         layer_index += 1
 
@@ -116,7 +109,7 @@ if __name__ == '__main__':
     #if we are packinng, do it here
     if args.packed:
         #sort the layers by total area
-        layer_holder.layers.sort(key = lambda x: x.area(), reverse = True)
+        layer_holder.sort(key = lambda x: x.area(), reverse = True)
         #set up the first sheet
         current_sheet_count = 0
         this_sheet_name = out_name + "_sheet_" + str(current_sheet_count) + ".dxf"
@@ -127,15 +120,14 @@ if __name__ == '__main__':
         sheet_dwg = ezdxf.new("AC1015")
         sheet_msp = sheet_dwg.modelspace()
         #add a border of space to each layer when placing in sheet
-        border_spacing = 0.05
+        border_spacing = 0.05 * max([abs(mesh.max_coord[i] - mesh.min_coord[i]) for i in range(0, mesh.dimension)])
 
-        for layer in layer_holder.layers:
+        for layer in layer_holder:
             #move on to next layer if this one is empty
             if len(layer.lines) == 0:
                 continue
             #try to place the block in the root node. if we cannot
             #then we must start a new sheet
-            print layer.width
             found_node = GuillotineNode.findNode(root_node, 
                                                 layer.width + border_spacing, 
                                                 layer.height + border_spacing)
