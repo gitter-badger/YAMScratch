@@ -14,6 +14,6 @@ There is a later version available, 0.6.5, which should work as the API is the s
 
 Roadmap
 ===========
--[ ] Add slicing along user defined direction
--[ ] Add sheet packing output
+-[x] Add slicing along user defined direction
+-[x] Add sheet packing output
 -[ ] Replace brute force O(n^3) slicing with elegant O(n^2)
