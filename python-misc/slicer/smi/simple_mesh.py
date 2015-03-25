@@ -109,3 +109,24 @@ class SimpleMesh(mesh.Mesh):
                 del self.vertices[old_key]
             else:
                 pass
+
+    def makeEdgeKey(self, a, b):
+        smallest = a
+        largest = b
+        #sort by z value first
+        if a[2] > b[2]:
+            smallest = b
+            largest = a
+        elif a[2] == b[2]:
+            if a[1] > b[1]:
+                smallest = b
+                largest = a
+            elif a[1] == b[1]:
+                if a[0] > b[0]:
+                    smallest = b
+                    largest = a
+                elif a[0] == b[0]:
+                    #if they are the same then
+                    return False
+        return (smallest,largest)
+        
