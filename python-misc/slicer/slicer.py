@@ -7,7 +7,6 @@ Copyright (c) 2015 Isaiah Bell all rights reserved
 import sys
 import os
 import argparse
-import struct
 import re
 
 import ezdxf
