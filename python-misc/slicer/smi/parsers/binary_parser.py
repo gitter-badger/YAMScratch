@@ -1,6 +1,7 @@
 import struct
 #non built in imports
 import smi
+import VectorMath
 
 def parseBinarySTL(filename, quaternion = None, scale = 1):
     #retry 3 times
