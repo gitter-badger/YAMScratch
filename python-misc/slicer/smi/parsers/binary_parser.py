@@ -1,5 +1,5 @@
 import struct
-
+#non built in imports
 import smi
 
 def parseBinarySTL(filename, quaternion = None, scale = 1):

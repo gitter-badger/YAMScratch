@@ -11,84 +11,13 @@ import re
 
 import ezdxf
 import VectorMath
-
 import smi
 from smi import SimpleMesh
-
 from smi import Face, Edge, Vertex
+from smi import SingleLayer
 
 
 
-
-class Layer(object):
-    def __init__(self):
-        self.points = []
-
-
-def lineInterpolate(vec1, vec2, z_value):
-    assert(len(vec1) == 3)
-    assert(len(vec2) == 3)
-    t = float(z_value - vec1[2]) / float(vec2[2] - vec1[2])
-    assert(t >= 0.0)
-    point_x = vec1[0] + t * (vec2[0] - vec1[0])
-    point_y = vec1[1] + t * (vec2[1] - vec1[1])
-    #we only need the x and y component
-    return (point_x, point_y)
-
-class SingleLayer(object):
-    def __init__(self, dimension):
-        self.dimension = dimension
-        self.min_coord = [0 for x in range(0,dimension)]
-        self.max_coord = [0 for x in range(0,dimension)]
-        self.lines = []
-        self.recompute_size_flag = True
-        #hold the fit into the tree
-        self.fit = None
-
-    def addLineSegment(self, point_a, point_b):
-        together = tuple([point_a, point_b])
-        self.lines.append(together)
-        for test_point in together:
-            for index in range(0, self.dimension):
-                if test_point[index] < self.min_coord[index]:
-                    self.min_coord[index] = test_point[index]
-                if test_point[index] > self.max_coord[index]:
-                    self.max_coord[index] = test_point[index]
-        #reset the flag so the method knows when to recompute
-        self.recompute_size_flag = True
-
-    def width():
-        doc = "The width property."
-        def fget(self):
-            if self.recompute_size_flag:
-                self._width = abs(self.max_coord[0] - self.min_coord[0])
-                self._height = abs(self.max_coord[1] - self.min_coord[1])
-                self.recompute_size_flag = False
-            return self._width
-        def fset(self, value):
-            self._width = value
-        def fdel(self):
-            del self._width
-        return locals()
-    width = property(**width())
-
-    def height():
-        doc = "The height property."
-        def fget(self):
-            if self.recompute_size_flag:
-                self._width = abs(self.max_coord[0] - self.min_coord[0])
-                self._height = abs(self.max_coord[1] - self.min_coord[1])
-                self.recompute_size_flag = False
-            return self._height
-        def fset(self, value):
-            self._height = value
-        def fdel(self):
-            del self._height
-        return locals()
-    height = property(**height())
-
-    def area(self):
-        return self.width*self.height
 
 class LayerHolder(object):
     def __init__(self):
@@ -157,13 +86,6 @@ class GuillotineNode(object):
         #we return self so the layer object can store a reference to it
         return self
 
-class BoundaryContour(object):
-    def __init__(self, mesh = None):
-        self.mesh = mesh
-
-
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = '''Slice the input STL file 
         and output a DXF file for each and every slice. Output files are 
@@ -216,10 +138,8 @@ if __name__ == '__main__':
     norm_vec = tuple([norm_vec[i]/magnitude for i in range(0, len(norm_vec))])
 
     if norm_vec != (0,0,1):
-
-        print norm_vec
-        print VectorMath.magnitude(norm_vec)
-
+        #print norm_vec
+        #print VectorMath.magnitude(norm_vec)
         (basis, rot_quaternion) = VectorMath.generate_basis(norm_vec)
         mesh = smi.parsers.parseBinarySTL(fn, quaternion = rot_quaternion, scale = global_scale )
     else:
@@ -227,16 +147,13 @@ if __name__ == '__main__':
 
     print "Min",mesh.min_coord
     print "Max",mesh.max_coord
-    #we assume we are always slicing along positive z axis
-    #start at an offset of half layer height and move until out of shape
-    z_offset = 0.5*layer_height
-    layer_index = 0
-    section_criteria = mesh.min_coord[2] + z_offset
+
     all_dwg = ezdxf.new("AC1015")
     all_msp = all_dwg.modelspace()
     all_layer_name = out_name + "_all.dxf"
 
-    while(section_criteria < mesh.max_coord[2]):
+    layer_index = 0
+    for layer in smi.IntersectionGenerator(mesh, layer_height):
         if not args.packed:
             this_layer_name = out_name + "_" + str(layer_index) + ".dxf"
             this_layer_path = os.path.join(out_dir,this_layer_name)
@@ -244,103 +161,16 @@ if __name__ == '__main__':
             #open the new DXF
             dwg = ezdxf.new("AC1015")
             msp = dwg.modelspace()
-        else:
-            this_single_layer = SingleLayer(2)
-            layer_holder.addLayer(this_single_layer)
-        #begin bad algorithm
-        #iterate over every face
-        loop_count = 0
-        for face in mesh.faces.values():
-            #test each edge for intersection
-            vert_intersection = False
-            point_a = None
-            point_b = None
-
-            for edge_key in face.edges:
-                a_vert_key = mesh.edges[edge_key].vertices[0]
-                b_vert_key = mesh.edges[edge_key].vertices[1]
-                a_z = mesh.vertices[a_vert_key].coord[2]
-                b_z = mesh.vertices[b_vert_key].coord[2]
-                #first case, we intersect a vertex and a edge
-                #we will hit this case twice for two edges if so
-                #the second time will just overwrite the coord
-                face_inter_count = 0
-                if a_z != b_z:
-                    if a_z == section_criteria:
-                        assert(point_a == None)
-                        point_a = (mesh.vertices[a_vert_key].coord[0], mesh.vertices[a_vert_key].coord[1])
-                        #if we already have found intersection, then quit
-                        if point_b != None:
-                            break
-                        else:
-                            vert_intersection = True
-
-                    elif b_z == section_criteria:
-                        assert(point_a == None)
-                        point_a = (mesh.vertices[b_vert_key].coord[0], mesh.vertices[b_vert_key].coord[1])
-                        #if we already have found intersection, then quit
-                        if point_b != None:
-                            break
-                        else:
-                            vert_intersection = True
-                    
-                    #second case, we might intersect a edge
-                    if a_z > b_z:
-                        if b_z < section_criteria < a_z:
-                            inter_test = True
-                        else:
-                            inter_test = False
-                    elif a_z < b_z:
-                        if a_z < section_criteria < b_z:
-                            inter_test = True
-                        else:
-                            inter_test = False
-
-                    #now we know if the edge is an intersection
-                    #this is if we have point_a and we can then calculate point_b
-                    if inter_test and point_b == None:
-                        point_b = lineInterpolate(mesh.vertices[a_vert_key].coord, 
-                                                  mesh.vertices[b_vert_key].coord,
-                                                  section_criteria)
-                        if vert_intersection:
-                            assert(point_a is not None)
-                            break
-                    #point_b is if we get here filled
-                    elif inter_test:
-                        point_a = lineInterpolate(mesh.vertices[a_vert_key].coord, 
-                                                  mesh.vertices[b_vert_key].coord,
-                                                  section_criteria)
-                        assert(point_b is not None)
-                        break
-
-                else:
-                    #the points are on the same z
-                    if a_z == section_criteria:
-                        #then return the line
-                        point_a = (mesh.vertices[a_vert_key].coord[0], mesh.vertices[a_vert_key].coord[1])
-                        point_b = (mesh.vertices[b_vert_key].coord[0], mesh.vertices[b_vert_key].coord[1])
-                        break
-
-            #if none of the points
-            #we must have two disimilar points
-            if(point_a and point_b):
-                if not args.packed:
-                    msp.add_line(point_a, point_b)
-                else:
-                    this_single_layer.addLineSegment(point_a, point_b)
-
-                three_a = (point_a[0], point_a[1], section_criteria)
-                three_b = (point_b[0], point_b[1], section_criteria)
-                all_msp.add_line(three_a, three_b)
-                loop_count += 1
-
-        if not args.packed:
+            for segment in layer.lines:
+                point_a = list(segment[0])    
+                point_b = list(segment[1])
+                msp.add_line(point_a, point_b)
+                all_msp.add_line(point_a, point_b)
+            #now save the filename out
             dwg.saveas(this_layer_path)
         else:
-            pass
+            layer_holder.addLayer(this_single_layer)
 
-        #print loop_count
-        section_criteria += layer_height
         layer_index += 1
 
     #save the composite dxf to top level dir

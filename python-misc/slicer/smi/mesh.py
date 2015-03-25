@@ -1,8 +1,5 @@
 
 
-def batman():
-    print "batman"
-
 class Mesh(object):
     def __init__(self):
         print "hi from Mesh"
