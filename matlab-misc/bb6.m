@@ -7,11 +7,11 @@ import mdo.*;
 d = datestr(clock);
 filename = regexprep(d, '\s|-|:', '_');
 
-CONTOUR = false;
+CONTOUR = true;
 if CONTOUR
-	a= 2;
-	b= 2;
-	grid_scale = 1e-1;
+	a= 10;
+	b= 10;
+	grid_scale = 1e0;
 	x = -a:grid_scale:a;
 	y = -b:grid_scale:b;
 	%special objective for use with array fun
@@ -28,7 +28,7 @@ if CONTOUR
 	saveas(mesh_fig, mesh_filename, 'fig')
 	con_fig = figure;
 	contour(x,y,out,50);
-	con_name = strcat('contour', filename);
+	con_name = strcat('contour_', filename);
 	saveas(con_fig, con_name, 'fig');
 	disp('All done')
 	exit;
