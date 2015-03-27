@@ -2,6 +2,5 @@ clear;
 close all
 import mdo.*
 
-new_plane = mdo.AirPlane;
 
-fmincon
+options = optimoptions('fmincon', 'Algorithm', 'sqp' ,'GradObj', 'on', 'GradConstr', 'on')
