@@ -1,16 +1,10 @@
-function [drag_total] = DragTotal(Aspect,Surface,varargin)
+function [drag_total] = DragTotal(Aspect,Surface)
 	%no need to extract the real part, sqrt works for imaginary
 	assert(Aspect >= 0);
 	assert(Surface >= 0);
 	chord = sqrt(Surface / Aspect);
 	beam = sqrt(Aspect * Surface);
-	if nargin == 3
-		%use a specific airplane
-		P = varargin{1};
-	else
-		%use the default airplane
-		P = mdo.AirPlane.(Aspect, Surface);
-	end
+	P = mdo.AirPlane(Aspect, Surface);
 	%note that the actual size of the airplane is not used,
 	%just its properties
 	W_0 = 4940;
@@ -21,10 +15,10 @@ function [drag_total] = DragTotal(Aspect,Surface,varargin)
 
 	Coeff_L = 2 * wing_total / (P.rho * P.Velocity^2 * Surface);
  
-	Coeff_f = 0.074 * (P.rho*P.Velocity*sqrt(P.S_area)/P.mu)^-0.2;
+	Coeff_f = 0.074 * (P.rho*P.Velocity*sqrt(Surface)/P.mu)^-0.2;
 
 	Coeff_D = (0.03062702 / Surface) ...
-			+ (P.k * Coeff_f * (P.S_area_wet/P.S_area)) ...
+			+ (P.k * Coeff_f * (P.S_wet_ratio)) ...
 			+ Coeff_L^2/(pi*Aspect*P.e);
 
 	drag_total = wing_total * Coeff_D/ Coeff_L;

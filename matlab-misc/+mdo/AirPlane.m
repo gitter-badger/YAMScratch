@@ -20,7 +20,7 @@ classdef AirPlane
 			assert(isscalar(S));
 			assert(isscalar(A));
 			obj.S_area = S;
-			obj.S_area_wet = 2.05 * S;
+			obj.S_wet_ratio = 2.05;
 			obj.beam = sqrt(A*S);
 			obj.chord = sqrt(S/A);
 			obj.Velocity = 35;
