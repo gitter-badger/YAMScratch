@@ -9,9 +9,9 @@ filename = regexprep(d, '\s|-|:', '_');
 
 CONTOUR = true;
 if CONTOUR
-	a= 10;
-	b= 10;
-	grid_scale = 1e0;
+	a= 5e0;
+	b= 5e0;
+	grid_scale = 7.5e-2;
 	x = -a:grid_scale:a;
 	y = -b:grid_scale:b;
 	%special objective for use with array fun
