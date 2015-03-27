@@ -1,10 +1,10 @@
-function [drag_total] = DragTotal(Aspect,Surface)
+function [drag_total] = DragTotal(Aspect,Surface,planeObj)
 	%no need to extract the real part, sqrt works for imaginary
 	assert(Aspect >= 0);
 	assert(Surface >= 0);
 	chord = sqrt(Surface / Aspect);
 	beam = sqrt(Aspect * Surface);
-	P = mdo.AirPlane(Aspect,Surface);
+	P = planeObj;
 	W_0 = 4940;
 	N_ult = 2.5;
 	t_over_c = 0.12;
