@@ -13,7 +13,7 @@ f3 = [radius/tand(60/2), 80-radius];
 f4 = [100 - (radius / tan((pi - atan(8/5))/2)), 5];
 
 temp = [f1; f2; f3; f4];
-plot(temp(:,1), temp(:,2), 'kd')
+%plot(temp(:,1), temp(:,2), 'kd')
 axis('equal')
 hold on
 
@@ -64,11 +64,11 @@ points_y = [points_y (radius*sin(theta_3) + f3(2)) ...
                      (radius*sin(theta_1) + f1(2)) ...
                      (radius*sin(theta_4) + f4(2)), 80];
 
-plot(points_x, points_y, 'b-')
+plot(points_x, points_y, 'k-')
 hold on
 
 %compute the offset for the last corner
-deposition_width = 1;
+deposition_width = 2.5;
 path_offset = deposition_width/2; 
 
 ur_x = 150 - path_offset/tan(atan(8/5)/2);
@@ -84,7 +84,7 @@ edge_path_y = [ur_y ((radius- path_offset)*sin(theta_3) + f3(2)) ...
                      ((radius- path_offset)*sin(theta_1) + f1(2)) ...
                      ((radius- path_offset)*sin(theta_4) + f4(2)), ur_y];
 
-plot(edge_path_x, edge_path_y, 'g-')
+plot(edge_path_x, edge_path_y, 'r--')
 hold on
 overlap = 0.95;
 bound_offset = deposition_width * overlap + path_offset;
@@ -100,30 +100,56 @@ inner_bound_y = [br_y ((radius- bound_offset)*sin(theta_3) + f3(2)) ...
                      ((radius+ bound_offset)*sin(theta_2) + f2(2)) ...
                      ((radius- bound_offset)*sin(theta_1) + f1(2)) ...
                      ((radius- bound_offset)*sin(theta_4) + f4(2)), br_y];
-plot(inner_bound_x, inner_bound_y, 'r')
+%plot(inner_bound_x, inner_bound_y, 'r')
 
 %now construct rastering parallel to x axis by brute force
 start_y = min(inner_bound_y);
 %the first fill raster is offset differently from the others to account for geometry
 start_y = start_y;
-section_criteria = start_y;
+y_value = start_y;
 end_y = max(inner_bound_y);
 
-while section_criteria < end_y
+%store the intersection points from each half of polygon
+right_side = [];
+left_side = [];
+
+while y_value < end_y
     %test the segments brute force wise
-    iter;
     intersections = [];
     for index = 1:length(inner_bound_x)-1
-
-        if (inner_bound_y(index) < section_criteria) &(inner_bound_y(index+1) > section_criteria)
-            intersections(end+1) = index;
+        if (inner_bound_y(index) < y_value) &(inner_bound_y(index+1) > y_value)
+            t = (y_value - inner_bound_y(index)) / (inner_bound_y(index+1) - inner_bound_y(index));
+            x_point = inner_bound_x(index) + t * (inner_bound_x(index+1) - inner_bound_x(index));
+            right_side(end+1, 1) = x_point;
+            right_side(end, 2) = y_value;
         %check the other direction
-        elseif (inner_bound_y(index) > section_criteria) & (inner_bound_y(index+1) < section_criteria)
-            intersections(end+1) = index;
+        elseif (inner_bound_y(index) > y_value) & (inner_bound_y(index+1) < y_value)
+            t = (y_value - inner_bound_y(index)) / (inner_bound_y(index+1) - inner_bound_y(index));
+            x_point = inner_bound_x(index) + t * (inner_bound_x(index+1) - inner_bound_x(index));
+            left_side(end+1, 1) = x_point;
+            left_side(end, 2) = y_value;
+
         end
                 
     end
-    disp(intersections)
-    section_criteria = section_criteria + deposition_width*overlap;
-    iter = iter +1;
+    %compute the intersection locations and draw
+    y_value = y_value + deposition_width*overlap;
+
 end
+
+%there really should be two endpoints for each slice
+assert(isequal(size(right_side), size(left_side)));
+
+full_path = [];
+for index = 1:length(left_side(:,1))
+    %alternate
+    if mod(index, 2)
+        full_path(end+1,:) = left_side(index,:);
+        full_path(end+1,:) = right_side(index,:);
+    else
+        full_path(end+1,:) = right_side(index,:);   
+        full_path(end+1,:) = left_side(index,:);  
+    end
+end
+
+plot(full_path(:,1), full_path(:,2), 'b-')
