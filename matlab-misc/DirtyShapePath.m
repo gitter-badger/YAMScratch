@@ -68,7 +68,7 @@ plot(points_x, points_y, 'k-')
 hold on
 
 %compute the offset for the last corner
-deposition_width = 2.5;
+deposition_width = 1;
 path_offset = deposition_width/2; 
 
 ur_x = 150 - path_offset/tan(atan(8/5)/2);
@@ -153,3 +153,4 @@ for index = 1:length(left_side(:,1))
 end
 
 plot(full_path(:,1), full_path(:,2), 'b-')
+legend('Final Shape', 'Outside Contour Path', 'Fill Tool Path')
