@@ -1,29 +1,52 @@
 classdef ComputeAirPlane < handle
-
+	properties
+		N_ult;
+		t_over_c;
+		W_0;
+		Rho;
+		Mu;
+		K;
+		E;
+		SWR;
+		V;
+	end
 	methods
-		function obj = ComputeAirPlane()
-
+		function obj = ComputeAirPlane(N_ult, t_over_c, W_0, rho, mu, k, e, S_wet_ratio, Velocity)
+			obj.N_ult = N_ult;
+			obj.t_over_c = t_over_c;
+			obj.W_0 = W_0;
+			obj.Rho = rho;
+			obj.Mu = mu;
+			obj.K = k;
+			obj.E = e;
+			obj.SWR = S_wet_ratio;
+			obj.V = Velocity;
 		end
 	end
 
 	methods(Static)
-		function [C_L] = CoefficientLift(S, W, rho, Velocity)
-			C_L = (2 * W) / (rho * Velocity^2 * Surface);
+		function [C_L] = s_CoefficientLift(S, A, rho, Velocity, W_0, N_ult, t_over_c )
+			W = W_0 + mdo.ComputeAirPlane.s_WingWeight(A, S, W_0, N_ult, t_over_c)
+			C_L = (2 * W) / (rho * Velocity^2 * S);
+			return
 		end
-		function [C_d] = CoefficientDrag()
-
-		end
-		function [C_f] = CoefficientFriction()
-
-		end
-		function [D] = DragForce(A,S)
-
-		end
-		function [val] = LandingConstraint(X)
-
+		function [grad_C_L] = s_gradCoefficientLift(S, W, del_W, Velocity, rho)
+			assert(isvector(del_W))
+			assert(length(del_W) == 2)
+			grad_C_L = (2/(rho * Velocity^2)) * ((del_W ./ S) - (W/S^2));
+			return
 		end
 
-		function [valid_weight] = wingWeight(A, S, W_0, N_ult, t_over_c)
+		function [C_d] = s_CoefficientDrag()
+
+		end
+
+		function [C_f] = s_CoefficientFriction()
+
+
+		end
+
+		function [valid_weight] = s_WingWeight(A, S, W_0, N_ult, t_over_c)
 			%Compute the wing weight using rearrangment of terms
 			% W_w = W - W_0
 			% W_w = 45.42*Surface + 8.71e-5 *(N_ult*b^3)/(S*(t/c))
@@ -48,7 +71,7 @@ classdef ComputeAirPlane < handle
 			return
 		end
 
-		function [grad] = gradientWingWeight(A, S, W_0, N_ult, t_over_c, varargin)
+		function [grad] = s_gradWingWeight(A, S, W_0, N_ult, t_over_c, varargin)
 			%first compute the weight
 			if nargin == 5
 				W = W_0 + mdo.ComputeAirPlane.wingWeight(A, S, W_0, N_ult, t_over_c)
@@ -69,6 +92,34 @@ classdef ComputeAirPlane < handle
 			top_part_S = k_1 +  k_4* ((1/2) * S^(-1/2) * W^(1/2));
 			bot_part_S = 1 - k_4 * (S^(1/2) * (1/2) * W^(-1/2));
 			grad(2,1) = top_part_S / bot_part_S;
+		end
+	end
+	%member methods
+	methods
+		function [Drag, gradient] = DragForce(self, X)
+			assert(isvector(X))
+			A = X(1);
+			S = X(2);
+			%compute the weight of the wing
+			W = obj.W_0 + obj.wingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c);
+
+			if naragout == 2
+				%capture the gradients
+
+			elseif naragout == 1
+
+				%Coeff_L = obj.CoefficientLift(S, W)
+			end
+			
+			return
+		end
+
+		function [val, gradient] = LandingConstraint(A, S, V_min, C_l_max)
+
+			if naragout == 2
+
+			end
+			return
 		end
 	end
 end
