@@ -25,20 +25,22 @@ classdef ComputeAirPlane < handle
 	end
 
 	methods(Static)
-		function [C_L] = s_CoefficientLift(S, A, rho, Velocity, W_0, N_ult, t_over_c )
-			W = W_0 + mdo.ComputeAirPlane.s_WingWeight(A, S, W_0, N_ult, t_over_c)
+		function [C_L] = s_CoefficientLift(S, W, rho, Velocity)
 			C_L = (2 * W) / (rho * Velocity^2 * S);
 			return
 		end
 		function [grad_C_L] = s_gradCoefficientLift(S, W, del_W, Velocity, rho)
 			assert(isvector(del_W))
 			assert(length(del_W) == 2)
-			grad_C_L = (2/(rho * Velocity^2)) * ((del_W ./ S) - (W/S^2));
+			k_1 = 2/(rho * Velocity^2)
+			k_2 = del_W ./ S
+			k_3 = [ W/S^2; 0]
+			grad_C_L = k_1 * (k_2 - k_3)
 			return
 		end
 
-		function [C_d] = s_CoefficientDrag()
-
+		function [C_d] = s_CoefficientDrag(A, S, S_wet_ratio, k, e, Coeff_L, Coeff_f)
+			C_d = (0.03062702/S) + k * C_f 
 		end
 
 		function [C_f] = s_CoefficientFriction()

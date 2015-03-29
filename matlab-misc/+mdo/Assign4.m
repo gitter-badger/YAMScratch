@@ -22,14 +22,22 @@ S = 27;
 cs_h = 1e-20;
 plane = mdo.ComputeAirPlane(N_ult, t_over_c, W_0, rho, mu, k, e, S_wet_ratio, Velocity);
 
-We = plane.s_WingWeight(A, S, plane.W_0, plane.N_ult, plane.t_over_c);
-del_W = plane.s_gradWingWeight(A, S, plane.W_0, plane.N_ult, plane.t_over_c, We);
-disp('A====================')
-dCLdA = imag(plane.s_CoefficientLift(S, A + 1i*cs_h, plane.Rho, plane.V, plane.W_0, plane.N_ult, plane.t_over_c )) /cs_h;
-disp('S====================')
-dCLdS = imag(plane.s_CoefficientLift(S + 1i*cs_h, A ,plane.Rho, plane.V, plane.W_0, plane.N_ult, plane.t_over_c )) /cs_h;
+W = plane.s_WingWeight(A, S, plane.W_0, plane.N_ult, plane.t_over_c)
 
-grad_CL = plane.s_gradCoefficientLift(S, We, del_W, Velocity, rho)
+W_iA = plane.s_WingWeight((A + 1i*cs_h), S, plane.W_0, plane.N_ult, plane.t_over_c)
+W_iS = plane.s_WingWeight(A, (S + 1i*cs_h), plane.W_0, plane.N_ult, plane.t_over_c)
+
+other_del_W = [(imag(W_iA) / cs_h) ; ...
+                (imag(W_iS) / cs_h) ]
+
+del_W = plane.s_gradWingWeight(A, S, plane.W_0, plane.N_ult, plane.t_over_c, W);
+
+del_W - other_del_W
+
+dCLdA = imag(plane.s_CoefficientLift(S, W_iA, plane.Rho, plane.V)) /cs_h;
+dCLdS = imag(plane.s_CoefficientLift(S + 1i*cs_h, W_iS, plane.Rho, plane.V)) /cs_h;
+
+grad_CL = plane.s_gradCoefficientLift(S, W, other_del_W, Velocity, rho)
 
 options = optimoptions('fmincon', 'Algorithm', 'sqp' ,'GradObj', 'on', 'GradConstr', 'on');
 
