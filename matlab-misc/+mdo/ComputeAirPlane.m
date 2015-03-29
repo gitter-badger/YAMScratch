@@ -58,16 +58,16 @@ classdef ComputeAirPlane < handle
 			end
 
 			k_1 = 45.42;
-			k_2 = 8.71e-5 * N_ult * sqrt(W_0) / t_over_c;
+			k_2 = (8.71e-5 * N_ult * sqrt(W_0)) / t_over_c;
 
-			k_3 = k_2 * S^(-5/2);
+			k_3 = k_2 * S^(1/2);
 			top_part_A = k_3 * ((3/2) * A^(1/2) * W^(1/2));
 			bot_part_A = 1 - k_3 * (A^(3/2) * (1/2) * W^(-1/2));
 			grad(1,1) = top_part_A / bot_part_A;
 
 			k_4 = k_2 * A^(3/2);
-			top_part_S = k_1 +  k_4* ((-5/2) * S^(-7/2) * W^(1/2));
-			bot_part_S = 1 - k_4 * (S^(-5/2) * (1/2) * W^(-1/2));
+			top_part_S = k_1 +  k_4* ((1/2) * S^(-1/2) * W^(1/2));
+			bot_part_S = 1 - k_4 * (S^(1/2) * (1/2) * W^(-1/2));
 			grad(2,1) = top_part_S / bot_part_S;
 		end
 	end
