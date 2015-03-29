@@ -44,9 +44,16 @@ classdef ComputeAirPlane < handle
 			C_d = (0.03062702/S) + k * C_f 
 		end
 
-		function [C_f] = s_CoefficientFriction()
+		function [C_f] = s_CoefficientFriction(S, rho, Velocity, mu)
+			C_f = 0.074 * (rho*Velocity*sqrt(S)/mu)^-0.2;
+			return
+		end
 
-
+		function [grad_C_f] = s_gradCoefficientFriction(S, rho, Velocity, mu)
+			%does not depend on A
+			grad_C_f(1,1) = 0;
+			grad_C_f(2,1) = 0.074 * ((rho * Velocity)/mu)^(-0.2) * (-1/10) * S^(-11/10);
+			return
 		end
 
 		function [valid_weight] = s_WingWeight(A, S, W_0, N_ult, t_over_c)

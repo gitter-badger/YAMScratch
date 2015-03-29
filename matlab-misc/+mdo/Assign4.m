@@ -16,7 +16,7 @@ Velocity = 35;
 V_max = 22;         %maximum landing velocity
 C_L_max = 2;        %maximum coefficient of lift at landing
 
-%test the Coefficeint of lift
+%test the Coefficient of lift
 A = 13;
 S = 27;
 cs_h = 1e-20;
@@ -26,8 +26,13 @@ W = W_0 + plane.s_WingWeight(A, S, plane.W_0, plane.N_ult, plane.t_over_c);
 
 del_W = 0 + plane.s_gradWingWeight(A, S, plane.W_0, plane.N_ult, plane.t_over_c, W);
 
-grad_CL = plane.s_gradCoefficientLift(S, W, del_W, Velocity, rho)
+grad_CL = plane.s_gradCoefficientLift(S, W, del_W, plane.V, plane.Rho)
 
+grad_Cf = plane.s_gradCoefficientFriction(S, plane.Rho, plane.V, plane.Mu)
+
+dCFdS = imag(plane.s_CoefficientFriction(S + 1i*cs_h, plane.Rho, plane.V, plane.Mu)) / cs_h;
+
+grad_Cf(1) - dCFdS
 
 options = optimoptions('fmincon', 'Algorithm', 'sqp' ,'GradObj', 'on', 'GradConstr', 'on');
 
