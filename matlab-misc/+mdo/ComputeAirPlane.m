@@ -32,12 +32,11 @@ classdef ComputeAirPlane < handle
 		function [grad_C_L] = s_gradCoefficientLift(S, W, del_W, Velocity, rho)
 			assert(isvector(del_W))
 			assert(length(del_W) == 2)
-			W
-			k_1 = 2/(rho * Velocity^2)
+			k_1 = 2/(rho * Velocity^2);
 			%get partial with respect to a
 			%grad_C_L(1,1) = k_1 * (del_W(1)/S)
 			%grad_C_L(2,1) = k_1 * (del_W(2)/S - (W / S^2))
-			grad_C_L = k_1 * (del_W ./S - [0; W/S^2])
+			grad_C_L = k_1 * (del_W ./S - [0; W/S^2]);
 			return
 		end
 
