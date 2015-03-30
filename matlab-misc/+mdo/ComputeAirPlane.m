@@ -41,16 +41,18 @@ classdef ComputeAirPlane < handle
         end
 
         function [C_d] = s_CoefficientDrag(A, S, S_wet_ratio, k, e, C_L, C_f)
-            C_d = (0.03062702/S) + k * C_f *S_wet_ratio + C_L ^2 / ();
+            C_d = (0.03062702/S) + k * C_f *S_wet_ratio + C_L ^2 / (pi*A*e);
             return
         end
 
-        function [grad_C_d] = s_gradCoefficientDrag(A, S, S_wet_ratio, k, e C_f, del_C_f, C_L, del_C_L)
+        function [grad_C_d] = s_gradCoefficientDrag(A, S, S_wet_ratio, k, e, C_f, del_C_f, C_L, del_C_L)
             assert(isvector(del_C_f));
             assert(length(del_C_f) == 2);
             assert(isvector(del_C_L));
             assert(length(del_C_L) == 2);
-            grad_C_d = [0 ; -0.03062702/S^2]  + (k * S_wet_ratio * del_C_f) + (1/(pi*e)) * ((2*C_L * del_C_L / A) + [-C_L^2/A^2; 0]);
+            grad_C_d(1,1) = 0 + (k * S_wet_ratio * del_C_f(1))  + ( (2* C_L* del_C_L(1) / A ) - (C_L^2/A^2)) / (pi* e)
+            grad_C_d(2,1) = (-0.03062702/S^2) + (k*S_wet_ratio*del_C_f(2)) + (1/(pi*e*A)) * (2* C_L * del_C_L(2))
+            %grad_C_d = [0 ; -0.03062702/S^2]  + (k * S_wet_ratio * del_C_f) + (1/(pi*e)) * ((2*C_L * del_C_L / A) + [-C_L^2/A^2; 0]);
             return
         end
 

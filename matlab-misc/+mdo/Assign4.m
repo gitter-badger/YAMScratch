@@ -26,11 +26,32 @@ W = W_0 + plane.s_WingWeight(A, S, plane.W_0, plane.N_ult, plane.t_over_c);
 
 del_W = 0 + plane.s_gradWingWeight(A, S, plane.W_0, plane.N_ult, plane.t_over_c, W);
 
-grad_CL = plane.s_gradCoefficientLift(S, W, del_W, plane.V, plane.Rho)
+W_iA = W_0 + plane.s_WingWeight(A + 1i*cs_h, S, plane.W_0, plane.N_ult, plane.t_over_c);
+W_iS = W_0 + plane.s_WingWeight(A , S + 1i*cs_h, plane.W_0, plane.N_ult, plane.t_over_c);
 
-grad_Cf = plane.s_gradCoefficientFriction(S, plane.Rho, plane.V, plane.Mu)
+
+C_L_iA = plane.s_CoefficientLift(S, W_iA, plane.Rho, plane.V);
+C_L_iS = plane.s_CoefficientLift(S + 1i*cs_h, W_iS, plane.Rho, plane.V);
+C_L = plane.s_CoefficientLift(S, W, plane.Rho, plane.V);
+
+grad_CL = plane.s_gradCoefficientLift(S, W, del_W, plane.V, plane.Rho);
+
+C_f_iA= plane.s_CoefficientFriction(S, plane.Rho, plane.V, plane.Mu);
+C_f_iS = plane.s_CoefficientFriction(S + 1i*cs_h, plane.Rho, plane.V, plane.Mu);
+C_f = plane.s_CoefficientFriction(S, plane.Rho, plane.V, plane.Mu);
 
 
+grad_Cf = plane.s_gradCoefficientFriction(S, plane.Rho, plane.V, plane.Mu);
+%===============================================
+dCDdA = imag(plane.s_CoefficientDrag(A + 1i*cs_h, S, plane.SWR, plane.K, plane.E, C_L_iA, C_f_iA)) / cs_h;
+
+dCDdS = imag(plane.s_CoefficientDrag(A , S + 1i*cs_h, plane.SWR, plane.K, plane.E, C_L_iS, C_f_iS)) / cs_h;
+
+grad_C_d = plane.s_gradCoefficientDrag(A, S, plane.SWR, plane.K, plane.E, C_f, grad_Cf, C_L, grad_CL)
+
+other_grad = [dCDdA ; dCDdS]
+
+grad_C_d - other_grad
 options = optimoptions('fmincon', 'Algorithm', 'sqp' ,'GradObj', 'on', 'GradConstr', 'on');
 
 
