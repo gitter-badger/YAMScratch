@@ -43,19 +43,20 @@ C_f = plane.s_CoefficientFriction(S, plane.Rho, plane.V, plane.Mu);
 
 grad_Cf = plane.s_gradCoefficientFriction(S, plane.Rho, plane.V, plane.Mu);
 %===============================================
-dCDdA = imag(plane.s_CoefficientDrag(A + 1i*cs_h, S, plane.SWR, plane.K, plane.E, C_L_iA, C_f_iA)) / cs_h;
+C_d_iA = plane.s_CoefficientDrag(A + 1i*cs_h, S, plane.SWR, plane.K, plane.E, C_L_iA, C_f_iA);
+C_d_iS = plane.s_CoefficientDrag(A , S + 1i*cs_h, plane.SWR, plane.K, plane.E, C_L_iS, C_f_iS);
 
-dCDdS = imag(plane.s_CoefficientDrag(A , S + 1i*cs_h, plane.SWR, plane.K, plane.E, C_L_iS, C_f_iS)) / cs_h;
+grad_C_d = plane.s_gradCoefficientDrag(A, S, plane.SWR, plane.K, plane.E, C_f, grad_Cf, C_L, grad_CL);
 
-grad_C_d = plane.s_gradCoefficientDrag(A, S, plane.SWR, plane.K, plane.E, C_f, grad_Cf, C_L, grad_CL)
+dDdA = imag(plane.DragForce([A + 1i* cs_h;S])) / cs_h;
+dDdS = imag(plane.DragForce([A; S + 1i* cs_h])) / cs_h;
 
-other_grad = [dCDdA ; dCDdS]
+[drag,grad_DF] = plane.DragForce([A; S]);
 
-grad_C_d - other_grad
+other = [dDdA; dDdS];
+grad_DF - other
+
 options = optimoptions('fmincon', 'Algorithm', 'sqp' ,'GradObj', 'on', 'GradConstr', 'on');
-
-
-
 fmin_obj = @plane.DragForce;
 
 nonlcon = @mdo.LandingConstraint;

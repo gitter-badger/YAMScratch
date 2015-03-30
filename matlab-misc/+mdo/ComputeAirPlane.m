@@ -50,8 +50,8 @@ classdef ComputeAirPlane < handle
             assert(length(del_C_f) == 2);
             assert(isvector(del_C_L));
             assert(length(del_C_L) == 2);
-            grad_C_d(1,1) = 0 + (k * S_wet_ratio * del_C_f(1))  + ( (2* C_L* del_C_L(1) / A ) - (C_L^2/A^2)) / (pi* e)
-            grad_C_d(2,1) = (-0.03062702/S^2) + (k*S_wet_ratio*del_C_f(2)) + (1/(pi*e*A)) * (2* C_L * del_C_L(2))
+            grad_C_d(1,1) = 0 + (k * S_wet_ratio * del_C_f(1))  + ( (2* C_L* del_C_L(1) / A ) - (C_L^2/A^2)) / (pi* e);
+            grad_C_d(2,1) = (-0.03062702/S^2) + (k*S_wet_ratio*del_C_f(2)) + (1/(pi*e*A)) * (2* C_L * del_C_L(2));
             %grad_C_d = [0 ; -0.03062702/S^2]  + (k * S_wet_ratio * del_C_f) + (1/(pi*e)) * ((2*C_L * del_C_L / A) + [-C_L^2/A^2; 0]);
             return
         end
@@ -118,19 +118,25 @@ classdef ComputeAirPlane < handle
     end
     %member methods
     methods
-        function [Drag, gradient] = DragForce(self, X)
+        function [varargout] = DragForce(obj, X)
             assert(isvector(X))
             A = X(1);
             S = X(2);
             %compute the weight of the wing
-            W = obj.W_0 + obj.wingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c);
-
-            if naragout == 2
+            W = obj.W_0 + obj.s_WingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c);
+            C_f = obj.s_CoefficientFriction(S, obj.Rho, obj.V, obj.Mu);
+            C_L = obj.s_CoefficientLift(S, W, obj.Rho, obj.V);
+            C_d = obj.s_CoefficientDrag(A, S, obj.SWR, obj.K, obj.E, C_L, C_f);
+            %compute the objective function
+            varargout{1} = W * C_d / C_L;
+            if nargout == 2
                 %capture the gradients
+                del_W = 0 + obj.s_gradWingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c, W);
+                del_C_f = obj.s_gradCoefficientFriction(S, obj.Rho, obj.V, obj.Mu);
+                del_C_L = obj.s_gradCoefficientLift(S, W, del_W, obj.V, obj.Rho);
+                del_C_d = obj.s_gradCoefficientDrag(A, S, obj.SWR, obj.K, obj.E, C_f, del_C_f, C_L, del_C_L);
+                varargout{2} = ((del_W .* C_d + del_C_d .* W) ./ C_L) - (del_C_L .* W .* C_d) ./ C_L^2;
 
-            elseif naragout == 1
-
-                %Coeff_L = obj.CoefficientLift(S, W)
             end
             
             return
