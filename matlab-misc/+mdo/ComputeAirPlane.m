@@ -23,7 +23,6 @@ classdef ComputeAirPlane < handle
             obj.V = Velocity;
         end
     end
-
     methods(Static)
         function [C_L] = s_CoefficientLift(S, W, rho, Velocity)
             C_L = (2 * W) / (rho * Velocity^2 * S);
@@ -151,4 +150,3 @@ classdef ComputeAirPlane < handle
         end
     end
 end
-
