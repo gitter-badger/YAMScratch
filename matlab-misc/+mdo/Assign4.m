@@ -30,9 +30,6 @@ grad_CL = plane.s_gradCoefficientLift(S, W, del_W, plane.V, plane.Rho)
 
 grad_Cf = plane.s_gradCoefficientFriction(S, plane.Rho, plane.V, plane.Mu)
 
-dCFdS = imag(plane.s_CoefficientFriction(S + 1i*cs_h, plane.Rho, plane.V, plane.Mu)) / cs_h;
-
-grad_Cf(1) - dCFdS
 
 options = optimoptions('fmincon', 'Algorithm', 'sqp' ,'GradObj', 'on', 'GradConstr', 'on');
 
