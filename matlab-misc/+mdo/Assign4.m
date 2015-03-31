@@ -40,14 +40,16 @@ AA(Constraint_out < 0) = NaN;
 SS(Constraint_out < 0) = NaN;
 plot(AA(:), SS(:), 'r*')
 
-X_0 = [20,30]
-lb = [1; 1]
-ub= [inf; inf]
+X_0 = [20,30];
+lb = [1; 1];
+ub= [inf; inf];
 options = optimoptions('fmincon', 'Algorithm', 'sqp' ,'GradObj', 'on', 'GradConstr', 'on');
 
 fmin_obj = @(X)(plane.m_DragForce(X(1), X(2)));
 
-nonlincon = @(X)(plane.m_nonLinearConstraint(X(1), X(2), V_min, C_L_max););
+nonlincon = @(X)(plane.m_nonLinearConstraint(X(1), X(2), V_min, C_L_max));
 
 
 [x,fval, exitflag, output, lambda] = fmincon(fmin_obj,X_0,[], [], [], [], lb, ub, nonlincon, options );
+hold on;
+plot(x(1), x(2), 'kd');
