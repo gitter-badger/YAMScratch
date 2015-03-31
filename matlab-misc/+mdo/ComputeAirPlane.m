@@ -117,10 +117,7 @@ classdef ComputeAirPlane < handle
     end
     %member methods
     methods
-        function [varargout] = DragForce(obj, X)
-            assert(isvector(X))
-            A = X(1);
-            S = X(2);
+        function [varargout] = m_DragForce(obj, A, S)
             %compute the weight of the wing
             W = obj.W_0 + obj.s_WingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c);
             C_f = obj.s_CoefficientFriction(S, obj.Rho, obj.V, obj.Mu);
@@ -141,12 +138,34 @@ classdef ComputeAirPlane < handle
             return
         end
 
-        function [val, gradient] = LandingConstraint(A, S, V_min, C_l_max)
-
-            if naragout == 2
-
+        function [varargout] = m_LandingConstraint(obj, A, S, V_min, C_L_max)
+            W = obj.W_0 + obj.s_WingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c);
+            cineq = (2 * W) / (obj.Rho * V_min^2 * C_L_max) - S;
+            varargout{1} = cineq;
+            if nargout == 2
+                del_W = obj.s_gradWingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c, W);
+                varargout{2} = (2 * del_W) ./ (obj.Rho * V_min^2 * C_L_max) - [ 0; 1]
             end
             return
         end
+
+        function [varargout] = m_nonLinearConstraint(obj, A, S, V_min, C_L_max)
+            varargout{1} = [];
+            if nargout == 2
+                cineq = obj.m_LandingConstraint(A, S, V_min, C_L_max);
+                varargout{2} = cineq; 
+            elseif nargout >= 3
+                if nargout >= 4;
+                    [cineq, del_cineq] = obj.m_LandingConstraint(A, S, V_min, C_L_max);
+                    varargout{4} = del_cineq
+                else
+                    cineq = obj.m_LandingConstraint(A, S, V_min, C_L_max);    
+                end
+                varargout{2} = cineq; 
+                varargout{3} = [];
+            end
+            return
+        end
+
     end
 end
