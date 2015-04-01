@@ -1,3 +1,4 @@
+classdef ComputeAirPlane < handle & mdo.MajorIterationHistory
     properties
         N_ult;
         t_over_c;
