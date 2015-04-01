@@ -71,8 +71,10 @@ ContourDragTotal(all_algs_fig, steep_log, 'kd-', x_star);
 ContourDragTotal(all_algs_fig, congj_log, 'ro-.');
 ContourDragTotal(all_algs_fig, qn_log, 'b<--');
 figure(all_algs_fig);
-legend1 = legend('Drag = f(S,A)', 'x_{*}','Steepest descent', 'Conjugate gradient', 'Quasi Newton BFGS');
+legend1 = legend('Drag = f(A,S)', 'x_{*}','Steepest descent', 'Conjugate gradient', 'Quasi Newton BFGS');
 set(legend1, 'Position',[0.7 0.5 0.15 0.067]);
+xlabel('A')
+ylabel('S')
 
 both_gradients_fig = figure;
 gradients_fig = subplot(1,2,1);

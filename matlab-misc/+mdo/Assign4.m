@@ -15,12 +15,11 @@ Velocity = 35;
 
 V_min = 22;         %maximum landing velocity
 C_L_max = 2;        %maximum coefficient of lift at landing
-
-
+%===========================================================
+%The plane object that holds all of the methods
 plane = mdo.ComputeAirPlane(N_ult, t_over_c, W_0, rho, mu, k, e, S_wet_ratio, Velocity);
-
-
-
+%===========================================================
+%plot the contour and feasible region
 a = [5:1e0:30]; % A
 s = [5:1e0:40]; % S
 [AA,SS] = meshgrid(a,s);
@@ -34,11 +33,12 @@ hold on
 
 fun = @(aspect, surface)(plane.m_LandingConstraint(aspect, surface, V_min, C_L_max));
 
-Constraint_out = arrayfun(fun, AA, SS);
+[scatA, scatS] = meshgrid([5:0.1:30],[5:0.1:40]);
+Constraint_out = arrayfun(fun, scatA, scatS);
 
-AA(Constraint_out < 0) = NaN; 
-SS(Constraint_out < 0) = NaN;
-plot(AA(:), SS(:), 'r*')
+scatA(Constraint_out < 0) = NaN; 
+scatS(Constraint_out < 0) = NaN;
+scatter(scatA(:), scatS(:), 3, 'filled')
 
 X_0 = [20,30];
 lb = [1; 1];
@@ -48,7 +48,6 @@ options = optimoptions('fmincon', 'Algorithm', 'sqp' ,'GradObj', 'on', 'GradCons
 fmin_obj = @(X)(plane.m_DragForce(X(1), X(2)));
 
 nonlincon = @(X)(plane.m_nonLinearConstraint(X(1), X(2), V_min, C_L_max));
-
 
 [x,fval, exitflag, output, lambda] = fmincon(fmin_obj,X_0,[], [], [], [], lb, ub, nonlincon, options );
 hold on;

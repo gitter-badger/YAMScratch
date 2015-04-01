@@ -55,15 +55,15 @@ classdef ComputeAirPlane < handle
             return
         end
 
-        function [C_f] = s_CoefficientFriction(S, rho, Velocity, mu)
-            C_f = 0.074 * (rho*Velocity*sqrt(S)/mu)^-0.2;
+        function [C_f] = s_CoefficientFriction(A, S, rho, Velocity, mu)
+            C_f = 0.074 * (rho*Velocity*sqrt(S/ A)/mu)^-0.2;
             return
         end
 
-        function [grad_C_f] = s_gradCoefficientFriction(S, rho, Velocity, mu)
+        function [grad_C_f] = s_gradCoefficientFriction(A, S, rho, Velocity, mu)
             %does not depend on A
-            grad_C_f(1,1) = 0;
-            grad_C_f(2,1) = 0.074 * ((rho * Velocity)/mu)^(-0.2) * (-1/10) * S^(-11/10);
+            grad_C_f(1,1) = 0.074 * ((rho * Velocity * sqrt(S))/mu)^(-0.2) * (1/10) * A ^(-9/10);
+            grad_C_f(2,1) = 0.074 * ((rho * Velocity* sqrt(1/A))/mu)^(-0.2) * (-1/10) * S^(-11/10);
             return
         end
 
@@ -120,7 +120,7 @@ classdef ComputeAirPlane < handle
         function [varargout] = m_DragForce(obj, A, S)
             %compute the weight of the wing
             W = obj.W_0 + obj.s_WingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c);
-            C_f = obj.s_CoefficientFriction(S, obj.Rho, obj.V, obj.Mu);
+            C_f = obj.s_CoefficientFriction(A, S, obj.Rho, obj.V, obj.Mu);
             C_L = obj.s_CoefficientLift(S, W, obj.Rho, obj.V);
             C_d = obj.s_CoefficientDrag(A, S, obj.SWR, obj.K, obj.E, C_L, C_f);
             %compute the objective function
@@ -128,7 +128,7 @@ classdef ComputeAirPlane < handle
             if nargout == 2
                 %capture the gradients
                 del_W = 0 + obj.s_gradWingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c, W);
-                del_C_f = obj.s_gradCoefficientFriction(S, obj.Rho, obj.V, obj.Mu);
+                del_C_f = obj.s_gradCoefficientFriction(A, S, obj.Rho, obj.V, obj.Mu);
                 del_C_L = obj.s_gradCoefficientLift(S, W, del_W, obj.V, obj.Rho);
                 del_C_d = obj.s_gradCoefficientDrag(A, S, obj.SWR, obj.K, obj.E, C_f, del_C_f, C_L, del_C_L);
                 varargout{2} = ((del_W .* C_d + del_C_d .* W) ./ C_L) - (del_C_L .* W .* C_d) ./ C_L^2;

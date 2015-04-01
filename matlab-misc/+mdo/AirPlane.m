@@ -9,7 +9,7 @@ classdef AirPlane
         e = 0.96;           %Oswald efficiency factor
     end
     properties
-        S_area_wet;
+        S_wet_ratio;
         S_area;
         beam;
         chord;
