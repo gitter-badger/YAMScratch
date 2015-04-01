@@ -31,8 +31,8 @@ classdef MajorIterationHistory < handle
         end
         function appendIteration(obj, x, g, fevals, dfevals)
             obj.total_iterations = obj.total_iterations + 1;
-            obj(end+1, :) = x;
-            obj(end+1, :) = g;
+            obj.x(end+1, :) = x;
+            obj.g(end+1, :) = g;
             obj.f(end+1, 1) = f;
             obj.fevals(end+1, 1) = fevals;
             obj.dfevals(end+1, 1) = dfevals;
