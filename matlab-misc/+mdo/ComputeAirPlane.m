@@ -1,4 +1,3 @@
-classdef ComputeAirPlane < handle
     properties
         N_ult;
         t_over_c;
