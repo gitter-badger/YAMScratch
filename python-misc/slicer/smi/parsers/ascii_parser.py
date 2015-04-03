@@ -13,9 +13,9 @@ def parseTextSTL(filename, quaternion = None, scale = 1):
 	m = smi.SimpleMesh()
 	vert_view = m.vertices.viewkeys()
 	line = f.next()
-	print line
+	
 
 	print "="*50
-	for line in f:
-		print line
+	# for line in f:
+	# 	print line
 	return m
