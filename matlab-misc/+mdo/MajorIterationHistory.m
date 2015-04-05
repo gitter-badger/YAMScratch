@@ -15,6 +15,18 @@ classdef MajorIterationHistory < handle
             obj.total_iterations = 0;
         end
         function editIteration(obj, k, f, x, g, fevals, dfevals, varargin)
+        % Purpose:
+        %     Change a specific row in each of the logging fields
+        % Inputs:
+        %     k - the row index we want to change
+        %     f - a scalar usually representing the function value
+        %     x - a vector of design variables
+        %     g - a vector holding the gradient
+        %     fevals - a scalar counting number of times the function has been evaluated
+        %     defeval - a scalar counting the number of times the gradient has been evaluated
+        % Outputs:
+        %   None
+
             %convert the vector to a column vector
             assert(isvector(x));
             assert(isvector(g));
@@ -34,6 +46,10 @@ classdef MajorIterationHistory < handle
             end
         end
         function appendIteration(obj, x, g, fevals, dfevals)
+        %Purpose:
+        %   Add some information to the end of each column, this is a bad idea because
+        %   the columns could be different lengths and currently this is not checked for
+
             obj.total_iterations = obj.total_iterations + 1;
             obj.x(end+1, :) = x;
             obj.g(end+1, :) = g;
