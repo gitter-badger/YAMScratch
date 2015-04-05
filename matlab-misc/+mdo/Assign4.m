@@ -35,16 +35,22 @@ hold on
 
 fun = @(aspect, surface)(plane1.m_LandingConstraint(aspect, surface, V_min, C_L_max));
 
-[scatA, scatS] = meshgrid([5:0.1:30],[5:0.1:40]);
-Constraint_out = arrayfun(fun, scatA, scatS);
+% [scatA, scatS] = meshgrid([5:0.1:30],[5:0.1:40]);
+% Constraint_out = arrayfun(fun, scatA, scatS);
 
-scatA(Constraint_out < 0) = NaN; 
-scatS(Constraint_out < 0) = NaN;
-scatter(scatA(:), scatS(:), 3, 'filled')
+% scatA(Constraint_out < 0) = NaN; 
+% scatS(Constraint_out < 0) = NaN;
+% scatter(scatA(:), scatS(:), 3, 'filled')
 
 %============================================================
 %           LOG BARRIER METHOD                              %
 %============================================================
+step = 1e-2;
+[Close_A, Close_S] = meshgrid(13:step:14, 12:step:13);
+[phi, grad_phi] = mdo.LogBarrierFactory(plane1, V_min, C_L_max);
+temp_out = arrayfun(phi, Close_A, Close_S);
+barrier_fig = figure;
+contour(Close_A, Close_S, temp_out, 50)
 
 %============================================================
 %           FMINCON WITH SQP                                %
@@ -61,3 +67,5 @@ nonlincon = @(X)(plane2.m_nonLinearConstraint(X(1), X(2), V_min, C_L_max));
 
 hold on;
 plot(x(1), x(2), 'kd');
+hold on
+
