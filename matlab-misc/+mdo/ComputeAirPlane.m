@@ -143,7 +143,7 @@ classdef ComputeAirPlane < handle & mdo.MajorIterationHistory
             varargout{1} = cineq;
             if nargout == 2
                 del_W = obj.s_gradWingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c, W);
-                varargout{2} = (2 * del_W) ./ (obj.Rho * V_min^2 * C_L_max) - [ 0; 1]
+                varargout{2} = (2 * del_W) ./ (obj.Rho * V_min^2 * C_L_max) - [ 0; 1];
             end
             return
         end
@@ -156,7 +156,7 @@ classdef ComputeAirPlane < handle & mdo.MajorIterationHistory
             elseif nargout >= 3
                 if nargout >= 4;
                     [cineq, del_cineq] = obj.m_LandingConstraint(A, S, V_min, C_L_max);
-                    varargout{4} = del_cineq
+                    varargout{4} = del_cineq;
                 else
                     cineq = obj.m_LandingConstraint(A, S, V_min, C_L_max);    
                 end
@@ -165,6 +165,5 @@ classdef ComputeAirPlane < handle & mdo.MajorIterationHistory
             end
             return
         end
-
     end
 end
