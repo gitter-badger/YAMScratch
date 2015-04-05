@@ -8,12 +8,13 @@ classdef MajorIterationHistory < handle
         g;
         fevals;
         dfevals;
+        optimality;
     end
     methods
         function obj = MajorIterationHistory()
             obj.total_iterations = 0;
         end
-        function editIteration(obj, k, f, x, g, fevals, dfevals)
+        function editIteration(obj, k, f, x, g, fevals, dfevals, varargin)
             %convert the vector to a column vector
             assert(isvector(x));
             assert(isvector(g));
@@ -28,6 +29,9 @@ classdef MajorIterationHistory < handle
             obj.f(k, 1) = f;
             obj.fevals(k, 1) = fevals;
             obj.dfevals(k, 1) = dfevals;
+            if nargin == 8
+                obj.optimality(k,1) = varargin{1};
+            end
         end
         function appendIteration(obj, x, g, fevals, dfevals)
             obj.total_iterations = obj.total_iterations + 1;
