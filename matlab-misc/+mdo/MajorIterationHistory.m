@@ -45,7 +45,7 @@ classdef MajorIterationHistory < handle
                 obj.optimality(k,1) = varargin{1};
             end
         end
-        function appendIteration(obj, x, g, fevals, dfevals)
+        function appendIteration(obj, f, x, g, fevals, dfevals)
         %Purpose:
         %   Add some information to the end of each column, this is a bad idea because
         %   the columns could be different lengths and currently this is not checked for
