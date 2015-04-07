@@ -1,4 +1,4 @@
-function [x_star, logObj] = QuasiNewtonBFGS(linesearch, obj, grad, x0, e_g, e_a, e_r, logObj, ls_parameters)
+function [x_star,Hessian, logObj] = QuasiNewtonBFGS(linesearch, obj, grad, x0, e_g, e_a, e_r, logObj, ls_parameters, varargin)
 %Purpose: returns the location of a local minimum and a history object
 %Inputs:
 %	obj - a function handle for the objective
@@ -31,7 +31,11 @@ function [x_star, logObj] = QuasiNewtonBFGS(linesearch, obj, grad, x0, e_g, e_a,
 	gk = grad(x0);
 	%store the very first gradient in local memory
 	grad_init = gk;
-	Vk = eye(N);
+	if nargin == 10
+		Vk = varargin{1}
+	else
+		Vk = eye(N);
+	end
 	%start off
 	xk = x0;
 	k = 1;
@@ -76,8 +80,7 @@ function [x_star, logObj] = QuasiNewtonBFGS(linesearch, obj, grad, x0, e_g, e_a,
 			% 	r = false;
 			% end
 		if DEBUG
-
-			norm(gk) / (tol * norm(grad_init))
+			condition = norm(gk) / (tol * norm(grad_init))
 		end
 		%This condition only relies on the gradient
 		if (norm(gk) < tol * norm(grad_init))
@@ -94,5 +97,6 @@ function [x_star, logObj] = QuasiNewtonBFGS(linesearch, obj, grad, x0, e_g, e_a,
 
 	end
 	x_star = xk;
+	Hessian = Vk;
 	return
 end
