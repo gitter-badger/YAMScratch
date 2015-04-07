@@ -133,7 +133,6 @@ classdef ComputeAirPlane < handle & mdo.MajorIterationHistory
                 del_C_d = obj.s_gradCoefficientDrag(A, S, obj.SWR, obj.K, obj.E, C_f, del_C_f, C_L, del_C_L);
                 varargout{2} = ((del_W .* C_d + del_C_d .* W) ./ C_L) - (del_C_L .* W .* C_d) ./ C_L^2;
             end
-            
             return
         end
 

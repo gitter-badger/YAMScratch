@@ -12,7 +12,8 @@ function [x_star, logObj] = QuasiNewtonBFGS(linesearch, obj, grad, x0, e_g, e_a,
 %Ouputs:
 %	x_star - best guess of local minimum meeting the convergence criteria passed in
 %	logObj - used to return the logging object in case a handle subclass is not used
-
+	
+	DEBUG = true
 	%sanity checks
 	assert(isvector(x0));
 	%get the dimensionality
@@ -35,11 +36,15 @@ function [x_star, logObj] = QuasiNewtonBFGS(linesearch, obj, grad, x0, e_g, e_a,
 	xk = x0;
 	k = 1;
 	logObj.editIteration(k, f_prev, xk, gk, 1, 1);
-	Vk = Vk * 1;
+	Vk = Vk ./ norm(gk);
 	while true
 		pk = -(Vk * gk);
+		if DEBUG
+			disp(k)
+			disp(xk)
+		end
 		%perform a line search
-		[step, fnew, num_f_evals, num_df_evals] = linesearch(obj, grad, xk, pk, mu_1, mu_2, (alpha_init / (norm(pk))), (alpha_max / norm(pk)), max_iter);
+		[step, fnew, num_f_evals, num_df_evals] = linesearch(obj, grad, xk, pk, mu_1, mu_2, alpha_init , alpha_max, max_iter);
 		%update for next iteration and log
 		k = k + 1;
 		p_prev = pk;
@@ -70,6 +75,10 @@ function [x_star, logObj] = QuasiNewtonBFGS(linesearch, obj, grad, x0, e_g, e_a,
 			% else 
 			% 	r = false;
 			% end
+		if DEBUG
+
+			norm(gk) / (tol * norm(grad_init))
+		end
 		%This condition only relies on the gradient
 		if (norm(gk) < tol * norm(grad_init))
 			r = true;
