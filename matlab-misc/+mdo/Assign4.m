@@ -18,7 +18,7 @@ Velocity = 35;
 V_min = 22;         %maximum landing velocity
 C_L_max = 2;        %maximum coefficient of lift at landing
 
-X_0 = [20; 30];
+X_0 = [10; 35];
 %===========================================================
 %The plane object that holds all of the methods
 plane7 = mdo.ComputeAirPlane(N_ult, t_over_c, W_0, rho, mu, k, e, S_wet_ratio, Velocity);
@@ -37,12 +37,12 @@ hold on
 
 fun = @(aspect, surface)(plane7.m_LandingConstraint(aspect, surface, V_min, C_L_max));
 
-% [scatA, scatS] = meshgrid([5:0.1:30],[5:0.1:40]);
-% Constraint_out = arrayfun(fun, scatA, scatS);
+[scatA, scatS] = meshgrid([5:0.5:30],[5:0.5:40]);
+Constraint_out = arrayfun(fun, scatA, scatS);
 
-% scatA(Constraint_out < 0) = NaN; 
-% scatS(Constraint_out < 0) = NaN;
-% scatter(scatA(:), scatS(:), 3, 'filled')
+scatA(Constraint_out < 0) = NaN; 
+scatS(Constraint_out < 0) = NaN;
+scatter(scatA(:), scatS(:), 3, 'g',  'filled')
 
 %============================================================
 %           LOG BARRIER METHOD                              %
@@ -139,11 +139,13 @@ fmin_obj = @(X)(plane2.m_DragForce(X(1), X(2)));
 nonlincon = @(X)(plane2.m_nonLinearConstraint(X(1), X(2), V_min, C_L_max));
 [x,fval, exitflag, output, lambda] = fmincon(fmin_obj,X_0,[], [], [], [], lb, ub, nonlincon, options );
 hold on;
-plot(x(1), x(2), 'kd');
+%plot(x(1), x(2), 'kd');
 hold on
-plot(fmin_log.x(:,1),fmin_log.x(:,2), 'kd-')
+plot(fmin_log.x(:,1),fmin_log.x(:,2), 'rd-')
 hold on
 plot(over_all_log.x(:,1), over_all_log.x(:,2), 'bd-.')
+hold on
+legend('Unmodified Objective Function', 'Infeasible region', 'SQP', 'Log Barrier' )
 
 
 %============================================================
@@ -155,14 +157,14 @@ gradients_fig = subplot(1,2,1);
 semilogy([1:fmin_log.total_iterations], fmin_log.optimality, 'kd-')
 
 xlabel('Major Iterations');
-ya1 = ylabel('$\nabla \mathcal{L}$','Rotation',0,'interpreter','latex');
+ya1 = ylabel('$|\nabla \mathcal{L}|$','Rotation',0,'interpreter','latex');
 set(ya1,'Units','Normalized','Position',[-0.17 0.5 0]);
 
 minor_fig = subplot(1,2,2);
 semilogy(fmin_log.fevals, fmin_log.optimality, 'kd-');
 
 xlabel('Function Evaluations')
-ya2 = ylabel('|g_k|/|g_0|','Rotation',0);
+ya2 = ylabel('$|\nabla \mathcal{L}|$','Rotation',0, 'interpreter','latex');
 set(ya2,'Units','Normalized','Position',[-0.17 0.5 0]);
 legend1 = legend('SQP');
 set(legend1, 'Position',[0.592125803489439 0.171707822533567 0.164370982552801 0.106246351430239]);
@@ -175,7 +177,7 @@ subplot(bg_fig);
 delete(semi_hand);
 
 xlabel('Major Iterations');
-ya1 = ylabel('$\nabla \mathcal{L}$','Rotation',0,'interpreter','latex');
+ya1 = ylabel('$|\nabla \pi |$','Rotation',0,'interpreter','latex');
 set(ya1,'Units','Normalized','Position',[-0.17 0.5 0]);
 
 barrier_minor_fig = subplot(1,2,2);
@@ -184,7 +186,7 @@ PlotMinorIterationConvergance(barrier_fig, over_all_log, 'kd-', barrier_minor_fi
 subplot(minor_fig);
 delete(semi_hand)
 xlabel('Function Evaluations')
-ya2 = ylabel('|g_k|/|g_0|','Rotation',0);
+ya2 = ylabel('$|\nabla \pi|$','Rotation',0,'interpreter','latex');
 set(ya2,'Units','Normalized','Position',[-0.17 0.5 0]);
 legend1 = legend('Log Barrier');
 set(legend1, 'Position',[0.73 0.8 0.164370982552801 0.106246351430239]);
