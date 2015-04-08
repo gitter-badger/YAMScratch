@@ -38,11 +38,22 @@ hold on
 fun = @(aspect, surface)(plane7.m_LandingConstraint(aspect, surface, V_min, C_L_max));
 
 [scatA, scatS] = meshgrid([5:0.5:30],[5:0.5:40]);
+
+otherA = gpuArray(scatA);
+otherS = gpuArray(scatS);
+tic 
+arrayfun(fun, otherA, otherS)
+toc
+
+tic
 Constraint_out = arrayfun(fun, scatA, scatS);
+toc
+
 
 scatA(Constraint_out < 0) = NaN; 
 scatS(Constraint_out < 0) = NaN;
 scatter(scatA(:), scatS(:), 3, 'g',  'filled')
+error
 
 %============================================================
 %           LOG BARRIER METHOD                              %
