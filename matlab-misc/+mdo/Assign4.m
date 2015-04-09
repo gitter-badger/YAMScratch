@@ -35,14 +35,14 @@ ylab = ylabel('S','Rotation',0);
 set(ylab,'Units','Normalized','Position',[-0.07 0.5 0]);
 hold on
 
-fun = @plane7.m_LandingConstraint;
+fun = @(aspect, surface)(plane7.m_LandingConstraint(aspect, surface, V_min, C_L_max));
 
 [scatA, scatS] = meshgrid([5:0.5:30],[5:0.5:40]);
 
 otherA = gpuArray(scatA);
 otherS = gpuArray(scatS);
 tic 
-gcons_out = arrayfun(fun, otherA, otherS, V_min, C_L_max)
+arrayfun(fun, otherA, otherS)
 toc
 
 tic

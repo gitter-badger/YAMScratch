@@ -136,15 +136,14 @@ classdef ComputeAirPlane < handle & mdo.MajorIterationHistory
             return
         end
 
-        function [drag] = m_LandingConstraint(obj, A, S, V_min, C_L_max)
+        function [varargout] = m_LandingConstraint(obj, A, S, V_min, C_L_max)
             W = obj.W_0 + obj.s_WingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c);
             cineq = (2 * W) / (obj.Rho * V_min^2 * C_L_max) - S;
-            %varargout{1} = cineq;
-            drag = cineq
-            % if nargout == 2
-            %     del_W = obj.s_gradWingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c, W);
-            %     varargout{2} = (2 * del_W) ./ (obj.Rho * V_min^2 * C_L_max) - [ 0; 1];
-            % end
+            varargout{1} = cineq;
+            if nargout == 2
+                del_W = obj.s_gradWingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c, W);
+                varargout{2} = (2 * del_W) ./ (obj.Rho * V_min^2 * C_L_max) - [ 0; 1];
+            end
             return
         end
 
