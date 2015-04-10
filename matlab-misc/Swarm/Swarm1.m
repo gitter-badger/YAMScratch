@@ -82,10 +82,10 @@ function [x_star] = Swarm1(obj, xlb, xub)
     end
 
     if STATE == 3
-        disp('Using parfor')
+        disp('Parallel Mode')
 
         for iter = 1:niter
-        
+            disp(iter)
             w = wi + ((wf-wi)/(niter))*(niter-iter);
             cp = cbi + ((cbf-cbi)/(niter))*(niter-iter);
             cg = cgi + ((cgf-cgi)/(niter))*(niter-iter);
@@ -118,16 +118,16 @@ function [x_star] = Swarm1(obj, xlb, xub)
             gbest = gbest(1);
         end
     elseif STATE == 2
-        disp('using gpu')
-            X = gpuArray(X);
-            Y = gpuArray(Y);
-            V = gpuArray(V);
-            Xbest = gpuArray(Xbest);
-            Ybest = gpuArray(Ybest);
-            mask = gpuArray(zeros(size(Y)));
+        disp('GPU Mode')
+        X = gpuArray(X);
+        Y = gpuArray(Y);
+        V = gpuArray(V);
+        Xbest = gpuArray(Xbest);
+        Ybest = gpuArray(Ybest);
+        mask = gpuArray(zeros(size(Y)));
 
-            for iter = 1:niter
-        
+        for iter = 1:niter
+            disp(iter)
             w = wi + ((wf-wi)/(niter))*(niter-iter);
             cp = cbi + ((cbf-cbi)/(niter))*(niter-iter);
             cg = cgi + ((cgf-cgi)/(niter))*(niter-iter);
@@ -156,9 +156,9 @@ function [x_star] = Swarm1(obj, xlb, xub)
             gbest = gbest(1);
         end
     elseif STATE == 1
-        disp('regular')
+        disp('Vanilla Mode')
         for iter = 1:niter
-        
+            disp(iter)
             w = wi + ((wf-wi)/(niter))*(niter-iter);
             cp = cbi + ((cbf-cbi)/(niter))*(niter-iter);
             cg = cgi + ((cgf-cgi)/(niter))*(niter-iter);
