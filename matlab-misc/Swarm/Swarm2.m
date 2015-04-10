@@ -1,12 +1,27 @@
 clear
 clc
 close all
-tic
-%import com.mathworks.jmi.*
-%Matlab.mtEval('sqrt(5)',1)
-pwd
 
-file_path = regexprep(mfilename('fullpath'), '(?!\\)[^\\]*$', '')
-javaaddpath(file_path)
-toc
+L = 10;
+result = [];
+
+a = -log(1- 10^(-L));
+
+reductions = [1:0.2:L-1];
+
+for k = reductions
+	b = -log(1- 10^(-L+k));;
+	result(end+1) = (b - a) /a;
+end
+
+semilogy(reductions, result, 'bd-')
+figure
+
+score = []
+for index = 1:length(reductions)
+	k = reductions(index)
+	score(end+1) =  -log(1-10^(-L+k)) / (result(index) + 1);
+end
+semilogy(reductions, score, 'bd-')
+
 disp('done')
