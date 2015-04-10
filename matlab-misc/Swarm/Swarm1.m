@@ -103,8 +103,11 @@ function [x_star] = Swarm1(obj, xlb, xub)
             X = X + V;
             other_mask = X < repmat(xlb,1,npart);
             X = bsxfun(@times, other_mask, xlb)+ bsxfun(@times, ~other_mask, X);
+            V = bsxfun(@times, -1*other_mask, V);
             third_mask = X > repmat(xub, 1, npart);
             X = bsxfun(@times, third_mask, xub) + bsxfun(@times, (~third_mask), X);
+            V = bsxfun(@times, -1*third_mask, V);
+
             parfor eval_index = 1:npart
                 Y(eval_index) = obj(X(:,eval_index));
             end
@@ -122,7 +125,7 @@ function [x_star] = Swarm1(obj, xlb, xub)
             ttotal = toc(overall_time);
             %test for convergence
             if iter > npart
-                test_val = (1.002903377918799*log(InitialGYbest/GYbest) -0.016006563343503);
+                test_val = (1.002903377918799*log10(InitialGYbest/GYbest) -0.016006563343503);
                 scores(iter-npart) = ttotal - test_val;
                 if log10(ttotal) > test_val;
                     break
@@ -162,8 +165,11 @@ function [x_star] = Swarm1(obj, xlb, xub)
             X = X + V;
             other_mask = X < repmat(xlb,1,npart);
             X = bsxfun(@times, other_mask, xlb)+ bsxfun(@times, ~other_mask, X);
+            V = bsxfun(@times, -1*other_mask, V);
             third_mask = X > repmat(xub, 1, npart);
             X = bsxfun(@times, third_mask, xub) + bsxfun(@times, (~third_mask), X);
+            V = bsxfun(@times, -1*third_mask, V);
+
             for eval_index = 1:npart
                 Y(eval_index) = obj(X(:,eval_index));
             end
@@ -180,7 +186,7 @@ function [x_star] = Swarm1(obj, xlb, xub)
             ttotal = toc(overall_time);
             %test for convergence
             if iter > npart
-                test_val = (1.002903377918799*log(InitialGYbest/GYbest) -0.016006563343503);
+                test_val = (1.002903377918799*log10(InitialGYbest/GYbest) -0.016006563343503);
                 scores(iter-npart) = ttotal - test_val;
                 if log10(ttotal) > test_val;
                     break
@@ -212,8 +218,10 @@ function [x_star] = Swarm1(obj, xlb, xub)
             X = X + V;
             other_mask = X < repmat(xlb,1,npart);
             X = bsxfun(@times, other_mask, xlb)+ bsxfun(@times, ~other_mask, X);
+            V = bsxfun(@times, -1*other_mask, V);
             third_mask = X > repmat(xub, 1, npart);
             X = bsxfun(@times, third_mask, xub) + bsxfun(@times, (~third_mask), X);
+            V = bsxfun(@times, -1*third_mask, V);
 
             for eval_index = 1:npart
                 Y(eval_index) = obj(X(:,eval_index));
@@ -231,7 +239,7 @@ function [x_star] = Swarm1(obj, xlb, xub)
             ttotal = toc(overall_time);
             %test for convergence
             if iter > npart
-                test_val = (1.002903377918799*log(InitialGYbest/GYbest) -0.016006563343503);
+                test_val = (1.002903377918799*log10(InitialGYbest/GYbest) -0.016006563343503);
                 scores(iter-npart) = ttotal - test_val;
                 if log10(ttotal) > test_val;
                     break
