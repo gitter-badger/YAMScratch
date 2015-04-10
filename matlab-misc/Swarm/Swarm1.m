@@ -1,4 +1,4 @@
-function [x_star,X] = Swarm1(obj, xlb, xub)
+function [x_star] = Swarm1(obj, xlb, xub)
 %Purpose:
     assert(isvector(xlb));
     assert(isvector(xub));
@@ -6,7 +6,7 @@ function [x_star,X] = Swarm1(obj, xlb, xub)
     assert(SIZE_X == length(xlb));
 
     npart = 30;     % The number of particles.
-    niter = 10;    % The number of iterations.
+    niter = 30;    % The number of iterations.
     cbi = 2.5;      % Initial value of the individual-best acceleration factor.
     cbf = 0.5;      % Final value of the individual-best acceleration factor.
     cgi = 0.5;      % Initial value of the global-best acceleration factor.
@@ -114,10 +114,47 @@ function [x_star,X] = Swarm1(obj, xlb, xub)
             
             % Calculating new globally best value
             [GYbest, gbest] = min(Ybest);
+            disp(GYbest)
             gbest = gbest(1);
         end
-    %elseif STATE == 2
-    %    disp('using gpu')
+    elseif STATE == 2
+        disp('using gpu')
+            X = gpuArray(X);
+            Y = gpuArray(Y);
+            V = gpuArray(V);
+            Xbest = gpuArray(Xbest);
+            Ybest = gpuArray(Ybest);
+            mask = gpuArray(zeros(size(Y)));
+
+            for iter = 1:niter
+        
+            w = wi + ((wf-wi)/(niter))*(niter-iter);
+            cp = cbi + ((cbf-cbi)/(niter))*(niter-iter);
+            cg = cgi + ((cgf-cgi)/(niter))*(niter-iter);
+
+            % For later calculations only
+            GXbest = repmat(Xbest(:, gbest), 1, npart);
+
+            % Calculating speeds
+            V = w*V + cp*rand(size(V)).*(Xbest-X) + cg*rand(size(V)).*(GXbest-X);
+            V = min(vmax, abs(V)).*sign(V);
+
+            % Population is moving
+            X = X + V;
+            for eval_index = 1:npart
+                Y(eval_index) = obj(X(:,eval_index));
+            end
+            % Calculating new individually best values
+            mask = Y<Ybest;
+            mask = mask.';
+            mask = repmat(mask, SIZE_X, 1);
+            Xbest = mask.*X +(~mask).*Xbest;
+            Ybest = min(Y,Ybest);
+            
+            % Calculating new globally best value
+            [GYbest, gbest] = min(Ybest);
+            gbest = gbest(1);
+        end
     elseif STATE == 1
         disp('regular')
         for iter = 1:niter
@@ -150,8 +187,6 @@ function [x_star,X] = Swarm1(obj, xlb, xub)
             gbest = gbest(1);
         end
     end
-
-
 
     x_star = Xbest(:,gbest);
      return
