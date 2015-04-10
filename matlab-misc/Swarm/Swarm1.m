@@ -1,9 +1,5 @@
-%function [x_star,X] = Swarm1(obj, xlb, xub)
+function [x_star,X] = Swarm1(obj, xlb, xub)
 %Purpose:
-    obj = @func3;
-    xlb = -10*ones(128,1);
-    xub = 10*ones(128,1);
-
     assert(isvector(xlb));
     assert(isvector(xub));
     SIZE_X = length(xub);
@@ -158,10 +154,5 @@
 
 
     x_star = Xbest(:,gbest);
-%     return
-% end
-
-parfor index = 1:128
-    xcpy = x_star; xcpy(index) = xcpy(index) + 1e-20 * 1i;
-    grad(index) = imag(func3(xcpy))/1e-20;
+     return
 end
