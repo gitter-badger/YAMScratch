@@ -6,7 +6,7 @@ function [x_star] = Swarm1(obj, xlb, xub)
     assert(SIZE_X == length(xlb));
 
     npart = 30;     % The number of particles.
-    niter = 30;    % The number of iterations.
+    niter = 100;    % The number of iterations.
     cbi = 2.5;      % Initial value of the individual-best acceleration factor.
     cbf = 0.5;      % Final value of the individual-best acceleration factor.
     cgi = 0.5;      % Initial value of the global-best acceleration factor.
@@ -14,7 +14,7 @@ function [x_star] = Swarm1(obj, xlb, xub)
     wi = 0.9;       % Initial value of the inertia factor.
     wf = 0.4;       % Final value of the inertia factor.
     vspaninit = 1;  % The initial velocity span. Initial 
-    vmax = Inf;     % Absolute speed limit. It is the primary
+    vmax = 20;     % Absolute speed limit. It is the primary
 
     Y = zeros(npart,1);
     %Initialize X with random variables
@@ -26,15 +26,15 @@ function [x_star] = Swarm1(obj, xlb, xub)
     %check for best conditions
     tic
     Y(1) = obj(X(:,1));
-    tend = toc
+    tend = toc;
     reg_time = tend;
     try
         gx0 = gpuArray(X);
         tic
         Y(1) = obj(gx0(:,1));
-        gpu_time = toc
+        gpu_time = toc;
     catch ME
-        disp('GPU disabled')
+        %disp('GPU disabled')
         gpu_time = Inf; 
     end
 
@@ -49,7 +49,7 @@ function [x_star] = Swarm1(obj, xlb, xub)
             Y(index) = obj(X(:,index));
         end
         tend = toc;
-        par_time = tend/npart
+        par_time = tend/npart;
     catch ME
         par_time = Inf;
         %compute the native method
@@ -83,9 +83,8 @@ function [x_star] = Swarm1(obj, xlb, xub)
 
     if STATE == 3
         disp('Parallel Mode')
-
         for iter = 1:niter
-            disp(iter)
+            %disp(iter)
             w = wi + ((wf-wi)/(niter))*(niter-iter);
             cp = cbi + ((cbf-cbi)/(niter))*(niter-iter);
             cg = cgi + ((cgf-cgi)/(niter))*(niter-iter);
@@ -99,11 +98,10 @@ function [x_star] = Swarm1(obj, xlb, xub)
 
             % Population is moving
             X = X + V;
-            tic
+            
             parfor eval_index = 1:npart
                 Y(eval_index) = obj(X(:,eval_index));
             end
-            toc
 
             % Calculating new individually best values
             mask = Y<Ybest;
@@ -114,9 +112,10 @@ function [x_star] = Swarm1(obj, xlb, xub)
             
             % Calculating new globally best value
             [GYbest, gbest] = min(Ybest);
-            disp(GYbest)
+            %disp(GYbest)
             gbest = gbest(1);
         end
+
     elseif STATE == 2
         disp('GPU Mode')
         X = gpuArray(X);
@@ -127,7 +126,7 @@ function [x_star] = Swarm1(obj, xlb, xub)
         mask = gpuArray(zeros(size(Y)));
 
         for iter = 1:niter
-            disp(iter)
+            %disp(iter)
             w = wi + ((wf-wi)/(niter))*(niter-iter);
             cp = cbi + ((cbf-cbi)/(niter))*(niter-iter);
             cg = cgi + ((cgf-cgi)/(niter))*(niter-iter);
@@ -154,11 +153,12 @@ function [x_star] = Swarm1(obj, xlb, xub)
             % Calculating new globally best value
             [GYbest, gbest] = min(Ybest);
             gbest = gbest(1);
+            %disp(GYbest)
         end
     elseif STATE == 1
         disp('Vanilla Mode')
         for iter = 1:niter
-            disp(iter)
+            %disp(iter)
             w = wi + ((wf-wi)/(niter))*(niter-iter);
             cp = cbi + ((cbf-cbi)/(niter))*(niter-iter);
             cg = cgi + ((cgf-cgi)/(niter))*(niter-iter);
@@ -185,6 +185,7 @@ function [x_star] = Swarm1(obj, xlb, xub)
             % Calculating new globally best value
             [GYbest, gbest] = min(Ybest);
             gbest = gbest(1);
+            %disp(GYbest)
         end
     end
 
