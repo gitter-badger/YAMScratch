@@ -13,7 +13,7 @@ function [x_star,Hessian, logObj] = QuasiNewtonBFGS(linesearch, obj, grad, x0, e
 %	x_star - best guess of local minimum meeting the convergence criteria passed in
 %	logObj - used to return the logging object in case a handle subclass is not used
 	
-	DEBUG = true
+	DEBUG = false
 	%sanity checks
 	assert(isvector(x0));
 	%get the dimensionality

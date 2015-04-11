@@ -136,6 +136,20 @@ classdef ComputeAirPlane < handle & mdo.MajorIterationHistory
             return
         end
 
+        function [grad] = mH_gradDragForce(obj, A, S)
+                        %compute the weight of the wing
+            W = obj.W_0 + obj.s_WingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c);
+            C_f = obj.s_CoefficientFriction(A, S, obj.Rho, obj.V, obj.Mu);
+            C_L = obj.s_CoefficientLift(S, W, obj.Rho, obj.V);
+            C_d = obj.s_CoefficientDrag(A, S, obj.SWR, obj.K, obj.E, C_L, C_f);
+
+            del_W = 0 + obj.s_gradWingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c, W);
+            del_C_f = obj.s_gradCoefficientFriction(A, S, obj.Rho, obj.V, obj.Mu);
+            del_C_L = obj.s_gradCoefficientLift(S, W, del_W, obj.V, obj.Rho);
+            del_C_d = obj.s_gradCoefficientDrag(A, S, obj.SWR, obj.K, obj.E, C_f, del_C_f, C_L, del_C_L);
+            grad = ((del_W .* C_d + del_C_d .* W) ./ C_L) - (del_C_L .* W .* C_d) ./ C_L^2;
+        end
+
         function [varargout] = m_LandingConstraint(obj, A, S, V_min, C_L_max)
             W = obj.W_0 + obj.s_WingWeight(A, S, obj.W_0, obj.N_ult, obj.t_over_c);
             cineq = (2 * W) / (obj.Rho * V_min^2 * C_L_max) - S;
