@@ -25,18 +25,24 @@ plane = mdo.ComputeAirPlane2(N_ult, t_over_c, W_0, rho, mu, k, e, S_wet_ratio, V
 a = [5:1e-1:30]; % A
 s = [5:1e-1:40]; % S
 [AA,SS] = meshgrid(a,s);
+
+tic
 Drag = arrayfun(@plane.m_DragForce, AA, SS);
+toc
+
 fig_1 = figure;
 contour(AA,SS,Drag,50);
 xlabel('A');
 ylab = ylabel('S','Rotation',0);
 set(ylab,'Units','Normalized','Position',[-0.07 0.5 0]);
 hold on
-plot(a,a*0.85^2,'r--')
 
-dCfdA = imag(plane.s_CoefficientFriction(15 + 1i * 1e-20, 5, rho, Velocity, mu))/1e-20;
-dCfdS = imag(plane.s_CoefficientFriction(15, 5 + 1i * 1e-20, rho, Velocity, mu))/1e-20;
+disconline = a*0.85^2;
+disconline(disconline < 5) = NaN;
+plot(a,disconline,'r--')
+%===========================================================
+obj = @(X)(plane.m_DragForce(X(1), X(2)));
+x_star = Swarm1(obj, [5;5], [40;40]);
 
-del_cf = plane.s_gradCoefficientFriction(15, 5, rho, Velocity, mu);
+plot(x_star(1), x_star(2), 'kd')
 
-del_cf - [dCfdA;  dCfdS];
