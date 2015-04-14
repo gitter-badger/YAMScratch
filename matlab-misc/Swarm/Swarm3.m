@@ -1,11 +1,26 @@
-function [x_star, swarmLogObj] = Swarm1(obj, xlb, xub, options)
+function [x_star, swarmLogObj] = Swarm1(obj, xlb, xub, varargin)
 %Purpose:
-    Attempt to minimise a scalar valued objective function over a domain
-    specificed by an upper and lower bound on the values of the design 
-    variables
-Inputs:
-    obj - a function handle to an objective function taking a column vector
-    xlb - a vector of 
+%     Attempt to minimise a scalar valued objective function over a domain
+%     specificed by an upper and lower bound on the values of the design 
+%     variables
+% Inputs:
+%     obj - a function handle to an objective function taking a column vector
+%     xlb - a vector of lower bounds for each of the design variables, set this
+%             to negative infinity if there is no lower bound
+%     xub - a vector of upper bounds for each of the design variables, set this
+%             to positive infinity if there is no upper bound
+%     options - a struct that enables finer control over the particle swarm
+%             and tuning of parameters. (NOT IMPLEMENTED)
+% Outputs:
+%     x_star - the optimum point found during the optimization, this may not be
+%              global or local minium, however it is generally a very good guess
+%     swarmLogObj - a structure holding information about the performance of the
+%                 algorithim. The options struct controls the verbosity of this 
+%                 information. LOW reports the best and worst particle position
+%                 and objective value for each iteration. HIGH reports the 
+%                 position and velocity of every particle for every iteration. 
+%                 This is very memory intensive, and the program will probably
+%                 crash.
 
 
     assert(isvector(xlb));

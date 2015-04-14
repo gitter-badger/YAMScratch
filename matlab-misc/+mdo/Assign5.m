@@ -24,7 +24,6 @@ X_0 = [25; 10];
 %The plane object that holds all of the methods
 plane = mdo.ComputeAirPlane2(N_ult, t_over_c, W_0, rho, mu, k, e, S_wet_ratio, Velocity);
 fig_1 = figure;
-<<<<<<< HEAD
 
 if PLOT_OBJECTIVE
 	a = [5:1e-1:30]; % A
@@ -44,7 +43,7 @@ if PLOT_OBJECTIVE
 	disconline(disconline < 5) = NaN;
 	plot(a,disconline,'r--')
 end
-=======
+
 contour(AA,SS,Drag,50);
 hold on
 %mesh(AA, SS, Drag)
@@ -56,7 +55,6 @@ hold on
 disconline = a*0.85^2;
 disconline(disconline < 5) = NaN;
 plot(a,disconline,'r--')
->>>>>>> origin/master
 %===========================================================
 obj = @(X)(plane.m_DragForce(X(1), X(2)));
 tic
