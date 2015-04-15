@@ -19,7 +19,7 @@ Velocity = 35;
 V_min = 22;         %maximum landing velocity
 C_L_max = 2;        %maximum coefficient of lift at landing
 
-X_0 = [25; 10];
+X_0 = [35; 35];
 %===========================================================
 %The plane object that holds all of the methods
 plane = mdo.ComputeAirPlane2(N_ult, t_over_c, W_0, rho, mu, k, e, S_wet_ratio, Velocity);
@@ -84,3 +84,6 @@ qn_log = MajorIterationHistory();
 
 [xk, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_0, e_g, e_a, e_r, qn_log, ls_parameters)
 plot(xk(1),xk(2),'rd')
+%plot the convergence of the algorithm
+hold on 
+plot(qn_log.x(:,1), qn_log.x(:,2), 'kd-')

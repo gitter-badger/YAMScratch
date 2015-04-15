@@ -1,4 +1,4 @@
-function [x_star, swarmLogObj] = Swarm1(obj, xlb, xub, varargin)
+function [x_star, swarmLogObj] = Swarm3(obj, xlb, xub, varargin)
 %Purpose:
 %     Attempt to minimise a scalar valued objective function over a domain
 %     specificed by an upper and lower bound on the values of the design 
