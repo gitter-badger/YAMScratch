@@ -39,3 +39,4 @@ high_rpm_limit = rpm(high_index)
 plot(rpm, deflection, 'b-')
 figure
 plot(rpm, acceptable_y,'r-')
+
