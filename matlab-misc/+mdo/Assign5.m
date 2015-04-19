@@ -3,7 +3,7 @@ close all
 import mdo.*
 
 DEBUG = false;
-PLOT_OBJECTIVE = true;
+PLOT_OBJECTIVE = false;
 
 %Define Constants
 N_ult = 2.5;
@@ -26,7 +26,7 @@ plane = mdo.ComputeAirPlane2(N_ult, t_over_c, W_0, rho, mu, k, e, S_wet_ratio, V
 fig_1 = figure;
 
 if PLOT_OBJECTIVE
-	a = [5:1e-1:30]; % A
+	a = [5:1e-1:35]; % A
 	s = [5:1e-1:40]; % S
 	[AA,SS] = meshgrid(a,s);
 	tic
@@ -34,7 +34,7 @@ if PLOT_OBJECTIVE
 	toc
 	contour(AA,SS,Drag,50);
 	hold on
-	%mesh(AA, SS, Drag)
+	mesh(AA, SS, Drag)
 	xlabel('A');
 	ylab = ylabel('S','Rotation',0);
 	set(ylab,'Units','Normalized','Position',[-0.07 0.5 0]);
@@ -44,22 +44,29 @@ if PLOT_OBJECTIVE
 	plot(a,disconline,'r--')
 end
 
-contour(AA,SS,Drag,50);
-hold on
-%mesh(AA, SS, Drag)
-xlabel('A');
-ylab = ylabel('S','Rotation',0);
-set(ylab,'Units','Normalized','Position',[-0.07 0.5 0]);
-hold on
 
-disconline = a*0.85^2;
-disconline(disconline < 5) = NaN;
-plot(a,disconline,'r--')
 %===========================================================
 obj = @(X)(plane.m_DragForce(X(1), X(2)));
-tic
-x_star = Swarm1(obj, [5;5], [40;40]);
-toc
+stop_critera = [1:5:36];
+num_samples = 50;
+fvals_accum = zeros(length(stop_critera), num_samples);
+
+for nnn = 1:length(stop_critera)
+	for ndata = 1:num_samples
+		tstart = tic;
+		[x_star, fval] = Swarm3(obj, [5;5], [40;40], stop_critera(nnn));
+		toc(tstart)
+		fvals_accum(nnn, ndata) = fval;
+	end
+	disp('===============================')
+end
+%std computes column wise and our samples are row wise so transpose
+S_devs = std(fvals_accum.');
+f_means = mean(fvals_accum, 1);
+
+data_fig = figure;
+errorbar(stop_critera, f_means, S_devs)
+
 
 %===========================================================
 %				BFGS SEARCH
@@ -82,8 +89,12 @@ grad = @(X) (plane.mH_gradDragForce(X(1), X(2)));
 
 qn_log = MajorIterationHistory();
 
-[xk, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_0, e_g, e_a, e_r, qn_log, ls_parameters)
-plot(xk(1),xk(2),'rd')
+try
+	[xk, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_0, e_g, e_a, e_r, qn_log, ls_parameters);
+	plot(xk(1),xk(2),'rd')
+catch ME
+
+end
 %plot the convergence of the algorithm
 hold on 
 plot(qn_log.x(:,1), qn_log.x(:,2), 'kd-')

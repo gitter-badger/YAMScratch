@@ -1,4 +1,4 @@
-function [x_star, swarmLogObj] = Swarm3(obj, xlb, xub, varargin)
+function [x_star, varargout] = Swarm3(obj, xlb, xub, varargin)
 %Purpose:
 %     Attempt to minimise a scalar valued objective function over a domain
 %     specificed by an upper and lower bound on the values of the design 
@@ -9,6 +9,7 @@ function [x_star, swarmLogObj] = Swarm3(obj, xlb, xub, varargin)
 %             to negative infinity if there is no lower bound
 %     xub - a vector of upper bounds for each of the design variables, set this
 %             to positive infinity if there is no upper bound
+%     stop_criteria - number of iterations of no change in best before exit
 %     options - a struct that enables finer control over the particle swarm
 %             and tuning of parameters. (NOT IMPLEMENTED)
 % Outputs:
@@ -22,7 +23,12 @@ function [x_star, swarmLogObj] = Swarm3(obj, xlb, xub, varargin)
 %                 This is very memory intensive, and the program will probably
 %                 crash.
 
-
+    DEBUG = false;
+    if nargin >=4
+        stop_criteria = varargin{1};
+    else 
+        stop_criteria = 30;
+    end
     assert(isvector(xlb));
     assert(isvector(xub));
     SIZE_X = length(xub);
@@ -38,6 +44,8 @@ function [x_star, swarmLogObj] = Swarm3(obj, xlb, xub, varargin)
     wf = 0.4;       % Final value of the inertia factor.
     vspaninit = 1;  % The initial velocity span. Initial 
     vmax = 0.3* max(xub-xlb);     % Absolute speed limit. It is the primary
+
+    swarmLogObj = SwarmIterationHistory(niter, npart);
 
     Y = zeros(npart,1);
     %Initialize X with random variables
@@ -87,6 +95,7 @@ function [x_star, swarmLogObj] = Swarm3(obj, xlb, xub, varargin)
     [GYbest, gbest] = min(Ybest);% GYbest is the best score within the entire swarm.
                                  % gbest is the index of particle that achived YGbest.
     InitialGYbest = GYbest; %store the original so we can compute performance ratio
+    prev_GYbest = GYbest;
     gbest = gbest(1);% In case when more than one particle achieved the best
                      % score, we choose the one with the lowest index as the
                      % best one.
@@ -105,9 +114,12 @@ function [x_star, swarmLogObj] = Swarm3(obj, xlb, xub, varargin)
     end
 
     if STATE == 3
-        disp('Parallel Mode')
+        if DEBUG
+            disp('Parallel Mode')
+        end
         overall_time = tic;
         scores = zeros(niter,1);
+        iter_since_best_change = 0;
         for iter = 1:niter
             w = wi + ((wf-wi)/(niter))*(niter-iter);
             cp = cbi + ((cbf-cbi)/(niter))*(niter-iter);
@@ -145,22 +157,22 @@ function [x_star, swarmLogObj] = Swarm3(obj, xlb, xub, varargin)
             gbest = gbest(1);
             ttotal = toc(overall_time);
             %test for convergence
-            if iter > npart
-                test_val = (1.002903377918799*log10(InitialGYbest/GYbest) -0.016006563343503);
-                scores(iter-npart) = ttotal - test_val;
-                if log10(ttotal) > test_val;
-                    break
-                elseif iter > npart + 5
-                    %test the condition where by running longer we loose points
-                    if scores(iter-npart-5) < scores(iter-npart)
-                        break
-                    end
-                end     
+            if GYbest < prev_GYbest
+                iter_since_best_change = 0;
+            else
+                iter_since_best_change = iter_since_best_change + 1;
             end
+            if iter_since_best_change >= stop_criteria
+                %terminate the loop
+                break;
+            end
+            prev_GYbest = GYbest;
         end
 
     elseif STATE == 2
-        disp('GPU Mode')
+        if DEBUG
+            disp('GPU Mode')
+        end
         X = gpuArray(X);
         Y = gpuArray(Y);
         V = gpuArray(V);
@@ -169,6 +181,7 @@ function [x_star, swarmLogObj] = Swarm3(obj, xlb, xub, varargin)
         mask = gpuArray(zeros(size(Y)));
         overall_time = tic;
         scores = zeros(niter,1);
+        iter_since_best_change = 0;
         for iter = 1:niter
             %disp(iter)
             w = wi + ((wf-wi)/(niter))*(niter-iter);
@@ -205,24 +218,25 @@ function [x_star, swarmLogObj] = Swarm3(obj, xlb, xub, varargin)
             [GYbest, gbest] = min(Ybest);
             gbest = gbest(1);
             ttotal = toc(overall_time);
-            %test for convergence
-            if iter > npart
-                test_val = (1.002903377918799*log10(InitialGYbest/GYbest) -0.016006563343503);
-                scores(iter-npart) = ttotal - test_val;
-                if log10(ttotal) > test_val;
-                    break
-                elseif iter > npart + 5
-                    %test the condition where by running longer we loose points
-                    if scores(iter-npart-5) < scores(iter-npart)
-                        break
-                    end
-                end     
+                        %test for convergence
+            if GYbest < prev_GYbest
+                iter_since_best_change = 0;
+            else
+                iter_since_best_change = iter_since_best_change + 1;
             end
+            if iter_since_best_change >= stop_criteria
+                %terminate the loop
+                break;
+            end
+            prev_GYbest = GYbest;
         end
     elseif STATE == 1
         scores = zeros(niter,1);
-        disp('Vanilla Mode')
+        if DEBUG
+            disp('Vanilla Mode')
+        end
         overall_time = tic;
+        iter_since_best_change = 0;
         for iter = 1:niter
             w = wi + ((wf-wi)/(niter))*(niter-iter);
             cp = cbi + ((cbf-cbi)/(niter))*(niter-iter);
@@ -259,20 +273,24 @@ function [x_star, swarmLogObj] = Swarm3(obj, xlb, xub, varargin)
             gbest = gbest(1);
             ttotal = toc(overall_time);
             %test for convergence
-            if iter > npart
-                test_val = (1.002903377918799*log10(InitialGYbest/GYbest) -0.016006563343503);
-                scores(iter-npart) = ttotal - test_val;
-                if log10(ttotal) > test_val;
-                    break
-                elseif iter > npart + 5
-                    %test the condition where by running longer we loose points
-                    if scores(iter-npart-5) < scores(iter-npart)
-                        break
-                    end
-                end     
+            if GYbest < prev_GYbest
+                iter_since_best_change = 0;
+            else
+                iter_since_best_change = iter_since_best_change + 1;
             end
+            if iter_since_best_change >= stop_criteria
+                %terminate the loop
+                break;
+            end
+            prev_GYbest = GYbest;
         end
     end
     x_star = Xbest(:,gbest);
+    if nargout >= 2 
+        varargout{1} = GYbest;
+    end
+    if nargout >= 3
+        varargout{2} = swarmLogObj;
+    end
      return
 end
