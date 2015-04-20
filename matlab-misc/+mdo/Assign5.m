@@ -4,6 +4,8 @@ import mdo.*
 
 DEBUG = false;
 PLOT_OBJECTIVE = false;
+d = datestr(clock);
+filename = regexprep(d, '\s|-|:', '_');
 
 %Define Constants
 N_ult = 2.5;
@@ -34,7 +36,7 @@ if PLOT_OBJECTIVE
 	toc
 	contour(AA,SS,Drag,50);
 	hold on
-	mesh(AA, SS, Drag)
+	%mesh(AA, SS, Drag)
 	xlabel('A');
 	ylab = ylabel('S','Rotation',0);
 	set(ylab,'Units','Normalized','Position',[-0.07 0.5 0]);
@@ -47,26 +49,50 @@ end
 
 %===========================================================
 obj = @(X)(plane.m_DragForce(X(1), X(2)));
-stop_critera = [1:5:36];
-num_samples = 50;
+stop_critera = [1:50];
+num_samples = 200;
 fvals_accum = zeros(length(stop_critera), num_samples);
+run_times = zeros(length(stop_critera), num_samples);
 
 for nnn = 1:length(stop_critera)
 	for ndata = 1:num_samples
 		tstart = tic;
+		flag_1 = true;
+		try
 		[x_star, fval] = Swarm3(obj, [5;5], [40;40], stop_critera(nnn));
-		toc(tstart)
-		fvals_accum(nnn, ndata) = fval;
+		catch ME
+			flag_1 = false;
+		end
+		run_times(nnn, ndata) = toc(tstart);
+		if flag_1
+			fvals_accum(nnn, ndata) = fval;
+		else
+			fvals_accum(nnn, ndata) = NaN;
+		end
 	end
 	disp('===============================')
 end
 %std computes column wise and our samples are row wise so transpose
 S_devs = std(fvals_accum.');
-f_means = mean(fvals_accum, 1);
+f_means = mean(fvals_accum, 2).';
+%plot the best of each values as well
+best_vals = min(fvals_accum, [], 2).';
+worst_vals = max(fvals_accum, [], 2).';
+
+time_S_devs = std(run_times.');
+time_means = mean(run_times.');
+
+save(filename, 'fvals_accum', 'S_devs', 'f_means', 'run_times')
 
 data_fig = figure;
 errorbar(stop_critera, f_means, S_devs)
+hold on
+plot(stop_critera, best_vals, 'g-')
+hold on
+plot(stop_critera, worst_vals, 'r-')
 
+time_fig = figure;
+errorbar(stop_critera, time_means, time_S_devs)
 
 %===========================================================
 %				BFGS SEARCH
