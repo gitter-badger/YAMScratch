@@ -2,6 +2,8 @@ classdef SwarmIterationHistory < handle
 	properties
 		niterations
 		nparticles
+		xlb
+		xub
 		Velocities
 		Positions
 		Xbest
@@ -22,8 +24,8 @@ classdef SwarmIterationHistory < handle
 		end
 		function m_lowEditIteration(obj, iteration, Xbest, Ybest, varargin)
 		%Usage:
-			m_lowEditIteration(iteration, Xbest, Ybest)
-			m_lowEditIteration(iteration, Xbest, Ybest, Xworst, Yworst)
+		%	m_lowEditIteration(iteration, Xbest, Ybest)
+		%	m_lowEditIteration(iteration, Xbest, Ybest, Xworst, Yworst)
 
 			assert(0 < iteration );
 			assert(obj.niterations >= iteration);
@@ -32,11 +34,24 @@ classdef SwarmIterationHistory < handle
 			obj.Xbest(iteration,:) = Xbest;
 			obj.Ybest(iteration,1) = Ybest;
 			if nargin == 4
+				assert(isvector(varargin{1}));
+				assert(isscalar(varargin{2}));
 				obj.Xworst(iteration,:) = varargin{1};
 				obj.Yworst(iteration,1) = varargin{2};
 			end
 		end
-		function m_highEditIteration(obj, iteration, positions, velocities, xbestndx, Ybest )
+		function m_highEditIteration(obj, iteration, positions, velocities, xbestndx, Ybest)
+			assert( 0 < iteration);
+			assert(obj.niterations >= iteration);
+			assert(isscalar(xbestndx));
+			assert(isscalar(Ybest));
+			%rows should be design variables
+			%columns are individual particles
+			[r,c] = size(positions);
+			%don't waste a function call
+			assert(all([r,c] == size(velocities)));
+			assert(obj.nparticles == c);
+			disp('passed')
 		end
 	end
 end
