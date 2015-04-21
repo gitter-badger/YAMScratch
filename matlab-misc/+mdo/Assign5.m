@@ -125,15 +125,17 @@ xlabel('Exit condition (iterations)');
 ya1 = ylabel('$\Delta_{lower}$', 'interpreter', 'latex','Rotation',0, 'FontSize', 16);
 set(ya1,'Units','Normalized','Position',[-0.10 0.5 0]);
 
-data_fig = figure;
-errorbar(stop_criteria, gev_coefficients(:,3), gev_coefficients(:,1))
-hold on
-plot(stop_criteria, best_vals, 'g-')
-hold on
-plot(stop_criteria, worst_vals, 'r-')
+% data_fig = figure;
+% errorbar(stop_criteria, gev_coefficients(:,3), gev_coefficients(:,1))
+% hold on
+% plot(stop_criteria, best_vals, 'g-')
+% hold on
+% plot(stop_criteria, worst_vals, 'r-')
 
 time_fig = figure;
 errorbar(stop_criteria, time_means, time_S_devs)
+xlabel('Termination Criteria')
+ylabel('Runtime (seconds)')
 
 plott_fig = figure;
 
@@ -159,6 +161,8 @@ set(ax(1), 'YColor', 'k')
 set(ax(2), 'YColor', 'r')
 set(p2,'Color', 'r')
 set(p2, 'LineWidth', 2)
+legend('200 samples, 50 bins','GEV estimator')
+title(strcat('Termination Criteria = ',' ', num2str(selector)))
 
 x_low_bound = gev_coefficients(selector,3) - 2*(gev_coefficients(selector,2)./gev_coefficients(selector,1));
 x_high_bound = gev_coefficients(selector,3) + 7*binWidth;
@@ -186,6 +190,8 @@ set(ax(1), 'YColor', 'k')
 set(ax(2), 'YColor', 'r')
 set(p2,'Color', 'r')
 set(p2, 'LineWidth', 2)
+legend('200 samples, 50 bins','GEV estimator')
+title(strcat('Termination Criteria = ',' ', num2str(selector)))
 
 x_low_bound = gev_coefficients(selector,3) - 2*(gev_coefficients(selector,2)./gev_coefficients(selector,1));
 x_high_bound = gev_coefficients(selector,3) + 7*binWidth;
@@ -213,6 +219,8 @@ set(ax(1), 'YColor', 'k')
 set(ax(2), 'YColor', 'r')
 set(p2,'Color', 'r')
 set(p2, 'LineWidth', 2)
+legend('200 samples, 50 bins','GEV estimator')
+title(strcat('Termination Criteria = ',' ', num2str(selector)))
 
 x_low_bound = gev_coefficients(selector,3) - 2*(gev_coefficients(selector,2)./gev_coefficients(selector,1));
 x_high_bound = gev_coefficients(selector,3) + 7*binWidth;
@@ -238,6 +246,10 @@ if PLOT_OBJECTIVE
 end
 iteration = 1;
 plot(swarmlog1.Positions(1,:,iteration), swarmlog1.Positions(2,:,iteration), 'rd')
+xlabel('A');
+ylab = ylabel('S','Rotation',0);
+set(ylab,'Units','Normalized','Position',[-0.1 0.5 0]);
+title('Iteration = 1')
 %#################
 subplot(2,2,2)
 iteration = 10;
@@ -250,7 +262,8 @@ end
 plot(swarmlog1.Positions(1,:,iteration), swarmlog1.Positions(2,:,iteration), 'rd');
 xlabel('A');
 ylab = ylabel('S','Rotation',0);
-set(ylab,'Units','Normalized','Position',[-0.07 0.5 0]);
+set(ylab,'Units','Normalized','Position',[-0.1 0.5 0]);
+title('Iteration = 10')
 %#################
 subplot(2,2,3)
 iteration = 50;
@@ -271,7 +284,8 @@ end
 plot(swarmlog1.Positions(1,:,iteration), swarmlog1.Positions(2,:,iteration), 'rd');
 xlabel('A');
 ylab = ylabel('S','Rotation',0);
-set(ylab,'Units','Normalized','Position',[-0.07 0.5 0]);
+set(ylab,'Units','Normalized','Position',[-0.1 0.5 0]);
+title('Iteration = 50')
 %#################
 subplot(2,2,4)
 iteration = 300;
@@ -292,7 +306,8 @@ end
 plot(swarmlog1.Positions(1,:,iteration), swarmlog1.Positions(2,:,iteration), 'rd');
 xlabel('A');
 ylab = ylabel('S','Rotation',0);
-set(ylab,'Units','Normalized','Position',[-0.07 0.5 0]);
+set(ylab,'Units','Normalized','Position',[-0.1 0.5 0]);
+title('Iteration = 300')
 %#################
 
 %===========================================================
@@ -316,40 +331,48 @@ e_r = 1e-6;
 grad = @(X) (plane.mH_gradDragForce(X(1), X(2)));
 
 qn_log1 = MajorIterationHistory();
-
+X_1 = X_0;
 try
-    [x1, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_0, e_g, e_a, e_r, qn_log1, ls_parameters);
+    [x1, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_1, e_g, e_a, e_r, qn_log1, ls_parameters);
     plot(xk(1),xk(2),'rd')
 catch ME
 end
 qn_log2 = MajorIterationHistory();
-X_1 = [10;30];
+X_2 = [10;30];
 try
-    [x2, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_1, e_g, e_a, e_r, qn_log2, ls_parameters);
+    [x2, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_2, e_g, e_a, e_r, qn_log2, ls_parameters);
     plot(xk(1),xk(2),'rd')
 catch ME
 end
 qn_log3 = MajorIterationHistory();
-X_2 = [24;7];
+X_3 = [24;7];
 try
-    [x3, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_2, e_g, e_a, e_r, qn_log3, ls_parameters);
+    [x3, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_3, e_g, e_a, e_r, qn_log3, ls_parameters);
     plot(xk(1),xk(2),'rd')
 catch ME
 end
 qn_log4 = MajorIterationHistory();
-X_3 = [30;20];
+X_4 = [30;20];
 try
-    [x3, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_3, e_g, e_a, e_r, qn_log4, ls_parameters);
+    [x4, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_4, e_g, e_a, e_r, qn_log4, ls_parameters);
     plot(xk(1),xk(2),'rd')
 catch ME
 end
 qn_log5 = MajorIterationHistory();
-X_4 = [23;23];
+X_5 = [23;23];
 try
-    [x3, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_3, e_g, e_a, e_r, qn_log4, ls_parameters);
+    [x5, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_5, e_g, e_a, e_r, qn_log5, ls_parameters);
     plot(xk(1),xk(2),'rd')
 catch ME
 end
+qn_log6 = MajorIterationHistory();
+X_6 = [13;6];
+try
+    [x5, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_6, e_g, e_a, e_r, qn_log6, ls_parameters);
+    plot(xk(1),xk(2),'rd')
+catch ME
+end
+
 %plot the convergence of the algorithm for several points
 hold on 
 plot(qn_log1.x(:,1), qn_log1.x(:,2), 'kd-', 'LineWidth', 2)
@@ -360,4 +383,6 @@ plot(qn_log3.x(:,1), qn_log3.x(:,2), 'bd-', 'LineWidth', 2)
 hold on
 plot(qn_log4.x(:,1), qn_log4.x(:,2), 'md-', 'LineWidth', 2)
 hold on
-plot(qn_log5.x(:,1), qn_log5.x(:,2), 'md-', 'LineWidth', 2)
+plot(qn_log5.x(:,1), qn_log5.x(:,2), 'cd-', 'LineWidth', 2)
+hold on
+plot(qn_log6.x(:,1), qn_log6.x(:,2), 'gd-', 'LineWidth', 2)
