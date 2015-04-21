@@ -24,25 +24,36 @@ function [x_star, varargout] = Swarm3(obj, xlb, xub, varargin)
 %                 crash.
 
     DEBUG = false;
+
     if nargin >=4
         stop_criteria = varargin{1};
     else 
         stop_criteria = 30;
     end
+    if nargin >= 5
+        if varargin{2} == 'high'
+            HIGH_DETAIL = true;
+        else
+            HIGH_DETAIL = false;
+        end
+    else
+        HIGH_DETAIL = false;
+    end
+
     assert(isvector(xlb));
     assert(isvector(xub));
     SIZE_X = length(xub);
     assert(SIZE_X == length(xlb));
 
-    npart = 40;     % The number of particles.
-    niter = 300;    % The number of iterations.
+    npart = 40;     % number of particles.
+    niter = 300;    % number of iterations.
     cbi = 2.5;      % Initial value of the individual-best acceleration factor.
     cbf = 0.5;      % Final value of the individual-best acceleration factor.
     cgi = 0.5;      % Initial value of the global-best acceleration factor.
     cgf = 2.5;      % Final value of the global-best acceleration factor.
     wi = 0.9;       % Initial value of the inertia factor.
     wf = 0.4;       % Final value of the inertia factor.
-    vspaninit = 1;  % The initial velocity span. Initial 
+    vspaninit = 1;  % The initial velocity span.
     vmax = 0.3* max(xub-xlb);     % Absolute speed limit. It is the primary
 
     swarmLogObj = SwarmIterationHistory(niter, npart);
@@ -90,14 +101,14 @@ function [x_star, varargout] = Swarm3(obj, xlb, xub, varargin)
         end 
     end
 
-    Ybest = Y; % The best individual score for each particle
-    Xbest = X; % The best individual position for each particle
+    Ybest = Y; % best individual score for each particle
+    Xbest = X; % best individual position for each particle
     [GYbest, gbest] = min(Ybest);% GYbest is the best score within the entire swarm.
                                  % gbest is the index of particle that achived YGbest.
     InitialGYbest = GYbest; %store the original so we can compute performance ratio
     prev_GYbest = GYbest;
-    gbest = gbest(1);% In case when more than one particle achieved the best
-                     % score, we choose the one with the lowest index as the
+    gbest = gbest(1);% In event when more than one particle has the best
+                     % score, pick the one with the lowest index as the
                      % best one.
     V = (rand(SIZE_X, npart)-0.5)*2.*repmat(npart, vspaninit.', 1);
 
@@ -167,6 +178,9 @@ function [x_star, varargout] = Swarm3(obj, xlb, xub, varargin)
                 break;
             end
             prev_GYbest = GYbest;
+            if HIGH_DETAIL
+                swarmLogObj.m_highEditIteration(iter, X, V, gbest, GYbest);
+            end
         end
 
     elseif STATE == 2
@@ -229,6 +243,9 @@ function [x_star, varargout] = Swarm3(obj, xlb, xub, varargin)
                 break;
             end
             prev_GYbest = GYbest;
+            if HIGH_DETAIL
+                swarmLogObj.m_highEditIteration(iter, X, V, gbest, GYbest);
+            end
         end
     elseif STATE == 1
         scores = zeros(niter,1);
@@ -283,6 +300,9 @@ function [x_star, varargout] = Swarm3(obj, xlb, xub, varargin)
                 break;
             end
             prev_GYbest = GYbest;
+            if HIGH_DETAIL
+                swarmLogObj.m_highEditIteration(iter, X, V, gbest, GYbest);
+            end
         end
     end
     x_star = Xbest(:,gbest);

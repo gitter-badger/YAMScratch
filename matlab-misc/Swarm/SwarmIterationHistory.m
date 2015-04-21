@@ -51,7 +51,8 @@ classdef SwarmIterationHistory < handle
 			%don't waste a function call
 			assert(all([r,c] == size(velocities)));
 			assert(obj.nparticles == c);
-			disp('passed')
+			
+
 		end
 	end
 end

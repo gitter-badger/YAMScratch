@@ -3,7 +3,7 @@ close all
 import mdo.*
 
 DEBUG = false;
-PLOT_OBJECTIVE = false;
+PLOT_OBJECTIVE = true;
 COLLECT_STATS = false;
 
 d = datestr(clock);
@@ -114,14 +114,16 @@ end
 compare_gev_mean_to_best_fig = figure;
 semilogy(1:50, gev_coefficients(:,3) - overall_best_val,'rd')
 xlabel('Exit condition (iterations)');
-ya1 = ylabel('u_k - f^*','Rotation',0);
-set(ya1,'Units','Normalized','Position',[-0.17 0.5 0]);
+ya1 = ylabel('$\Delta_{mean}$', 'interpreter', 'latex','Rotation',0, 'FontSize', 16);
+set(ya1,'Units','Normalized','Position',[-0.10 0.55 0]);
 
 low_bound_gev_fig = figure;
 low_bound_gev = gev_coefficients(:,3) - (gev_coefficients(:,2) ./ gev_coefficients(:,1));
 
-semilogy(1:50, low_bound_gev.' - best_vals, 'kd')
-
+semilogy(1:50,  overall_best_val - low_bound_gev.', 'kd')
+xlabel('Exit condition (iterations)');
+ya1 = ylabel('$\Delta_{lower}$', 'interpreter', 'latex','Rotation',0, 'FontSize', 16);
+set(ya1,'Units','Normalized','Position',[-0.10 0.5 0]);
 
 data_fig = figure;
 errorbar(stop_criteria, gev_coefficients(:,3), gev_coefficients(:,1))
@@ -156,6 +158,7 @@ delete(p1)
 set(ax(1), 'YColor', 'k')
 set(ax(2), 'YColor', 'r')
 set(p2,'Color', 'r')
+set(p2, 'LineWidth', 2)
 
 x_low_bound = gev_coefficients(selector,3) - 2*(gev_coefficients(selector,2)./gev_coefficients(selector,1));
 x_high_bound = gev_coefficients(selector,3) + 7*binWidth;
@@ -182,6 +185,7 @@ delete(p1)
 set(ax(1), 'YColor', 'k')
 set(ax(2), 'YColor', 'r')
 set(p2,'Color', 'r')
+set(p2, 'LineWidth', 2)
 
 x_low_bound = gev_coefficients(selector,3) - 2*(gev_coefficients(selector,2)./gev_coefficients(selector,1));
 x_high_bound = gev_coefficients(selector,3) + 7*binWidth;
@@ -208,6 +212,7 @@ delete(p1)
 set(ax(1), 'YColor', 'k')
 set(ax(2), 'YColor', 'r')
 set(p2,'Color', 'r')
+set(p2, 'LineWidth', 2)
 
 x_low_bound = gev_coefficients(selector,3) - 2*(gev_coefficients(selector,2)./gev_coefficients(selector,1));
 x_high_bound = gev_coefficients(selector,3) + 7*binWidth;
@@ -215,16 +220,15 @@ set(ax(1), 'XLim', [x_low_bound, x_high_bound])
 set(ax(2), 'XLim', [x_low_bound, x_high_bound])
 
 
-%{
-tenth_time_fig = subplot(3,2,4);
-hist(fvals_accum(10,:),50)
+%===========================================================
+%	Visualize the swarm moving
+%===========================================================
 
-twentyfive_time_fig = subplot(3,2,5);
-hist(fvals_accum(25,:),50)
+%make sure we go full 300 iterations
+[x_star, fval, swarmlog1] = Swarm3(obj, [5;5], [40;40], 300, 'high');
 
-fifty_time_fig = subplot(3,2,6);
-hist(fvals_accum(50,:),50)
-%}
+swarm_progress_fig = figure;
+%plot(swarmlog1.Positions(1,:,iteration), swarmlog1.Positions(2,:,iteration))
 
 %===========================================================
 %				BFGS SEARCH
@@ -246,14 +250,40 @@ e_r = 1e-6;
 
 grad = @(X) (plane.mH_gradDragForce(X(1), X(2)));
 
-qn_log = MajorIterationHistory();
+qn_log1 = MajorIterationHistory();
 
 try
-	[xk, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_0, e_g, e_a, e_r, qn_log, ls_parameters);
+	[x1, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_0, e_g, e_a, e_r, qn_log1, ls_parameters);
 	plot(xk(1),xk(2),'rd')
 catch ME
-
 end
-%plot the convergence of the algorithm
+qn_log2 = MajorIterationHistory();
+X_1 = [10;30];
+try
+	[x2, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_1, e_g, e_a, e_r, qn_log2, ls_parameters);
+	plot(xk(1),xk(2),'rd')
+catch ME
+end
+qn_log3 = MajorIterationHistory();
+X_2 = [24;7];
+try
+	[x3, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_2, e_g, e_a, e_r, qn_log3, ls_parameters);
+	plot(xk(1),xk(2),'rd')
+catch ME
+end
+qn_log4 = MajorIterationHistory();
+X_3 = [30;20];
+try
+	[x3, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_3, e_g, e_a, e_r, qn_log4, ls_parameters);
+	plot(xk(1),xk(2),'rd')
+catch ME
+end
+%plot the convergence of the algorithm for several points
 hold on 
-plot(qn_log.x(:,1), qn_log.x(:,2), 'kd-')
+plot(qn_log1.x(:,1), qn_log1.x(:,2), 'kd-', 'LineWidth', 2)
+hold on
+plot(qn_log2.x(:,1), qn_log2.x(:,2), 'rd-', 'LineWidth', 2)
+hold on
+plot(qn_log3.x(:,1), qn_log3.x(:,2), 'bd-', 'LineWidth', 2)
+hold on
+plot(qn_log4.x(:,1), qn_log4.x(:,2), 'md-', 'LineWidth', 2)
