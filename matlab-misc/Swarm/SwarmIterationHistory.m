@@ -51,7 +51,10 @@ classdef SwarmIterationHistory < handle
 			%don't waste a function call
 			assert(all([r,c] == size(velocities)));
 			assert(obj.nparticles == c);
-			
+			obj.Positions(:,:,iteration) = positions;
+			obj.Velocities(:,:,iteration) = velocities;
+			obj.Xbestindex(iteration) = xbestndx;
+			obj.Ybest(iteration) = Ybest; 
 
 		end
 	end

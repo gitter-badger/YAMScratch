@@ -30,67 +30,67 @@ plane = mdo.ComputeAirPlane2(N_ult, t_over_c, W_0, rho, mu, k, e, S_wet_ratio, V
 fig_1 = figure;
 
 if PLOT_OBJECTIVE
-	a = [5:1e-1:35]; % A
-	s = [5:1e-1:40]; % S
-	[AA,SS] = meshgrid(a,s);
-	tic
-	Drag = arrayfun(@plane.m_DragForce, AA, SS);
-	toc
-	contour(AA,SS,Drag,50);
-	hold on
-	%mesh(AA, SS, Drag)
-	xlabel('A');
-	ylab = ylabel('S','Rotation',0);
-	set(ylab,'Units','Normalized','Position',[-0.07 0.5 0]);
-	hold on
-	disconline = a*0.85^2;
-	disconline(disconline < 5) = NaN;
-	plot(a,disconline,'r--')
+    a = [5:1e-1:35]; % A
+    s = [5:1e-1:40]; % S
+    [AA,SS] = meshgrid(a,s);
+    tic
+    Drag = arrayfun(@plane.m_DragForce, AA, SS);
+    toc
+    contour(AA,SS,Drag,50);
+    hold on
+    %mesh(AA, SS, Drag)
+    xlabel('A');
+    ylab = ylabel('S','Rotation',0);
+    set(ylab,'Units','Normalized','Position',[-0.07 0.5 0]);
+    hold on
+    disconline = a*0.85^2;
+    disconline(disconline < 5) = NaN;
+    plot(a,disconline,'r--')
 end
 
 
 %===========================================================
 obj = @(X)(plane.m_DragForce(X(1), X(2)));
 if COLLECT_STATS
-	stop_criteria = [1:50];
-	num_samples = 200;
-	fvals_accum = zeros(length(stop_criteria), num_samples);
-	run_times = zeros(length(stop_criteria), num_samples);
+    stop_criteria = [1:50];
+    num_samples = 200;
+    fvals_accum = zeros(length(stop_criteria), num_samples);
+    run_times = zeros(length(stop_criteria), num_samples);
 
-	for nnn = 1:length(stop_criteria)
-		for ndata = 1:num_samples
-			tstart = tic;
-			flag_1 = true;
-			try
-			[x_star, fval] = Swarm3(obj, [5;5], [40;40], stop_criteria(nnn));
-			catch ME
-				flag_1 = false;
-			end
-			run_times(nnn, ndata) = toc(tstart);
-			if flag_1
-				fvals_accum(nnn, ndata) = fval;
-			else
-				fvals_accum(nnn, ndata) = NaN;
-			end
-		end
-		disp('===============================')
-	end
-	save(filename, 'fvals_accum', 'S_devs', 'f_means', 'run_times', 'stop_criteria')
+    for nnn = 1:length(stop_criteria)
+        for ndata = 1:num_samples
+            tstart = tic;
+            flag_1 = true;
+            try
+            [x_star, fval] = Swarm3(obj, [5;5], [40;40], stop_criteria(nnn));
+            catch ME
+                flag_1 = false;
+            end
+            run_times(nnn, ndata) = toc(tstart);
+            if flag_1
+                fvals_accum(nnn, ndata) = fval;
+            else
+                fvals_accum(nnn, ndata) = NaN;
+            end
+        end
+        disp('===============================')
+    end
+    save(filename, 'fvals_accum', 'S_devs', 'f_means', 'run_times', 'stop_criteria')
 else
-	while true
-		filename = input('Enter filename with pso statistics to load: ', 's')
-		response = input(strcat('Do you want to load: ', filename, ' [N/y]? '), 's');
-		if response == 'y'
-			try
-			 	load(filename);
-			 	break
-			catch ME
-				disp('could not load file, try again')
-			end
-			
-		end
-	end
-	[x_star, fval] = Swarm3(obj, [5;5], [40;40]);
+    while true
+        filename = input('Enter filename with pso statistics to load: ', 's')
+        response = input(strcat('Do you want to load: ', filename, ' [N/y]? '), 's');
+        if response == 'y'
+            try
+                load(filename);
+                break
+            catch ME
+                disp('could not load file, try again')
+            end
+            
+        end
+    end
+    [x_star, fval] = Swarm3(obj, [5;5], [40;40]);
 end
 %rows are convergence criteria, columns are individual tests
 [r1,c1] = size(fvals_accum);
@@ -108,7 +108,7 @@ time_means = mean(run_times.');
 %generate mean squares for each run
 gev_coefficients = zeros(r1, 3);
 for index = 1:r1
-	gev_coefficients(index, :) =  mle(fvals_accum(index,:),'distribution', 'gev');
+    gev_coefficients(index, :) =  mle(fvals_accum(index,:),'distribution', 'gev');
 end
 
 compare_gev_mean_to_best_fig = figure;
@@ -221,17 +221,82 @@ set(ax(2), 'XLim', [x_low_bound, x_high_bound])
 
 
 %===========================================================
-%	Visualize the swarm moving
+%   Visualize the swarm moving
 %===========================================================
 
 %make sure we go full 300 iterations
 [x_star, fval, swarmlog1] = Swarm3(obj, [5;5], [40;40], 300, 'high');
 
 swarm_progress_fig = figure;
-%plot(swarmlog1.Positions(1,:,iteration), swarmlog1.Positions(2,:,iteration))
+%#################
+subplot(2,2,1)
+if PLOT_OBJECTIVE
+    contour(AA,SS,Drag,50);
+    hold on
+    plot(a,disconline,'r--')
+    hold on
+end
+iteration = 1;
+plot(swarmlog1.Positions(1,:,iteration), swarmlog1.Positions(2,:,iteration), 'rd')
+%#################
+subplot(2,2,2)
+iteration = 10;
+if PLOT_OBJECTIVE
+    contour(AA,SS,Drag,50);
+    hold on
+    plot(a,disconline,'r--')
+    hold on
+end
+plot(swarmlog1.Positions(1,:,iteration), swarmlog1.Positions(2,:,iteration), 'rd');
+xlabel('A');
+ylab = ylabel('S','Rotation',0);
+set(ylab,'Units','Normalized','Position',[-0.07 0.5 0]);
+%#################
+subplot(2,2,3)
+iteration = 50;
+%zoom in here so recompute the contour
+if PLOT_OBJECTIVE
+    a = linspace(17, 17.5); % A
+    s = linspace(12.35, 12.55); % S
+    [AA,SS] = meshgrid(a,s);
+    tic
+    Drag = arrayfun(@plane.m_DragForce, AA, SS);
+    toc
+    contour(AA,SS,Drag,50);
+    hold on
+    disconline = a*0.85^2;
+    disconline(disconline < 5) = NaN;
+    plot(a,disconline,'r--')
+end
+plot(swarmlog1.Positions(1,:,iteration), swarmlog1.Positions(2,:,iteration), 'rd');
+xlabel('A');
+ylab = ylabel('S','Rotation',0);
+set(ylab,'Units','Normalized','Position',[-0.07 0.5 0]);
+%#################
+subplot(2,2,4)
+iteration = 300;
+if PLOT_OBJECTIVE
+    a = linspace(17, 17.5); % A
+    s = linspace(12.35, 12.55); % S
+    [AA,SS] = meshgrid(a,s);
+    tic
+    Drag = arrayfun(@plane.m_DragForce, AA, SS);
+    toc
+    contour(AA,SS,Drag,50);
+    hold on
+    disconline = a*0.85^2;
+    disconline(disconline < 5) = NaN;
+    plot(a,disconline,'r--')
+    hold on
+end
+plot(swarmlog1.Positions(1,:,iteration), swarmlog1.Positions(2,:,iteration), 'rd');
+xlabel('A');
+ylab = ylabel('S','Rotation',0);
+set(ylab,'Units','Normalized','Position',[-0.07 0.5 0]);
+%#################
 
 %===========================================================
-%				BFGS SEARCH
+%               BFGS SEARCH
 %===========================================================
 figure(fig_1)
 plot(x_star(1), x_star(2), 'kd')
@@ -253,29 +318,36 @@ grad = @(X) (plane.mH_gradDragForce(X(1), X(2)));
 qn_log1 = MajorIterationHistory();
 
 try
-	[x1, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_0, e_g, e_a, e_r, qn_log1, ls_parameters);
-	plot(xk(1),xk(2),'rd')
+    [x1, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_0, e_g, e_a, e_r, qn_log1, ls_parameters);
+    plot(xk(1),xk(2),'rd')
 catch ME
 end
 qn_log2 = MajorIterationHistory();
 X_1 = [10;30];
 try
-	[x2, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_1, e_g, e_a, e_r, qn_log2, ls_parameters);
-	plot(xk(1),xk(2),'rd')
+    [x2, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_1, e_g, e_a, e_r, qn_log2, ls_parameters);
+    plot(xk(1),xk(2),'rd')
 catch ME
 end
 qn_log3 = MajorIterationHistory();
 X_2 = [24;7];
 try
-	[x3, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_2, e_g, e_a, e_r, qn_log3, ls_parameters);
-	plot(xk(1),xk(2),'rd')
+    [x3, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_2, e_g, e_a, e_r, qn_log3, ls_parameters);
+    plot(xk(1),xk(2),'rd')
 catch ME
 end
 qn_log4 = MajorIterationHistory();
 X_3 = [30;20];
 try
-	[x3, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_3, e_g, e_a, e_r, qn_log4, ls_parameters);
-	plot(xk(1),xk(2),'rd')
+    [x3, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_3, e_g, e_a, e_r, qn_log4, ls_parameters);
+    plot(xk(1),xk(2),'rd')
+catch ME
+end
+qn_log5 = MajorIterationHistory();
+X_4 = [23;23];
+try
+    [x3, hessian] = QuasiNewtonBFGS(linesearch, obj, grad, X_3, e_g, e_a, e_r, qn_log4, ls_parameters);
+    plot(xk(1),xk(2),'rd')
 catch ME
 end
 %plot the convergence of the algorithm for several points
@@ -287,3 +359,5 @@ hold on
 plot(qn_log3.x(:,1), qn_log3.x(:,2), 'bd-', 'LineWidth', 2)
 hold on
 plot(qn_log4.x(:,1), qn_log4.x(:,2), 'md-', 'LineWidth', 2)
+hold on
+plot(qn_log5.x(:,1), qn_log5.x(:,2), 'md-', 'LineWidth', 2)
