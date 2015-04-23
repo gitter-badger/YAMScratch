@@ -56,7 +56,8 @@ if COLLECT_STATS
     num_samples = 200;
     fvals_accum = zeros(length(stop_criteria), num_samples);
     run_times = zeros(length(stop_criteria), num_samples);
-
+    xk_best = [];
+    fval_best = Inf;
     for nnn = 1:length(stop_criteria)
         for ndata = 1:num_samples
             tstart = tic;
@@ -69,13 +70,16 @@ if COLLECT_STATS
             run_times(nnn, ndata) = toc(tstart);
             if flag_1
                 fvals_accum(nnn, ndata) = fval;
+                if fval < fval_best
+                    fval_best = fval;
+                    xk_best(:,:) = x_star;
             else
                 fvals_accum(nnn, ndata) = NaN;
             end
         end
         disp('===============================')
     end
-    save(filename, 'fvals_accum', 'S_devs', 'f_means', 'run_times', 'stop_criteria')
+    save(filename, 'fvals_accum', 'S_devs', 'f_means', 'run_times', 'stop_criteria', 'fval_best', 'xk_best')
 else
     while true
         filename = input('Enter filename with pso statistics to load: ', 's')
@@ -105,7 +109,7 @@ overall_best_val = min(best_vals);
 
 time_S_devs = std(run_times.');
 time_means = mean(run_times.');
-%generate mean squares for each run
+%generate mean gev for each run
 gev_coefficients = zeros(r1, 3);
 for index = 1:r1
     gev_coefficients(index, :) =  mle(fvals_accum(index,:),'distribution', 'gev');
@@ -113,7 +117,7 @@ end
 
 compare_gev_mean_to_best_fig = figure;
 semilogy(1:50, gev_coefficients(:,3) - overall_best_val,'rd')
-xlabel('Exit condition (iterations)');
+xlabel('Termination condition (iterations)');
 ya1 = ylabel('$\Delta_{mean}$', 'interpreter', 'latex','Rotation',0, 'FontSize', 16);
 set(ya1,'Units','Normalized','Position',[-0.10 0.55 0]);
 
@@ -121,7 +125,7 @@ low_bound_gev_fig = figure;
 low_bound_gev = gev_coefficients(:,3) - (gev_coefficients(:,2) ./ gev_coefficients(:,1));
 
 semilogy(1:50,  overall_best_val - low_bound_gev.', 'kd')
-xlabel('Exit condition (iterations)');
+xlabel('Termination condition (iterations)');
 ya1 = ylabel('$\Delta_{lower}$', 'interpreter', 'latex','Rotation',0, 'FontSize', 16);
 set(ya1,'Units','Normalized','Position',[-0.10 0.5 0]);
 
@@ -136,6 +140,7 @@ time_fig = figure;
 errorbar(stop_criteria, time_means, time_S_devs)
 xlabel('Termination Criteria')
 ylabel('Runtime (seconds)')
+legend('average')
 
 plott_fig = figure;
 
@@ -158,7 +163,10 @@ temp_vals(2,:) = pdf('gev',temp_vals(1,:), A_gev, B_gev, C_gev);
 delete(p1)
 %recolor the bloody axis
 set(ax(1), 'YColor', 'k')
+ylabel(ax(1), 'Bin Count')
 set(ax(2), 'YColor', 'r')
+ylabel(ax(2), 'GEV pdf')
+xlabel('Best value returned by optimizer')
 set(p2,'Color', 'r')
 set(p2, 'LineWidth', 2)
 legend('200 samples, 50 bins','GEV estimator')
@@ -187,7 +195,10 @@ temp_vals(2,:) = pdf('gev',temp_vals(1,:), A_gev, B_gev, C_gev);
 delete(p1)
 %recolor the bloody axis
 set(ax(1), 'YColor', 'k')
+ylabel(ax(1), 'Bin Count')
 set(ax(2), 'YColor', 'r')
+ylabel(ax(2), 'GEV pdf')
+xlabel('Best value returned by optimizer')
 set(p2,'Color', 'r')
 set(p2, 'LineWidth', 2)
 legend('200 samples, 50 bins','GEV estimator')
@@ -216,7 +227,10 @@ temp_vals(2,:) = pdf('gev',temp_vals(1,:), A_gev, B_gev, C_gev);
 delete(p1)
 %recolor the bloody axis
 set(ax(1), 'YColor', 'k')
+ylabel(ax(1), 'Bin Count')
 set(ax(2), 'YColor', 'r')
+ylabel(ax(2), 'GEV pdf')
+xlabel('Best value returned by optimizer')
 set(p2,'Color', 'r')
 set(p2, 'LineWidth', 2)
 legend('200 samples, 50 bins','GEV estimator')
@@ -248,7 +262,7 @@ iteration = 1;
 plot(swarmlog1.Positions(1,:,iteration), swarmlog1.Positions(2,:,iteration), 'rd')
 xlabel('A');
 ylab = ylabel('S','Rotation',0);
-set(ylab,'Units','Normalized','Position',[-0.1 0.5 0]);
+set(ylab,'Units','Normalized','Position',[-0.12 0.5 0]);
 title('Iteration = 1')
 %#################
 subplot(2,2,2)
@@ -262,7 +276,7 @@ end
 plot(swarmlog1.Positions(1,:,iteration), swarmlog1.Positions(2,:,iteration), 'rd');
 xlabel('A');
 ylab = ylabel('S','Rotation',0);
-set(ylab,'Units','Normalized','Position',[-0.1 0.5 0]);
+set(ylab,'Units','Normalized','Position',[-0.12 0.5 0]);
 title('Iteration = 10')
 %#################
 subplot(2,2,3)
@@ -284,7 +298,7 @@ end
 plot(swarmlog1.Positions(1,:,iteration), swarmlog1.Positions(2,:,iteration), 'rd');
 xlabel('A');
 ylab = ylabel('S','Rotation',0);
-set(ylab,'Units','Normalized','Position',[-0.1 0.5 0]);
+set(ylab,'Units','Normalized','Position',[-0.12 0.5 0]);
 title('Iteration = 50')
 %#################
 subplot(2,2,4)
@@ -306,7 +320,7 @@ end
 plot(swarmlog1.Positions(1,:,iteration), swarmlog1.Positions(2,:,iteration), 'rd');
 xlabel('A');
 ylab = ylabel('S','Rotation',0);
-set(ylab,'Units','Normalized','Position',[-0.1 0.5 0]);
+set(ylab,'Units','Normalized','Position',[-0.12 0.5 0]);
 title('Iteration = 300')
 %#################
 
