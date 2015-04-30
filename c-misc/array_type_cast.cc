@@ -3,7 +3,7 @@
 int main(int argc, char** argv) {
 
 	int* a;
-	int b[10];
+	int b[500];
 	int c[3];
 	int d[4];
 	int e[5];
@@ -16,7 +16,8 @@ int main(int argc, char** argv) {
 	long ll = (long) b;
 	printf("%lu - %lu\n", kk, ll );
 	printf("%lu\n", (kk - ll) );
-	printf("sizeof(b) = %lu \n", ((long)(* (&b + 1)) - ((long) b) ));
+	printf("sizeof(b) = %lu \n", ((long)(* (&b + 1)) - ((long) b)));
+	printf("length of b = %lu\n", (sizeof(b))/ (sizeof(*(b+0))));
 	printf("sizeof(int[10]) = %zu\n", sizeof(b));
 	printf("sizeof(int[3]) = %zu\n", sizeof(c));
 	printf("sizeof(int[4]) = %zu\n", sizeof(d));
