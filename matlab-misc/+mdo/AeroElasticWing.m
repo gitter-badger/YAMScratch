@@ -49,7 +49,6 @@ classdef AeroElasticWing < handle
 			obj.sthick = .01;
 			obj.aeAxis = .25; % Location of aeroelastic axis as percent of local wing chord (from l.e.)
 			obj.dy = (obj.span/2)/obj.nPanel;
-			obj.dy
 			obj.yPanel = [obj.dy/2 : obj.dy : obj.span/2-obj.dy/2]';
 			obj.yElem = [obj.dy : obj.dy : obj.span/2]';
 			obj.diam = obj.diamRoot * (1 - ((1-obj.taper)/(obj.span/2))*obj.yElem); % (inches)
@@ -60,7 +59,7 @@ classdef AeroElasticWing < handle
 				[L, D, W, alpha, lift, twist, uz, maxStress]=...
 			    aeroln(obj.rho, obj.Mach, obj.temp, obj.AR, obj.sweep, obj.span, ...
 			    obj.taper, obj.nPanel, obj.diam, thick, obj.aeAxis, jigtwist, ...
-			    obj.loadFactor, obj.range, obj.sfc, 1);
+			    obj.loadFactor, obj.range, obj.sfc, false);
 		end
 
 		function [W_fuel] = fuelWeight(obj, Weight, Drag, Lift)
@@ -73,6 +72,32 @@ classdef AeroElasticWing < handle
 			return
 		end
 
+		function [W_fuel] = OneObjectiveToRuleThemAll(obj, X)
+			%provides objective for the 
+			assert(isvector(X));
+			assert(length(X) == obj.nElem + obj.nPanel)
+			local_thick = X(1:obj.nElem);
+			local_jigtwist = X(obj.nElem+1:end);
+			[L, D, W, alpha, lift, twist, uz, maxStress] = obj.MDA(local_thick, local_jigtwist);
+			W_fuel = obj.fuelWeight(W, D, L);
+
+		end
+
+		function [c, ceq] = OneNonlinearConstraintToRuleThemAll(obj, X)
+			%equality constraints is only on the root
+			assert(isvector(X));
+			X_length = length(X);
+			assert(X_length == obj.nElem + obj.nPanel)
+			local_thick = X(1:obj.nElem);
+			local_jigtwist = X(obj.nElem+1:end);
+			[L, D, W, alpha, lift, twist, uz, maxStress] = obj.MDA(local_thick, local_jigtwist);
+			%fill this with feasible regions
+			ceq = zeros(X_length, 1);
+			ceq(1) = twist(1);
+			c = -1 * ones(X_length, 1);
+			c(obj.nElem+1:end) = maxStress - obj.yieldStress;
+
+		end
 	end
 
 
