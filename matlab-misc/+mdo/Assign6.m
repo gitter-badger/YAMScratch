@@ -1,8 +1,12 @@
 clear('all');
 clc
+close all
 import mdo.*
 
-wing = AeroElasticWing()
+GRAPH = false;
+DEBUG = true;
+
+wing = AeroElasticWing();
 
 tiptwist = -1;
 
@@ -22,18 +26,22 @@ Wfuel = W*(tmp - 1.0)/tmp % (lb)
 
 otherW = wing.fuelWeight(W, D, L)
 
+%============================================================
+%                			MDF                             %
+%============================================================
+
 fmin_log = MajorIterationHistory();
 logger_callback = IterationLogger(fmin_log);
 
-options = optimoptions('fmincon', 'Algorithm', 'sqp' , ...
+options = optimoptions('fmincon', 'Algorithm', 'interior-point' , ...
 	     'GradObj', 'off', 'GradConstr', 'off', ...
 	     'OutputFcn', logger_callback,'Display', 'iter');
 
 %constrain the root twist to be zero
 jigtwist(1) = 0;
-X_0 = vertcat(thick, jigtwist)
+X_0 = vertcat(thick, jigtwist);
 
-lb = [];
+lb = vertcat(1e-10 * ones(wing.nElem, 1), -inf* ones(wing.nPanel, 1));
 ub = [];
 A = [];
 b = [];
@@ -47,20 +55,74 @@ fmin_obj = @(X) (wing.OneObjectiveToRuleThemAll(X));
 %============================================================
 %                Plotting Code                              %
 %============================================================
+if GRAPH
+	only_fmincon_fig = figure;
+	gradients_fig = subplot(1,2,1);
+	semilogy([1:fmin_log.total_iterations], fmin_log.optimality, 'kd-')
 
-only_fmincon_fig = figure;
-gradients_fig = subplot(1,2,1);
-semilogy([1:fmin_log.total_iterations], fmin_log.optimality, 'kd-')
+	xlabel('Major Iterations');
+	ya1 = ylabel('$|\nabla \mathcal{L}|$','Rotation',0,'interpreter','latex');
+	set(ya1,'Units','Normalized','Position',[-0.17 0.5 0]);
 
-xlabel('Major Iterations');
-ya1 = ylabel('$|\nabla \mathcal{L}|$','Rotation',0,'interpreter','latex');
-set(ya1,'Units','Normalized','Position',[-0.17 0.5 0]);
+	minor_fig = subplot(1,2,2);
+	semilogy(fmin_log.fevals, fmin_log.optimality, 'kd-');
 
-minor_fig = subplot(1,2,2);
-semilogy(fmin_log.fevals, fmin_log.optimality, 'kd-');
+	xlabel('Function Evaluations')
+	ya2 = ylabel('$|\nabla \mathcal{L}|$','Rotation',0, 'interpreter','latex');
+	set(ya2,'Units','Normalized','Position',[-0.17 0.5 0]);
+	legend1 = legend('Interior Point');
+	set(legend1, 'Position',[0.592125803489439 0.171707822533567 0.164370982552801 0.106246351430239]);
+end
+%============================================================
+%                			IDF                             %
+%============================================================
 
-xlabel('Function Evaluations')
-ya2 = ylabel('$|\nabla \mathcal{L}|$','Rotation',0, 'interpreter','latex');
-set(ya2,'Units','Normalized','Position',[-0.17 0.5 0]);
-legend1 = legend('SQP');
-set(legend1, 'Position',[0.592125803489439 0.171707822533567 0.164370982552801 0.106246351430239]);
+fmin_log_IDF = MajorIterationHistory();
+logger_callback = IterationLogger(fmin_log_IDF);
+
+options = optimoptions('fmincon', 'Algorithm', 'SQP' , ...
+	     'GradObj', 'off', 'GradConstr', 'off', ...
+	     'OutputFcn', logger_callback,'Display', 'iter');
+
+%constrain the root twist to be zero
+jigtwist(1) = 0;
+u_init = zeros(wing.nDOF, 1);
+gamma_init = zeros(wing.nPanel, 1);
+alpha_init = [0];
+
+X_0 = vertcat(thick, jigtwist, u_init, gamma_init, alpha_init);
+
+lb = vertcat(1e-10 * ones(wing.nElem, 1), -inf* ones(wing.Offsets(5) - (wing.Offsets(2) - 1), 1));
+ub = [];
+A = [];
+b = [];
+Aeq = [];
+beq = [];
+nonlincon = @(X) (wing.OneNonlinearConstraintToRuleThemAll(X));
+fmin_obj = @(X) (wing.OneObjectiveToRuleThemAll(X));
+
+error('Description');
+[x,fval, exitflag, output, lambda] = fmincon(fmin_obj,X_0, A, b, Aeq, beq, lb, ub, nonlincon, options );
+
+%============================================================
+%                Plotting Code                              %
+%============================================================
+if GRAPH
+	only_fmincon_fig = figure;
+	gradients_fig = subplot(1,2,1);
+	semilogy([1:fmin_log_IDF.total_iterations], fmin_log_IDF.optimality, 'kd-')
+
+	xlabel('Major Iterations');
+	ya1 = ylabel('$|\nabla \mathcal{L}|$','Rotation',0,'interpreter','latex');
+	set(ya1,'Units','Normalized','Position',[-0.17 0.5 0]);
+
+	minor_fig = subplot(1,2,2);
+	semilogy(fmin_log_IDF.fevals, fmin_log_IDF.optimality, 'kd-');
+
+	xlabel('Function Evaluations')
+	ya2 = ylabel('$|\nabla \mathcal{L}|$','Rotation',0, 'interpreter','latex');
+	set(ya2,'Units','Normalized','Position',[-0.17 0.5 0]);
+	legend1 = legend('Interior Point');
+	set(legend1, 'Position',[0.592125803489439 0.171707822533567 0.164370982552801 0.106246351430239]);
+end
+
