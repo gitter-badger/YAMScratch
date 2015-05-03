@@ -160,7 +160,7 @@ classdef AeroElasticWing < handle
 			local_alpha = X(obj.Offsets(5));
 			%compute the parts as a function of the target variables
 			Gamma = obj.AeroDiscipline(local_jigtwist, local_alpha, local_u);
-			Gamma
+			%Gamma
 			%disp(Gamma - local_gamma)
 			U = obj.StructDiscipline(local_thick, local_gamma);
 			%Alpha = obj.AttackDiscipline(local_jigtwist, local_gamma, local_u);
@@ -168,9 +168,9 @@ classdef AeroElasticWing < handle
 			lift = seclift(Gamma, obj.nPanel, obj.q, obj.span);
   			f = force(lift, obj.aeAxis, obj.nDOF, obj.nPanel, obj.AR, obj.sweep, obj.taper, obj.span);
 
- 			L = totalLift(Gamma, obj.nPanel, obj.q, obj.S, obj.AR, obj.sweep, obj.Mach)
- 			W = weightStruct(obj.sweep, obj.span*12, obj.diam, local_thick, obj.matRho, obj.nElem)
- 			D = totalDrag(Gamma, obj.nPanel, obj.q, obj.S, obj.AR, obj.sweep, obj.Mach)
+ 			L = totalLift(Gamma, obj.nPanel, obj.q, obj.S, obj.AR, obj.sweep, obj.Mach);
+ 			W = weightStruct(obj.sweep, obj.span*12, obj.diam, local_thick, obj.matRho, obj.nElem);
+ 			D = totalDrag(Gamma, obj.nPanel, obj.q, obj.S, obj.AR, obj.sweep, obj.Mach);
 
  			W_fuel = obj.fuelWeight(W, D, L);
 			
@@ -187,11 +187,11 @@ classdef AeroElasticWing < handle
 			c = -1 * ones(X_length, 1);
 
 
-			local_thick = X(1:obj.Offsets(2)-1)
-			local_jigtwist = X(obj.Offsets(2):obj.Offsets(3)-1)
-			local_u = X(obj.Offsets(3): obj.Offsets(4)-1)
-			local_gamma = X(obj.Offsets(4): obj.Offsets(5)-1)
-			local_alpha = X(obj.Offsets(5))
+			local_thick = X(1:obj.Offsets(2)-1);
+			local_jigtwist = X(obj.Offsets(2):obj.Offsets(3)-1);
+			local_u = X(obj.Offsets(3): obj.Offsets(4)-1);
+			local_gamma = X(obj.Offsets(4): obj.Offsets(5)-1);
+			local_alpha = X(obj.Offsets(5));
 			
 			Gamma = obj.AeroDiscipline(local_jigtwist, local_alpha, local_u);
 			U = obj.StructDiscipline(local_thick, local_gamma);

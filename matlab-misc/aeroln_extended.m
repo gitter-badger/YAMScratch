@@ -239,7 +239,7 @@ while 1
   niter = niter+1;
   
   error = norm(deltas, inf); 
-  fprintf (1, 'niter = %d   Max delta = %15.5e \n', niter, error);
+  %fprintf (1, 'niter = %d   Max delta = %15.5e \n', niter, error);
     
   % Check convergence / divergence
   if error < 10E-10
