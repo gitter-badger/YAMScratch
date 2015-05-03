@@ -92,16 +92,16 @@ classdef AeroElasticWing < handle
 			    obj.loadFactor, obj.range, obj.sfc, graph);
 		end
 
-		function [u_p , gamma_p, alpha_p, dgdx] = insideMDA(obj, thick, jigtwist)
+		function [u_p , gamma_p, alpha_p, RHS, dgdx] = insideMDA(obj, thick, jigtwist)
 
-				[L, D, W, alpha, lift, twist, uz, maxStress, RHS, dgdx]=...
+				[L, D, W, alpha, lift, twist, uz, maxStress, RHS, LHS, dgdx]=...
 			    aeroln_extended(obj.rho, obj.Mach, obj.temp, obj.AR, obj.sweep, obj.span, ...
 			    obj.taper, obj.nPanel, obj.diam, thick, obj.aeAxis, jigtwist, ...
 			    obj.loadFactor, obj.range, obj.sfc, false);
 
-			    u_p = RHS(1:obj.nDOF,1);
-			    gamma_p = RHS(obj.nDOF+1 :obj.nDOF+obj.nPanel,1 );
-			    alpha_p = RHS(obj.nDOF+obj.nPanel+1, 1);
+			    u_p = LHS(1:obj.nDOF,1);
+			    gamma_p = LHS(obj.nDOF+1 :obj.nDOF+obj.nPanel,1 );
+			    alpha_p = LHS(obj.nDOF+obj.nPanel+1, 1);
 
 			return
 		end

@@ -10,7 +10,7 @@
 % Last modified: Juan J. Alonso, 5/25/04
 %
 
-function [L, D, W, alpha, lift, twist, uz, maxStress, RHS, dgdx] = ...
+function [L, D, W, alpha, lift, twist, uz, maxStress, RHS, LHS, dgdx] = ...
   aeroln_extended(rho, Mach, temp, AR, sweep, span, taper, nPanel, ...
          diam, thick, aeAxis, jigtwist, loadFactor, ...
          range, sfc, graph)
@@ -253,6 +253,12 @@ while 1
   end 
  
 end
+
+LHS = vertcat(u, Gamma, alpha);
+
+disp('*************************************')
+norm((K * u) - f)
+disp('*************************************')
 
 % Calc Drag
 D = totalDrag(Gamma, nPanel, q, S, AR, sweep, Mach);

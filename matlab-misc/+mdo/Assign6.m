@@ -15,16 +15,23 @@ jigtwist = wing.yPanel *(tiptwist/(wing.span/2)); % (degrees)
 
 [L, D, W, alpha, lift, twist, uz, maxStress, Gamma] = wing.MDA(thick, jigtwist);
 
-[u_t, g_t, a_t, dgdx] = wing.insideMDA(thick, jigtwist);
+[u_t, g_t, a_t, RHS, dgdx] = wing.insideMDA(thick, jigtwist);
 
 g_p = wing.AeroDiscipline(jigtwist, a_t, u_t);
-[g_t, g_p, (g_t - g_p)]
+norm(g_t - g_p)
+
+
 u_p = wing.StructDiscipline(thick, g_t);
 
-[u_t, u_p, (u_t - u_p)]
+norm(u_t - u_p)
 
-%bat = vertcat(u_t, g_t, a_t);
-%dgdx \ bat
+K = stiffness(wing.sweep, wing.span*12, wing.diam, thick, wing.E, wing.nElem);
+lift = seclift(g_t, wing.nPanel, wing.q, wing.span);
+f = force(lift, wing.aeAxis, wing.nDOF, wing.nPanel, wing.AR, wing.sweep, wing.taper, wing.span);
+disp('===================')
+norm(K * u_t - f)
+disp('===================')
+
 
 error('Description');
 
