@@ -5,41 +5,50 @@ import mdo.*
 
 GRAPH = true;
 DEBUG = true;
+TEST = true;
 
 wing = AeroElasticWing();
+
+
+
+if TEST
+	tolerance = 1e-6;
+
+	for index = 1:10
+		thick = rand(wing.nElem, 1) + 0.25;
+		jigtwist = (rand(wing.nPanel) - 0.5) * 2 * 3;
+
+		[L, D, W, alpha, lift, twist, uz, maxStress, Gamma] = wing.MDA(thick, jigtwist);
+		[u_t, g_t, a_t, RHS, dgdx] = wing.insideMDA(thick, jigtwist);
+
+		g_p = wing.AeroDiscipline(jigtwist, a_t, u_t);
+		disp(norm(g_t - g_p))
+
+
+		u_p = wing.StructDiscipline(thick, g_t);
+
+		disp(norm(u_t - u_p))
+
+		K = stiffness(wing.sweep, wing.span*12, wing.diam, thick, wing.E, wing.nElem);
+		lift = seclift(g_t, wing.nPanel, wing.q, wing.span);
+		f = force(lift, wing.aeAxis, wing.nDOF, wing.nPanel, wing.AR, wing.sweep, wing.taper, wing.span);
+		disp(norm(K * u_t - f))
+		%fprintf(1, 'Passed iteration %d\n', index);
+	end
+end
 
 tiptwist = -1;
 
 thick = wing.thickRoot * (1 - ((1-wing.taper)/(wing.span/2))*wing.yElem);   % (inches)
 jigtwist = wing.yPanel *(tiptwist/(wing.span/2)); % (degrees)
 
-[L, D, W, alpha, lift, twist, uz, maxStress, Gamma] = wing.MDA(thick, jigtwist);
-
-[u_t, g_t, a_t, RHS, dgdx] = wing.insideMDA(thick, jigtwist);
-
-g_p = wing.AeroDiscipline(jigtwist, a_t, u_t);
-norm(g_t - g_p)
-
-
-u_p = wing.StructDiscipline(thick, g_t);
-
-norm(u_t - u_p)
-
-K = stiffness(wing.sweep, wing.span*12, wing.diam, thick, wing.E, wing.nElem);
-lift = seclift(g_t, wing.nPanel, wing.q, wing.span);
-f = force(lift, wing.aeAxis, wing.nDOF, wing.nPanel, wing.AR, wing.sweep, wing.taper, wing.span);
-disp('===================')
-norm(K * u_t - f)
-disp('===================')
-
-
-error('Description');
-
 % L
 % D
 % W
 % alpha
 % maxStress
+[L, D, W, alpha, lift, twist, uz, maxStress, Gamma] = wing.MDA(thick, jigtwist);
+
 
 tmp = exp(wing.range*6076.11549*(wing.sfc*D)/(wing.V*L));
 Wfuel = W*(tmp - 1.0)/tmp % (lb)
@@ -113,12 +122,14 @@ options = optimoptions('fmincon', 'Algorithm', 'interior-point' , ...
 this_thick = ones(wing.nElem, 1);
 this_jigtwist = zeros(wing.nPanel, 1);
 
-jigtwist(1) = 0;
-u_init = zeros(wing.nDOF, 1);
-gamma_init = ones(wing.nPanel, 1); % from mda above
-alpha_init = [0];
+[u_init, g_init, a_init, RHS, dgdx] = wing.insideMDA(this_thick, this_jigtwist);
 
-X_0 = vertcat(this_thick, this_jigtwist, u_init, gamma_init, alpha_init);
+jigtwist(1) = 0;
+%u_init = zeros(wing.nDOF, 1);
+%gamma_init = ones(wing.nPanel, 1); % from mda above
+%alpha_init = [0];
+
+X_0 = vertcat(this_thick, this_jigtwist, u_init, g_init, a_init);
 
 lb = vertcat(1e-10 * ones(wing.nElem, 1), ...
 			-inf* ones(wing.Offsets(4) - (wing.Offsets(2)), 1), ...
@@ -131,8 +142,12 @@ beq = [];
 nonlincon = @(X) (wing.MalebolgeConstraint(X));
 fmin_obj = @(X) (wing.IDFObjective(X));
 
-%fmin_obj(X_0)
-%nonlincon(X_0)
+disp('============= fmin_obj ===============')
+fmin_obj(X_0)
+disp('======================================')
+disp('============= nonlincon ===============')
+nonlincon(X_0)
+disp('======================================')
 
 [x_star_I,fval, exitflag, output, lambda] = fmincon(fmin_obj,X_0, A, b, Aeq, beq, lb, ub, nonlincon, options );
 

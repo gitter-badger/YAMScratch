@@ -256,10 +256,6 @@ end
 
 LHS = vertcat(u, Gamma, alpha);
 
-disp('*************************************')
-norm((K * u) - f)
-disp('*************************************')
-
 % Calc Drag
 D = totalDrag(Gamma, nPanel, q, S, AR, sweep, Mach);
 
