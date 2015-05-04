@@ -1,6 +1,7 @@
 classdef AeroElasticWing < handle
-singleton class that stores all of the constants for the associated aerostructural 
-problem. Basicaly reimplements aeropt.m as well as breaks the 
+	%singleton class that stores all of the constants for the associated aerostructural 
+	%problem. Basicaly reimplements aeropt.m as well as breaks the aeroln.m up
+	%into individual discipline solutions
 
 	properties
 		rho
