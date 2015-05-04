@@ -160,7 +160,7 @@ options = optimoptions('fmincon', 'Algorithm', 'interior-point' , ...
 	     'GradObj', 'off', 'GradConstr', 'off', ...
 	     'OutputFcn', logger_callback,'Display', 'iter', 'MaxFunEvals', 1e6);
 
-[x_start_I2, fval2, exitflag2, output2, lambda2] = fmincon(fmin_obj,x_star_I, A, b, Aeq, beq, lb, ub, nonlincon, options );
+[x_star_I2, fval2, exitflag2, output2, lambda2] = fmincon(fmin_obj,x_star_I, A, b, Aeq, beq, lb, ub, nonlincon, options );
 
 %============================================================
 %                Plotting Code                              %
@@ -211,5 +211,28 @@ if GRAPH
 	legend12 = legend('Interior Point');
 	set(legend12, 'Position',[0.592125803489439 0.171707822533567 0.164370982552801 0.106246351430239]);
 
+	local_thick_I2 = x_star_I2(1:wing.Offsets(2)-1);
+	local_jigtwist_I2 = x_star_I2(wing.Offsets(2):wing.Offsets(3)-1);
+	wing_fig = wing.plotWing(local_thick_I2, local_jigtwist_I2);
+	%==============================================================================
+	%both runs together
+	total_fevals = vertcat(fmin_log_IDF.fevals(:), (fmin_log_IDF.fevals(end) + fmin_log_IDF2.fevals(:)) ).';
+	total_optimality = vertcat(fmin_log_IDF.optimality(:), fmin_log_IDF2.optimality(:)).';
+	total_fmincon = figure;
+
+	all_gradients_fig2 = subplot(1,2,1);
+	semilogy([1:length(total_fevals)], total_optimality, 'kd-')
+	xlabel('Major Iterations');
+	ya3 = ylabel('$|\nabla \mathcal{L}|$','Rotation',0,'interpreter','latex');
+	set(ya3,'Units','Normalized','Position',[-0.17 0.5 0]);
+
+	minor_fig2 = subplot(1,2,2);
+	semilogy(total_fevals, total_optimality, 'kd-');
+
+	xlabel('Function Evaluations')
+	ya4 = ylabel('$|\nabla \mathcal{L}|$','Rotation',0, 'interpreter','latex');
+	set(ya4,'Units','Normalized','Position',[-0.17 0.5 0]);
+	legend14 = legend('Interior Point');
+	set(legend14, 'Position',[0.592125803489439 0.171707822533567 0.164370982552801 0.106246351430239]);
 
 end

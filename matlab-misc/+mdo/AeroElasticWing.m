@@ -1,4 +1,7 @@
 classdef AeroElasticWing < handle
+singleton class that stores all of the constants for the associated aerostructural 
+problem. Basicaly reimplements aeropt.m as well as breaks the 
+
 	properties
 		rho
 		Mach
@@ -81,27 +84,29 @@ classdef AeroElasticWing < handle
 		end
 		
 		function [L, D, W, alpha, lift, twist, uz, maxStress, Gamma] = MDA(obj, thick, jigtwist, varargin)
-				if nargin == 3
-					graph = false;
-				elseif nargin == 4
-					graph = varargin{1};
-				end
-				[L, D, W, alpha, lift, twist, uz, maxStress, Gamma]=...
-			    aeroln(obj.rho, obj.Mach, obj.temp, obj.AR, obj.sweep, obj.span, ...
-			    obj.taper, obj.nPanel, obj.diam, thick, obj.aeAxis, jigtwist, ...
-			    obj.loadFactor, obj.range, obj.sfc, graph);
+			if nargin == 3
+				graph = false;
+			elseif nargin == 4
+				graph = varargin{1};
+			end
+			[L, D, W, alpha, lift, twist, uz, maxStress, Gamma]=...
+		    aeroln(obj.rho, obj.Mach, obj.temp, obj.AR, obj.sweep, obj.span, ...
+		    obj.taper, obj.nPanel, obj.diam, thick, obj.aeAxis, jigtwist, ...
+		    obj.loadFactor, obj.range, obj.sfc, graph);
 		end
 
 		function [u_p , gamma_p, alpha_p, RHS, dgdx] = insideMDA(obj, thick, jigtwist)
+			%helper method used for testing the consitency of the individual
+			%discipline analysis codes against the MDA
+			%only called in testing 
+			[L, D, W, alpha, lift, twist, uz, maxStress, RHS, LHS, dgdx]=...
+		    aeroln_extended(obj.rho, obj.Mach, obj.temp, obj.AR, obj.sweep, obj.span, ...
+		    obj.taper, obj.nPanel, obj.diam, thick, obj.aeAxis, jigtwist, ...
+		    obj.loadFactor, obj.range, obj.sfc, false);
 
-				[L, D, W, alpha, lift, twist, uz, maxStress, RHS, LHS, dgdx]=...
-			    aeroln_extended(obj.rho, obj.Mach, obj.temp, obj.AR, obj.sweep, obj.span, ...
-			    obj.taper, obj.nPanel, obj.diam, thick, obj.aeAxis, jigtwist, ...
-			    obj.loadFactor, obj.range, obj.sfc, false);
-
-			    u_p = LHS(1:obj.nDOF,1);
-			    gamma_p = LHS(obj.nDOF+1 :obj.nDOF+obj.nPanel,1 );
-			    alpha_p = LHS(obj.nDOF+obj.nPanel+1, 1);
+		    u_p = LHS(1:obj.nDOF,1);
+		    gamma_p = LHS(obj.nDOF+1 :obj.nDOF+obj.nPanel,1 );
+		    alpha_p = LHS(obj.nDOF+obj.nPanel+1, 1);
 
 			return
 		end
@@ -117,7 +122,7 @@ classdef AeroElasticWing < handle
 		end
 
 		function [W_fuel] = OneObjectiveToRuleThemAll(obj, X)
-			%provides objective for the 
+			%provides objective for the MDF
 			assert(isvector(X));
 			assert(length(X) == obj.nElem + obj.nPanel)
 			%X
@@ -132,6 +137,7 @@ classdef AeroElasticWing < handle
 		end
 
 		function [c, ceq] = OneNonlinearConstraintToRuleThemAll(obj, X)
+			%provides nonlinear constraint for MDF
 			%equality constraints is only on the root
 			assert(isvector(X));
 			X_length = length(X);
@@ -151,6 +157,7 @@ classdef AeroElasticWing < handle
 		end
 
 		function [W_fuel] = IDFObjective(obj, X)
+			%provides the objective for IDF
 			assert(isvector(X));
 			X_length = length(X);
 			local_thick = X(1:obj.Offsets(2)-1);
@@ -163,8 +170,8 @@ classdef AeroElasticWing < handle
 			%Gamma
 			%disp(Gamma - local_gamma)
 			U = obj.StructDiscipline(local_thick, local_gamma);
-			%Alpha = obj.AttackDiscipline(local_jigtwist, local_gamma, local_u);
 
+			%now calculate the objective function, this part is basically the same as in MDF
 			lift = seclift(Gamma, obj.nPanel, obj.q, obj.span);
   			f = force(lift, obj.aeAxis, obj.nDOF, obj.nPanel, obj.AR, obj.sweep, obj.taper, obj.span);
 
@@ -178,6 +185,7 @@ classdef AeroElasticWing < handle
 		end
 
 		function [c, ceq] = MalebolgeConstraint(obj,X)
+			%provides nonlinear constraint for IDF
 			assert(isvector(X))
 			X_length = length(X);
 			%make sure we will not run off the edge
@@ -195,8 +203,7 @@ classdef AeroElasticWing < handle
 			
 			Gamma = obj.AeroDiscipline(local_jigtwist, local_alpha, local_u);
 			U = obj.StructDiscipline(local_thick, local_gamma);
-			%Alpha = obj.AttackDiscipline(local_jigtwist, local_gamma, local_u);
-
+			%now calculate the stresses and the wing weight
 			lift = seclift(Gamma, obj.nPanel, obj.q, obj.span);
   			f = force(lift, obj.aeAxis, obj.nDOF, obj.nPanel, obj.AR, obj.sweep, obj.taper, obj.span);
 
@@ -204,7 +211,7 @@ classdef AeroElasticWing < handle
  			W = weightStruct(obj.sweep, obj.span*12, obj.diam, local_thick, obj.matRho, obj.nElem);
  			maxStress = stress(obj.sweep, obj.span*12, obj.diam, local_thick, obj.E, obj.loadFactor*U, obj.nElem);
 
- 			%make sure that the stress is satisfied
+ 			%make sure that the stress constraint is satisfied
  			c(obj.Offsets(1):obj.Offsets(2)-1) = (maxStress - obj.yieldStress);
 
  			%constrain the root
@@ -212,6 +219,7 @@ classdef AeroElasticWing < handle
  			%consitency constraints
  			ceq(obj.Offsets(3): obj.Offsets(4)-1) = local_u - U;
  			ceq(obj.Offsets(4):obj.Offsets(5)- 1) = local_gamma - Gamma;
+ 			%how we deal with alpha state equation
  			ceq(obj.Offsets(5)) = W - L;
  			%c
  			%ceq
@@ -219,6 +227,7 @@ classdef AeroElasticWing < handle
 		end
 
 		function [y_prime] = AeroDiscipline(obj, jigtwist, alpha, u)
+			%directly solve for the circulations given copies of the state variables
 			AIC = aeroAIC(obj.AR, obj.nPanel, obj.Mach, obj.taper, obj.sweep);
 			v = zeros(obj.nPanel, 1);
 			twist(1) = jigtwist(1) + .5*u(6*1-1)*180/pi;
@@ -233,39 +242,13 @@ classdef AeroElasticWing < handle
 		end
 
 		function [y_prime] = StructDiscipline(obj, thick, Gamma)
-
+			%directly solve for the discplacements given copies of the state variables
 			K = stiffness(obj.sweep, obj.span*12, obj.diam, thick, obj.E, obj.nElem);
 			lift = seclift(Gamma, obj.nPanel, obj.q, obj.span);
 			f = force(lift, obj.aeAxis, obj.nDOF, obj.nPanel, obj.AR, obj.sweep, obj.taper, obj.span);
 			u = K \ f;
 			y_prime = u;
 			return
-		end
-
-		function [y_prime] = AttackDiscipline(obj, jigtwist, Gamma, u)
-			%working backwards from the circulations, since the weight
-			%is not a function alpha, it is the target
-
-			% Calc dliftdGamma
-			%
-			dliftdGamma = zeros(nPanel, nPanel);
-			for i = 1 : nPanel
-			 	for j = i : nPanel
-			   		dliftdGamma(i, j) = q*span;
-			 	end
-			end
-
-			normWidth =  1./nElem;
-			dLdGamma = zeros(1, nPanel);
-			dLdGamma = q*S * normWidth*ones(1, nPanel) * dliftdGamma / (q*span) * AR;
-			
-
-			AIC = aeroAIC(obj.AR, obj.nPanel, obj.Mach, obj.taper, obj.sweep);
-			v = AIC*Gamma;
-			twist(1) = jigtwist(1) + .5*u(6*1-1)*180/pi;
-
-			alpha = (v(1) * 180/pi) - twist(1); %degrees
-			y_prime = alpha;
 		end
 
 		function [fig] = plotWing(obj, thick, jigtwist)
