@@ -3,7 +3,7 @@ MAINTAINER yetanotherminion <yetanotherminion@gmail.com>
 
 RUN apt-get update
 
-ADD Leap_Motion_SDK_Linux_2.2.0.tgz /leap
+ADD Leap_Motion_SDK_Linux_2.2.5.tgz /leap
 
 RUN cd /leap/LeapDeveloperKit*  \
 	dpkg --install Leap-*-x64.deb
