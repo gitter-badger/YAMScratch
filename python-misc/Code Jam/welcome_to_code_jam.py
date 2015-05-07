@@ -1,15 +1,35 @@
 import sys
 import os
 
-class LetterComboTracker(object):
-	#utility class for each char in a search sequence
-	#used offsets and 
-	def __init__(self, character = ""):
-		self.char = character
+class CharWrapper(object):
+	"""Purpose: wrap the related datastructures that stores and
+		operates on a series of integers keys that represent indices.
+		We provide some simple memoization features in a foolish attempt
+		to prematurely optimize and to save time writing the same code"""
+	def __init__(self, character, keys = []):
+		#we assume that the list of integer keys is sorted in increasing order
+		if keys:
+			#cursory check, will not catch everything
+			assert(keys[0] <= keys[-1])
+		#takes a list of keys and sets the default appearance count to a null value
+		self.smallest_key
+		self.largest_key
+		self.keys = keys
 
-	def __repr__(self):
-		pretty_print = "Char: "  + self.char + ""
-		return pretty_print
+	def sumGreaterThanKey(self, key):
+		#slices list of keys to count only values with a key greater than argument
+		#then sums the permuation counts of all passible indices
+		running_sum = 0
+		#for key,value in 
+
+		return running_sum
+
+	def pruneLessThan(self, key):
+		#remove all integer keys less than or equal 
+		pass
+
+	def pruneGreaterThan(self, key):
+		pass
 
 def substring_find(substring, string):
 	#find number of possible substrings
@@ -39,24 +59,15 @@ def substring_find(substring, string):
 
 	#there should be an offset value for each letter in the search string
 	assert(len(substring) == len(letter_offsets))
-
 	#show the available letter indices for each letter overall
 	# for index,letter in enumerate(substring):
 	# 	print "{} : {}".format(letter, char_index[letter][letter_offsets[index]:])
 
 
 	#we prune the lists of letter indices for efficiency below
-	#			NOT IMPLEMENTED
+
 
 	#set up the base case for the last letter
-	reverse_it = reversed(substring)
-	base_letter = LetterComboTracker(reverse_it.next())
-	print base_letter
-	all_letters = [base_letter]
-	for char in reverse_it:
-		all_letters.insert(0, char)
-	print all_letters
-
 
 	return 0
 
