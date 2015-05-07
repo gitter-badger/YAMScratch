@@ -12,6 +12,8 @@ class CharWrapper(object):
 
 	"""
 	def __init__(self, character, keys = []):
+		assert(len(character) == 1)
+		self.char = character
 		#we assume that the list of integer keys is sorted in increasing order
 		if keys:
 			#cursory check, will not catch everything
