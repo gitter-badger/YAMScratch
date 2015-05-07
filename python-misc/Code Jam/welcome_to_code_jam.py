@@ -28,8 +28,10 @@ def substring_find(substring, string):
 
 	#there should be an offset value for each letter in the search string
 	assert(len(substring) == len(letter_offsets))
+
+	#show the available letter indices for each letter overall
 	for index,letter in enumerate(substring):
-		print "{} : {}".format(letter, letter_offsets[index])
+		print "{} : {}".format(letter, char_index[letter][letter_offsets[index]:])
 	return 0
 
 
