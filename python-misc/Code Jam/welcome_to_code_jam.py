@@ -17,11 +17,13 @@ def substring_find(substring, string):
 	letter_count = {key : 0 for key in unique_chars}
 	#cache how many times the charater has appeared before it in the substring
 	letter_offsets = list()
+	substring = substring + "!"
 	for char in substring:
 		try:
 			letter_offsets.append(letter_count[char])
 		except KeyError as e:
-			print e
+			print '''ERROR: char from search string not found in dictionary of unique chars of the search string'''
+			print "Letter searched for: '{}'' | ord: {}\n".format(letter, ord(letter))
 			return -1
 		else:
 			letter_count[char] += 1
@@ -45,6 +47,9 @@ if __name__ == '__main__':
 				test_string = f.readline()
 				test_string = test_string.strip("\n")
 				result = substring_find(magic_search, test_string)
+				if result == -1:
+					print "Error in searching\n"
+					continue
 				print "Case {}: {}".format(case, result)
 
 	else:
