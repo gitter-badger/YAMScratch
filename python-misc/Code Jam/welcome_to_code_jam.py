@@ -9,7 +9,7 @@ class CharWrapper(object):
 
 		WARNING: The code assumes only positive integer keys
 			Since keys are meant represent indices, negative values are not supported
-			
+
 	"""
 	def __init__(self, character, keys = []):
 		#we assume that the list of integer keys is sorted in increasing order
@@ -42,27 +42,28 @@ class CharWrapper(object):
 
 	def pruneLessThan(self, minimum):
 		#remove all integer keys less than or equal 
-		for key in self.keys:
-			if key <= minimum:
-				#this block would be sychronized in java
-				self.keys.pop(0)
-				self.count.pop(0)
-				#reset the cached value once everything is changed
-				if self.keys:
-					self.smallest_key = self.keys[0]
-				else:
-					self.smallest_key = None
+
+		while self.keys[0] <= minimum and len(self.keys) > 0:
+			#this block would be sychronized in java
+			self.keys.pop(0)
+			self.count.pop(0)
+			#reset the cached value once everything is changed
+			if self.keys:
+				self.smallest_key = self.keys[0]
+			else:
+				self.smallest_key = None
+		return 0
 
 	def pruneGreaterThan(self, maximum):
-		#remove all integer keys greater than or equal to 
-		for key in reversed(self.keys):
-			if key >= maximum:
-				self.keys.pop()
-				self.count.pop()
-				if self.keys:
-					self.largest_key = self.keys[-1]
-				else:
-					self.largest_key = None
+		#remove all integer keys greater than or equal to :
+		while self.keys[-1] >= maximum:
+			self.keys.pop()
+			self.count.pop()
+			if self.keys:
+				self.largest_key = self.keys[-1]
+			else:
+				self.largest_key = None
+		return 0
 
 def substring_find(substring, string):
 	#find number of possible substrings
