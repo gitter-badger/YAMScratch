@@ -1,6 +1,16 @@
 import sys
 import os
 
+class LetterComboTracker(object):
+	#utility class for each char in a search sequence
+	#used offsets and 
+	def __init__(self, character = ""):
+		self.char = character
+
+	def __repr__(self):
+		pretty_print = "Char: "  + self.char + ""
+		return pretty_print
+
 def substring_find(substring, string):
 	#find number of possible substrings
 	unique_chars = set([x for x in substring])
@@ -17,7 +27,6 @@ def substring_find(substring, string):
 	letter_count = {key : 0 for key in unique_chars}
 	#cache how many times the charater has appeared before it in the substring
 	letter_offsets = list()
-	substring = substring + "!"
 	for char in substring:
 		try:
 			letter_offsets.append(letter_count[char])
@@ -32,17 +41,37 @@ def substring_find(substring, string):
 	assert(len(substring) == len(letter_offsets))
 
 	#show the available letter indices for each letter overall
-	for index,letter in enumerate(substring):
-		print "{} : {}".format(letter, char_index[letter][letter_offsets[index]:])
+	# for index,letter in enumerate(substring):
+	# 	print "{} : {}".format(letter, char_index[letter][letter_offsets[index]:])
+
+
+	#we prune the lists of letter indices for efficiency below
+	#			NOT IMPLEMENTED
+
+	#set up the base case for the last letter
+	reverse_it = reversed(substring)
+	base_letter = LetterComboTracker(reverse_it.next())
+	print base_letter
+	all_letters = [base_letter]
+	for char in reverse_it:
+		all_letters.insert(0, char)
+	print all_letters
+
+
 	return 0
 
-
-if __name__ == '__main__':
+def main():
 	magic_search = "welcome to code jam"
 
 	if len(sys.argv) == 2:
 		with open(sys.argv[1], "r") as f:
-			num_test_cases = int(f.readline())
+			try:
+				num_test_cases = int(f.readline())
+			except ValueError:
+				print "ERROR: could not determine number of test cases"
+				print "please use a numeric, found {} instead".format(num_test_cases)
+				return -1
+
 			for case in range(0,num_test_cases):
 				test_string = f.readline()
 				test_string = test_string.strip("\n")
@@ -54,3 +83,6 @@ if __name__ == '__main__':
 
 	else:
 		print "Usage: <input filename>"
+
+if __name__ == '__main__':
+	main()
