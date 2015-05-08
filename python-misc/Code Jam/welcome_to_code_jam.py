@@ -111,28 +111,23 @@ def substring_find(substring, string):
 	# for index,letter in enumerate(substring):
 	#  	print "{} : {}".format(letter, char_index[letter][letter_offsets[index]:])
 
+	#========================================================
+	# 		ACTUAL IMPLEMENTATION OF ALGORITHM
+	#========================================================
 	#set up the base case for the last letter
 	rit = reversed(substring)
 	character = rit.next()
 	base_case = CharWrapper(character, char_index[character][letter_offsets[substr_len-1]:])
 	for index,value in enumerate(base_case.keys):
 		base_case.count[index] = 1
-
-	#print base_case
 	prev = base_case
 
 	for ii,character  in enumerate(rit):
 		real_index = substr_len - 2 - ii
 		gen_case = CharWrapper(character, char_index[character][letter_offsets[real_index]:])
-		# print "^"*100
-		# print gen_case
-		# print "^"*100
-
 		for jj, key in enumerate(gen_case.keys):
 			gen_case.count[jj] = prev.sumGreaterThanKey(key)
 		prev = gen_case
-		#print prev
-
 
 	return gen_case.sumGreaterThanKey(-1)
 
