@@ -1,5 +1,6 @@
 import sys
 import os
+import string
 
 class CharWrapper(object):
 	"""Purpose: wrap the related datastructures that stores and
@@ -150,7 +151,7 @@ def main():
 				if result == -1:
 					print "Error in searching\n"
 					continue
-				print "Case {}: {}".format(case, result)
+				print "Case #{}: {}".format(case+1, str(result)[-3:].zfill(4) )
 
 	else:
 		print "Usage: <input filename>"
