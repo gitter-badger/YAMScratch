@@ -36,6 +36,18 @@ class TestCharWrapper(unittest.TestCase):
 			self.assertEquals(char, temp.char)
 			del temp
 
+	def test_printing(self):
+		keys = [x for x in range(10,100,11)]
+		foo = CharWrapper("f", keys)
+		counts = [x - 3 for x in keys]
+		for index in range(0, len(foo.count)):
+			foo.count[index] = counts[index]
+		print "\n"
+		print "Keys:  ", keys
+		print "Counts:", counts
+		print
+		print foo
+
 
 if __name__ == '__main__':
 	unittest.main()

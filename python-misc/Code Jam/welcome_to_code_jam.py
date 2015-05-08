@@ -67,6 +67,13 @@ class CharWrapper(object):
 				self.largest_key = None
 		return 0
 
+	def __repr__(self):
+		out_string = "Character = '{}'\n".format(self.char)
+		out_string += ("="*30 + "\n")
+		for index,value in enumerate(self.keys):
+			out_string += "{0: >4} : {1: <4}\n".format(value, self.count[index])
+		return out_string
+
 def substring_find(substring, string):
 	#find number of possible substrings
 	unique_chars = set([x for x in substring])
@@ -98,11 +105,7 @@ def substring_find(substring, string):
 	#show the available letter indices for each letter overall
 	# for index,letter in enumerate(substring):
 	# 	print "{} : {}".format(letter, char_index[letter][letter_offsets[index]:])
-
-
-	#we prune the lists of letter indices for efficiency below
-
-
+	
 	#set up the base case for the last letter
 
 	return 0
