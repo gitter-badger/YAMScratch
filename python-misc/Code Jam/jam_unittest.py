@@ -48,6 +48,19 @@ class TestCharWrapper(unittest.TestCase):
 		print
 		print foo
 
+	def test_sumGreaterThanKey(self):
+		keys = [x for x in range(10,21)]
+		wrap = CharWrapper("w", keys)
+		test_counts = [x + 3 for x in keys]
+		for index in range(0, len(wrap.count)):
+			wrap.count[index] = test_counts[index]
+
+		result = wrap.sumGreaterThanKey(10)
+		self.assertEquals(sum(test_counts[1:]),result)
+
+		result = wrap.sumGreaterThanKey(19)
+		self.assertEquals(test_counts[-1], result)
+
 
 if __name__ == '__main__':
 	unittest.main()

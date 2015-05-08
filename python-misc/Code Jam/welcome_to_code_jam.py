@@ -34,12 +34,16 @@ class CharWrapper(object):
 
 		#sephomore for making sure the two lists are trimmed the same
 
-	def sumGreaterThanKey(self, key):
+	def sumGreaterThanKey(self, min_key):
 		#slices list of keys to count only values with a key greater than argument
 		#then sums the permuation counts of all passible indices
 		running_sum = 0
-		#for key,value in 
-
+		total_len = len(self.keys)
+		for index,key in enumerate(reversed(self.keys)):
+			real_index = total_len - index - 1
+			if key <= min_key:
+				break
+			running_sum += self.count[real_index]
 		return running_sum
 
 	def pruneLessThan(self, minimum):
@@ -105,7 +109,7 @@ def substring_find(substring, string):
 	#show the available letter indices for each letter overall
 	# for index,letter in enumerate(substring):
 	# 	print "{} : {}".format(letter, char_index[letter][letter_offsets[index]:])
-	
+
 	#set up the base case for the last letter
 
 	return 0
