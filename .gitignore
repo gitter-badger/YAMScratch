@@ -2,6 +2,7 @@
 *.exe
 *.class
 *.dat
+*.out
 
 #hide the sublime packages
 *.sublime-package*
