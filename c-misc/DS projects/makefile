@@ -23,5 +23,10 @@ HW3_INC =
 $(BIN)hw3 : ./src/main3.cpp
 	g++ $(HW3_INC) $< $(CFLAGS) -o $@
 
+HW6_INC = 
+
+$(BIN)hw6 : ./src/hw6.cpp
+	g++ $(HW6_INC) $< $(CFLAGS) -o $@
+
 clean:
 	$(RM) $(LIST)
