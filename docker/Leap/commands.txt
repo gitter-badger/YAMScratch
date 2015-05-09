@@ -1,0 +1,16 @@
+
+#to build when we are in current directory
+sudo docker build -t yam/leapv1 .
+
+#if we get a warning like this:
+#	Trying to pull repository docker.io/ubuntu ... failed
+#	INFO[0005] Get https://index.docker.io/v1/repositories/library/ubuntu/images: dial tcp: lookup index.docker.io: no such host 
+# then first try to restart docker daemon
+sudo systemctl restart docker.service
+
+#To get the container´s ip address, run the 2 commands:
+docker ps
+docker inspect <container_name> | grep IPAddress
+
+#to find the leap controller
+lsusb | grep "Leap Motion Controller"
