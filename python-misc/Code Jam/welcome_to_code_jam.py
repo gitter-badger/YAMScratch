@@ -134,7 +134,6 @@ def substring_find(substring, string):
 
 def main():
 	magic_search = "welcome to code jam"
-
 	if len(sys.argv) == 2:
 		with open(sys.argv[1], "r") as f:
 			try:
