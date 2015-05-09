@@ -1,11 +1,9 @@
 #! /bin/bash
 
-CONTAINER=testfire
+CONTAINER=yam/leapv1
 
 #bind the usb for the leap
-CONTAINER_ID=$(sudo docker run -ti  \
-				-e DISPLAY=$DISPLAY \
-				-v /temp/.X11-unix:/temp/.X11-unix \
+CONTAINER_ID=$(sudo docker run -t -i  \
 				$CONTAINER)
 
 echo $(sudo docker logs $CONTAINER_ID | sed -n 1p)
