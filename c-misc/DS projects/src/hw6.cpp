@@ -9,7 +9,7 @@
 
 int main(int argc, char const *argv[])
 {
-
+	fprintf(stderr, "%s\n", "blarg" );
 	/* code */
 	return 0;
 }
