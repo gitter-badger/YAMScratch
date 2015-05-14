@@ -72,7 +72,6 @@ int main(int argc, char* argv[]) {
 			token_length = 0;
 			lineptr[ii] = '\0'; /*make a token string by null terminating*/
 			running_sum += atoi(token);
-			printf("Token: %s\n",token); /*emit the token*/
 			if(++jj > N) {
 				break;
 			}
@@ -82,14 +81,11 @@ int main(int argc, char* argv[]) {
 			lineptr[ii] = '\0';
 			running_sum += atoi(token);
 			/*check that all tokens have been read in*/
-			printf("Token: %s\n", token);
-			/*printf("%d\n",++jj );*/
 			if(++jj > N) {
 				errno = EPROTO;
 				perror("Reached end of line before all tokens were parsed");
 				exit(-1);
 			}
-
 		} else {
 			token_length++;
 		}
