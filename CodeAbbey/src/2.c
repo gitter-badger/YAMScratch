@@ -64,9 +64,8 @@ int main(int argc, char* argv[]) {
 	*/
 	jj = 0;
 	token_length = 0;
+	delimeter = ' ';
 	for(ii = 0; ii < bytes_read; ii++){
-
-		token = lineptr + ii;
 		if( lineptr[ii] == delimeter) {
 			token_length = 0;
 			lineptr[ii] = '\0'; /*make a token string by null terminating*/
@@ -79,16 +78,24 @@ int main(int argc, char* argv[]) {
 			token_length = 0;
 			lineptr[ii] = '\0';
 			/*check that all tokens have been read in*/
-			if(jj++ < N) {
+			printf("Token: %s\n", token);
+			/*printf("%d\n",++jj );*/
+			if(++jj > N) {
 				errno = EPROTO;
 				perror("Reached end of line before all tokens were parsed");
 				exit(-1);
 			}
 
-			printf("Token: %s\n", token);
-
+		} else {
+			token_length++;
 		}
+		/*started new token*/
+		if(token_length == 1) {
+			token = lineptr + ii;
+		}
+		printf("%c\n",lineptr[ii] );
 	}
-	printf("%s\n", lineptr);
+	/*printf("%s\n", lineptr);
+	*/
 	return 0;
 }
