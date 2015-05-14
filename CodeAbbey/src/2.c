@@ -11,6 +11,7 @@ int main(int argc, char* argv[]) {
 	size_t nbytes;
 	ssize_t bytes_read;
 	int N, ii, jj, token_length;
+	long running_sum;
 	char delimeter;
 	lineptr = NULL; /*cause getline to allocate buffer for us*/
 	nbytes = 0;
@@ -65,10 +66,12 @@ int main(int argc, char* argv[]) {
 	jj = 0;
 	token_length = 0;
 	delimeter = ' ';
+	running_sum = 0;
 	for(ii = 0; ii < bytes_read; ii++){
 		if( lineptr[ii] == delimeter) {
 			token_length = 0;
 			lineptr[ii] = '\0'; /*make a token string by null terminating*/
+			running_sum += atoi(token);
 			printf("Token: %s\n",token); /*emit the token*/
 			if(++jj > N) {
 				break;
@@ -77,6 +80,7 @@ int main(int argc, char* argv[]) {
 		} else if( lineptr[ii] == '\n') {
 			token_length = 0;
 			lineptr[ii] = '\0';
+			running_sum += atoi(token);
 			/*check that all tokens have been read in*/
 			printf("Token: %s\n", token);
 			/*printf("%d\n",++jj );*/
@@ -93,9 +97,13 @@ int main(int argc, char* argv[]) {
 		if(token_length == 1) {
 			token = lineptr + ii;
 		}
-		printf("%c\n",lineptr[ii] );
 	}
-	/*printf("%s\n", lineptr);
-	*/
+	/*at the end, make sure that we found the appropriate number of tokens*/
+	if(jj != N) {
+		errno = EINVAL;
+		perror("Number of tokens did not match input");
+		exit(-1);
+	}
+	printf("%ld\n", running_sum);
 	return 0;
 }
