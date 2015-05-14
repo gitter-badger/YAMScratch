@@ -75,7 +75,6 @@ int main(int argc, char* argv[]) {
 			if(++jj > N) {
 				break;
 			}
-
 		} else if( lineptr[ii] == '\n') {
 			token_length = 0;
 			lineptr[ii] = '\0';
@@ -100,6 +99,8 @@ int main(int argc, char* argv[]) {
 		perror("Number of tokens did not match input");
 		exit(-1);
 	}
+	token = NULL;
+	free(lineptr); lineptr = NULL;
 	printf("%ld\n", running_sum);
 	return 0;
 }
