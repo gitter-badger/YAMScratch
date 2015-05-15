@@ -1,7 +1,7 @@
 #ifndef _PARSE_CODE_ABBEY_
 #define _PARSE_CODE_ABBEY_
 
-#define INPUT_ARRAY_INIT(name) 									\
+#define INPUT_ARRAY_INIT(name) 										\
 	typedef struct { 												\
 		name * items; 												\
 		size_t size; 												\
@@ -17,5 +17,7 @@
 
 #define InArray(name) ia_##name##_t
 
+/*operations*/
+#define parseLine(name, fn_ptr, tokens) 0
 
 #endif
