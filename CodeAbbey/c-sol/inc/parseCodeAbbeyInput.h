@@ -3,7 +3,7 @@
 
 #include <errno.h>
 
-#define TOKEN_ARRAY_INIT(TYPE) 													\
+#define VECTOR_INIT(TYPE) 														\
 	typedef struct { 															\
 		TYPE* items; 															\
 		unsigned _size; 														\
@@ -46,12 +46,12 @@
 		out_ptr->elms += 1;														\
 	}
 
-#define TokenArray(TYPE) ta_##TYPE##_t
-#define NewTokenArray(TYPE) init_##TYPE()
+#define Vector_t(TYPE) ta_##TYPE##_t
+#define newVector(TYPE) init_##TYPE()
 
 /*operations*/
 
-#define ta_push_back(TYPE, out_ptr, val) push_back_##TYPE ( out_ptr, val)
+#define vector_push_back(TYPE, out_ptr, val) push_back_##TYPE ( out_ptr, val)
 
 
 /*TYPE - the type of the token
