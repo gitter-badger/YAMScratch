@@ -7,10 +7,11 @@
 
 #include "parseCodeAbbeyInput.h"
 
-/*
+/**/
 TOKEN_ARRAY_INIT(int)
-*/
+/**/
 
+/*
 typedef struct { 
 	int* items; 
 	unsigned _size; 
@@ -30,15 +31,12 @@ void push_back_int ( ta_int_t** ref_ptr, const int val ) {
 	out_ptr = *ref_ptr;
 	unsigned new_size;
  	if(out_ptr->elms == out_ptr->_size) { 
- 		printf("equal elements\n");
  		if(out_ptr->elms) {
 	 		new_size = (2 * out_ptr->elms * sizeof(int));
 	 	} else {
 	 		new_size = 2 * sizeof(int);
 	 	}
-	 	printf("new size %d\n",new_size );
  		int* new_ptr = realloc(out_ptr->items, new_size ); 
- 		printf("%p\n", new_ptr );
  		if(new_ptr == ((void *)0)) {
  		 	if( (*__errno_location ()) == 12) { 
  				perror("Not enough memory to allocate new element");
@@ -52,12 +50,13 @@ void push_back_int ( ta_int_t** ref_ptr, const int val ) {
  		out_ptr->items = new_ptr; 
 	 	out_ptr->_size = new_size; 
  	}
- 	printf("New number of elements: %d\n",out_ptr->elms );
  	*(out_ptr->items + out_ptr->elms) = val; 
  	out_ptr->elms += 1; 
 
  	printf("boo\n");
 }
+*/
+
 #define SIX 6
 
 int main(int argc, char* argv[]) {
