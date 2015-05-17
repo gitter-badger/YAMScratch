@@ -18,6 +18,7 @@
 #define InArray(name) ia_##name##_t
 
 /*operations*/
-#define parseLine(name, fn_ptr, tokens) 0
+#define parseLine(name, fn_ptr, tokens) \
+	
 
 #endif
