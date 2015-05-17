@@ -5,6 +5,25 @@
 #include <stdlib.h> /*provides exit*/
 #include <string.h> /*provides strsep*/
 
+ssize_t wrap_getline(char** lineptr, size_t* nbytes, FILE * stream) {
+	ssize_t bytes_read;
+	bytes_read = getline(lineptr, nbytes, stream);
+	if(bytes_read < 0) {
+		/*this checks for when there is only EOF */
+		errno = EINVAL;
+		perror("Must input a number");
+		exit(EINVAL);
+	} else if(bytes_read == 1) {
+		/*check for newline ignoring specific EOL*/
+		if(*(*lineptr) == '\n') {
+			errno = EINVAL;
+			perror("Please input a number");
+			exit(EINVAL);
+		}
+	}
+	return bytes_read;
+}
+
 
 int main(int argc, char* argv[]) {
 	char * lineptr, * token ;
@@ -15,20 +34,9 @@ int main(int argc, char* argv[]) {
 	char delimeter;
 	lineptr = NULL; /*cause getline to allocate buffer for us*/
 	nbytes = 0;
-	bytes_read = getline(&lineptr, &nbytes, stdin);
-	if(bytes_read < 0) {
-		/*this checks for when there is only EOF */
-		errno = EINVAL;
-		perror("Must input a number");
-		exit(EINVAL);
-	} else if(bytes_read == 1) {
-		/*check for newline ignoring specific EOL*/
-		if(*lineptr == '\n') {
-			errno = EINVAL;
-			perror("Please input a number");
-			exit(EINVAL);
-		}
-	}
+
+	bytes_read = wrap_getline(&lineptr, &nbytes, stdin);
+
 	/*assume past here that the first line is a valid integer*/
 	N = atoi(lineptr);
 	if(!N){
@@ -40,20 +48,7 @@ int main(int argc, char* argv[]) {
 	/*get the list of numbers all on one line */
 	lineptr = NULL;
 	nbytes = 0;
-	bytes_read = getline(&lineptr, &nbytes, stdin);
-	if(bytes_read < 0) {
-		/*this checks for when there is only EOF */
-		errno = EINVAL;
-		perror("Must input a number");
-		exit(EINVAL);
-	} else if(bytes_read == 1) {
-		/*check for newline ignoring specific EOL*/
-		if(*lineptr == '\n') {
-			errno = EINVAL;
-			perror("Please input a number");
-			exit(EINVAL);
-		}
-	}
+	bytes_read = wrap_getline(&lineptr, &nbytes, stdin);
 	/*
 	* iterate over line buffer and change all delimeter characters to nulls
 	* yielding pointers the start of each subsegment
