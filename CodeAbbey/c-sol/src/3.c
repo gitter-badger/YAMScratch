@@ -6,13 +6,32 @@
 #include <string.h> /*provides strsep*/
 
 #include "parseCodeAbbeyInput.h"
+#include "wrapped.h"
 
 VECTOR_INIT(int)
+/*TOKENIZE must come after VECTOR declaration*/
+TOKENIZE_INIT(int)
+
 
 #define SIX 6
 
-int main(int argc, char* argv[]) {
 
+int main(int argc, char* argv[]) {
+	/*setup our parser template*/
+	int (*int_from_string)(char*);
+	int_from_string = &wrap_atoi;
+	size_t nbytes;
+	ssize_t bytes_read;
+	char* lineptr;
+	lineptr = NULL;
+	nbytes = 0;
+
+	bytes_read = wrap_getline(&lineptr, &nbytes, stdin);
+	printf("%s\n",lineptr );
+
+	unsigned a;
+	a = (*int_from_string)(lineptr);
+	printf("%d\n\n",a );
 
 	Vector_t(int) foo = *(newVector(int));
 	printf("elements: %d\n", foo.elms );

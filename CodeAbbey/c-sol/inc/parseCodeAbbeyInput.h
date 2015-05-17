@@ -3,6 +3,7 @@
 
 #include <errno.h>
 
+#ifndef VECTOR_INIT
 #define VECTOR_INIT(TYPE) 														\
 	typedef struct { 															\
 		TYPE* items; 															\
@@ -45,22 +46,35 @@
 		out_ptr->items[out_ptr->elms] = val;									\
 		out_ptr->elms += 1;														\
 	}
-
-#define Vector_t(TYPE) vec_##TYPE##_t
-#define newVector(TYPE) init_##TYPE()
+#endif
 
 /*operations*/
 
+#define Vector_t(TYPE) vec_##TYPE##_t
+#define newVector(TYPE) init_##TYPE()
 #define vector_push_back(TYPE, out_ptr, val) push_back_##TYPE ( out_ptr, val)
 
 
-/*TYPE - the type of the token
+/*=========================================================
+			INPUT PARSER TEMPLATE
+  =========================================================*/
+
+#define TOKENIZE_INIT(TYPE) \
+	void tokenize_##TYPE(Vector_t(TYPE)* out_ptr, TYPE (*fn_ptr)(char *), 		\
+								char* line_ptr, char delimeter ) {				\
+																				\
+	}																			\
+
+/*
+* TYPE - the type of the token
 * out_ptr - pointer to result structure
 * fn_ptr - a function pointer that the accepts the input token string
-* 			and returns a type_t
+* 			and returns a variable of type TYPE
 * line_ptr - a pointer to the input string, must be null terminated
+* delimeter - character to delimit
 */
 #define tokenizeLine(TYPE, out_ptr, fn_ptr, line_ptr, delimeter) \
-	foo
+	tokenize_##TYPE(out_ptr, fn_ptr, line_ptr, delimeter) {}\
+	
 
 #endif
