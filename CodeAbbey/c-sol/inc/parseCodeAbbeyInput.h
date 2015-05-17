@@ -8,28 +8,28 @@
 		TYPE* items; 															\
 		unsigned _size; 														\
 		unsigned elms;															\
-	} ta_##TYPE##_t; 															\
-	static inline ta_##TYPE##_t *init_##TYPE() { 								\
-		return (ta_##TYPE##_t*)calloc(1, sizeof(ta_##TYPE##_t)); 				\
+	} vec_##TYPE##_t; 															\
+	static inline vec_##TYPE##_t *init_##TYPE() { 								\
+		return (vec_##TYPE##_t*)calloc(1, sizeof(vec_##TYPE##_t)); 				\
 	} 																			\
-	static inline void destroy_##TYPE(ta_##TYPE##_t *p) { 						\
+	static inline void destroy_##TYPE(vec_##TYPE##_t *p) { 						\
 		if(p) {																	\
 			if(p->items){free(p->items);}										\
 			free(p); 															\
 		} 																		\
 	}																			\
-	void push_back_##TYPE ( ta_##TYPE##_t** ref_out_ptr, const TYPE val ) {		\
-		ta_##TYPE##_t* out_ptr;													\
+	void push_back_##TYPE ( vec_##TYPE##_t** ref_out_ptr, const TYPE val ) {	\
+		vec_##TYPE##_t* out_ptr;												\
 		out_ptr = *ref_out_ptr;													\
 		unsigned new_size;														\
 		/*resize the array to accomodate more elements*/						\
 		if(out_ptr->elms == out_ptr->_size) {									\
 			if(out_ptr->elms) {													\
-		 		new_size = (2 * out_ptr->elms * sizeof(int));					\
+		 		new_size = 2 * out_ptr->elms;									\
 		 	} else {															\
-		 		new_size = 2 * sizeof(int);										\
+		 		new_size = 2 ;													\
 		 	}																	\
-			TYPE* new_ptr = realloc(out_ptr->items, new_size);					\
+			TYPE* new_ptr = realloc(out_ptr->items, new_size * sizeof(TYPE));	\
 			if(new_ptr == NULL) {												\
 				if(errno == ENOMEM) {											\
 					perror("Not enough memory to allocate new element");		\
@@ -46,7 +46,7 @@
 		out_ptr->elms += 1;														\
 	}
 
-#define Vector_t(TYPE) ta_##TYPE##_t
+#define Vector_t(TYPE) vec_##TYPE##_t
 #define newVector(TYPE) init_##TYPE()
 
 /*operations*/
