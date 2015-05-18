@@ -9,11 +9,14 @@
 #include "wrapped.h"
 
 VECTOR_INIT(int)
+VECTOR_INIT(signed)
 /*TOKENIZE must come after VECTOR declaration*/
 TOKENIZE_INIT(int)
+TOKENIZE_INIT(signed)
 
 
 #define DELIMETER ' '
+#define MIN(a,b) a < b ? a : b
 
 
 int main(int argc, char* argv[]) {
@@ -38,29 +41,32 @@ int main(int argc, char* argv[]) {
 	}
 	unsigned N;
 	N = vec->items[0];
-	Vector_t(int)* result = newVector(int);
+	vector_destroy(int, vec);
+	/*hack to get around spaces in typename*/
+	Vector_t(signed)* result = newVector(signed);
+	Vector_t(signed)* each_line = newVector(signed);
 
 	unsigned ii, tmp;
 	for(ii = 0; ii < N; ii++) {
-		vector_clear(int, vec);
+		vector_clear(signed, each_line);
 		free(lineptr);
 		lineptr = NULL;
 		nbytes = 0;
 		bytes_read = wrap_getline(&lineptr, &nbytes, stdin);
 		/*account for the terminating null char from getline*/
 		bytes_read++;
-		tokenizeLine(int, vec , int_from_string, lineptr, bytes_read, DELIMETER);
-		if(vec->elms >= 2){
-			tmp = vec->items[0] + vec->items[1];
-			vector_push_back(int, result, tmp);	
+		tokenizeLine(signed, each_line , int_from_string, lineptr, bytes_read, DELIMETER);
+		if(each_line->elms >= 2){
+			tmp = MIN(each_line->items[0], each_line->items[1]);
+			vector_push_back(signed, result, tmp);	
 		}
 	}
 	free(lineptr);
-	vector_destroy(int, vec);
+	vector_destroy(signed, each_line);
 	for(ii = 0; ii < result->elms; ii++){
 		printf("%d ", result->items[ii]);
 	}
 	printf("\n");
-	vector_destroy(int, result);
+	vector_destroy(signed, result);
 	return 0;
 }

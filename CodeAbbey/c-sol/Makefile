@@ -22,6 +22,11 @@ $(BIN)/2.out : $(SRC)/2.c
 $(BIN)/3.out : $(SRC)/3.c
 	clang $(CFLAGS) -I $(INC) $< -o $@
 
+4 : $(BIN)/4.out
+
+$(BIN)/4.out : $(SRC)/4.c
+	clang $(CFLAGS) -I $(INC) $< -o $@
+
 clean : 
 	rm -f $(BIN)/* $(OBJ)/*
 	
