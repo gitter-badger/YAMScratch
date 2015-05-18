@@ -13,7 +13,7 @@ VECTOR_INIT(int)
 TOKENIZE_INIT(int)
 
 
-#define SIX 6
+#define DELIMETER ' '
 
 
 int main(int argc, char* argv[]) {
@@ -25,36 +25,19 @@ int main(int argc, char* argv[]) {
 	char* lineptr;
 	lineptr = NULL;
 	nbytes = 0;
+	Vector_t(int)* foo = newVector(int);
 
 	bytes_read = wrap_getline(&lineptr, &nbytes, stdin);
-	printf("%s\n",lineptr );
 
-	unsigned a;
-	a = (*int_from_string)(lineptr);
-	printf("%d\n\n",a );
+	printf("Read: %s\n",lineptr );
+	printf("%p\n", int_from_string );
+	printf("Bytes read %d\n", bytes_read );
+	/*account for the terminating null char from getline*/
+	bytes_read++;
+	tokenizeLine(int, foo, int_from_string, lineptr, bytes_read, DELIMETER);
 
-	Vector_t(int) foo = *(newVector(int));
-	printf("elements: %d\n", foo.elms );
-	printf("size: %d\n", foo._size );
-	printf("items: %p\n", foo.items );
+	printf("%d\n", foo->elms );
+	vector_destroy(int, foo);
 
-	Vector_t(int) * foo_ptr;
-	foo_ptr = &foo;
-	printf("%p\n",foo_ptr );
-	vector_push_back(int, &foo_ptr, 7);
-	printf("%p\n",foo_ptr );
-
-	printf("elements: %d\n", foo_ptr->elms);
-	printf("size: %d\n", foo_ptr->_size );
-	vector_push_back(int, &foo_ptr, 9);
-	vector_push_back(int, &foo_ptr, 10);
-	vector_push_back(int, &foo_ptr, 11);
-	vector_push_back(int, &foo_ptr, 12);
-	printf("elements: %d\n", foo_ptr->elms );
-	printf("size: %d\n", foo_ptr->_size );
-	unsigned ii;
-	for(ii = 0; ii < foo_ptr->elms; ii++) {
-		printf("items[%d] = %d\n", ii, foo_ptr->items[ii]);
-	}
 	return 0;
 }

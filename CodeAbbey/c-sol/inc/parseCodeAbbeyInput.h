@@ -19,9 +19,7 @@
 			free(p); 															\
 		} 																		\
 	}																			\
-	void push_back_##TYPE ( vec_##TYPE##_t** ref_out_ptr, const TYPE val ) {	\
-		vec_##TYPE##_t* out_ptr;												\
-		out_ptr = *ref_out_ptr;													\
+	void push_back_##TYPE(vec_##TYPE##_t* out_ptr, const TYPE val) {	\
 		unsigned new_size;														\
 		/*resize the array to accomodate more elements*/						\
 		if(out_ptr->elms == out_ptr->_size) {									\
@@ -45,7 +43,18 @@
 		}																		\
 		out_ptr->items[out_ptr->elms] = val;									\
 		out_ptr->elms += 1;														\
+	}																			\
+	void clear_##TYPE(vec_##TYPE##_t * p) {										\
+		if(p){																	\
+			if(p->items) {														\
+				free(p->items);													\
+				p->items = NULL;												\
+			}																	\
+			p->_size = 0;														\
+			p->elms = 0;														\
+		}																		\
 	}
+
 #endif
 
 /*operations*/
@@ -53,7 +62,8 @@
 #define Vector_t(TYPE) vec_##TYPE##_t
 #define newVector(TYPE) init_##TYPE()
 #define vector_push_back(TYPE, out_ptr, val) push_back_##TYPE ( out_ptr, val)
-
+#define vector_clear(TYPE, ptr) clear_##TYPE(ptr)
+#define vector_destroy(TYPE, ptr) destroy_##TYPE(ptr)
 
 /*=========================================================
 			INPUT PARSER TEMPLATE
@@ -61,9 +71,59 @@
 
 #define TOKENIZE_INIT(TYPE) \
 	void tokenize_##TYPE(Vector_t(TYPE)* out_ptr, TYPE (*fn_ptr)(char *), 		\
-								char* line_ptr, char delimeter ) {				\
+						 char* line_ptr, ssize_t n_bytes, char delimeter ) {	\
+		unsigned ii;															\
+		printf("%p\n", fn_ptr );												\
+		printf("Delim%x\n", delimeter);											\
+		printf("n_bytes%x\n", n_bytes);											\
+		unsigned token_len;														\
+		char* token, tmp;														\
+		token_len = 0;															\
 																				\
-	}																			\
+		TYPE value;																\
+		value = 0;																\
+		for(ii = 0; ii < n_bytes; ii++){										\
+			printf("[%d] = %c\n",ii, line_ptr[ii]);								\
+			switch (line_ptr[ii]) {												\
+			case ' ':															\
+			case '\t':															\
+			case '\r':															\
+			case '\n':															\
+			case '\v':															\
+			case '\f':															\
+				token_len = 0;													\
+				tmp = line_ptr[ii];												\
+				line_ptr[ii] = '\0'; /*make a token string by null terminating*/\
+				printf("token%s\n",token ); 									\
+				value = (*fn_ptr)(token);										\
+				printf("value: %d\n",value );									\
+				line_ptr[ii] = tmp; 											\
+				vector_push_back(TYPE, out_ptr, value);							\
+				break;															\
+			default:															\
+				/*for when delimeter is not whitespace*/						\
+				if(line_ptr[ii] == delimeter) {									\
+					token_len = 0;												\
+					tmp = line_ptr[ii];											\
+					/*make a token string by null terminating*/					\
+					line_ptr[ii] = '\0'; 										\
+					printf("token%s\n",token ); 								\
+					value = (*fn_ptr)(token);									\
+					printf("value: %d\n",value );								\
+					line_ptr[ii] = tmp; 										\
+					vector_push_back(TYPE, out_ptr, value);						\
+				} else {														\
+					token_len++;												\
+				}																\
+				break;															\
+			}																	\
+			/*started new token*/												\
+			if(token_len == 1) {												\
+				printf("Token started\n" );										\
+				token = line_ptr + ii;											\
+			}																	\
+		}																		\
+	}																			
 
 /*
 * TYPE - the type of the token
@@ -73,8 +133,7 @@
 * line_ptr - a pointer to the input string, must be null terminated
 * delimeter - character to delimit
 */
-#define tokenizeLine(TYPE, out_ptr, fn_ptr, line_ptr, delimeter) \
-	tokenize_##TYPE(out_ptr, fn_ptr, line_ptr, delimeter) {}\
+#define tokenizeLine(TYPE, out_ptr, fn_ptr, line_ptr, n_bytes, delimeter) \
+	tokenize_##TYPE(out_ptr, fn_ptr, line_ptr, n_bytes, delimeter)\
 	
-
 #endif
