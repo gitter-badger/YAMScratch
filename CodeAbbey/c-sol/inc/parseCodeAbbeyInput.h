@@ -86,6 +86,7 @@
 			case '\n':/* FALLTHROUGH */											\
 			case '\v':/* FALLTHROUGH */											\
 			case '\f':															\
+			case EOF:															\
 				token_len = 0;													\
 				tmp = line_ptr[ii];												\
 				line_ptr[ii] = '\0'; /*make a token string by null terminating*/\
