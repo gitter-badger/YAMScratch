@@ -25,19 +25,25 @@ int main(int argc, char* argv[]) {
 	char* lineptr;
 	lineptr = NULL;
 	nbytes = 0;
-	Vector_t(int)* foo = newVector(int);
+	Vector_t(int)* first_line = newVector(int);
 
 	bytes_read = wrap_getline(&lineptr, &nbytes, stdin);
 
-	printf("Read: %s\n",lineptr );
-	printf("%p\n", int_from_string );
-	printf("Bytes read %d\n", bytes_read );
 	/*account for the terminating null char from getline*/
 	bytes_read++;
-	tokenizeLine(int, foo, int_from_string, lineptr, bytes_read, DELIMETER);
+	tokenizeLine(int, first_line, int_from_string, lineptr, bytes_read, DELIMETER);
 
-	printf("%d\n", foo->elms );
-	vector_destroy(int, foo);
+	if(first_line->elms < 1) {
+		vector_destroy(int, first_line);
+		errno = EINVAL;
+		perror("Enter at one integer > 0");
+		exit(-1);
+	}
+	int N;
+	N = first_line->items[0];
+	printf("N = %d\n",N );
 
+	free(lineptr);
+	vector_destroy(int, first_line);
 	return 0;
 }

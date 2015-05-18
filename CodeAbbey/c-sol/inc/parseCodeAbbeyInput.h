@@ -19,7 +19,7 @@
 			free(p); 															\
 		} 																		\
 	}																			\
-	void push_back_##TYPE(vec_##TYPE##_t* out_ptr, const TYPE val) {	\
+	void push_back_##TYPE(vec_##TYPE##_t* out_ptr, const TYPE val) {			\
 		unsigned new_size;														\
 		/*resize the array to accomodate more elements*/						\
 		if(out_ptr->elms == out_ptr->_size) {									\
@@ -34,7 +34,7 @@
 					perror("Not enough memory to allocate new element");		\
 					exit(-1);													\
 				} else {														\
- 				 	printf("Inderminate error");								\
+ 				 	perror("Inderminate error");								\
  			 		exit(-1);													\
 				}																\
 			}																	\
@@ -73,30 +73,23 @@
 	void tokenize_##TYPE(Vector_t(TYPE)* out_ptr, TYPE (*fn_ptr)(char *), 		\
 						 char* line_ptr, ssize_t n_bytes, char delimeter ) {	\
 		unsigned ii;															\
-		printf("%p\n", fn_ptr );												\
-		printf("Delim%x\n", delimeter);											\
-		printf("n_bytes%x\n", n_bytes);											\
 		unsigned token_len;														\
 		char* token, tmp;														\
 		token_len = 0;															\
-																				\
 		TYPE value;																\
 		value = 0;																\
 		for(ii = 0; ii < n_bytes; ii++){										\
-			printf("[%d] = %c\n",ii, line_ptr[ii]);								\
 			switch (line_ptr[ii]) {												\
-			case ' ':															\
-			case '\t':															\
-			case '\r':															\
-			case '\n':															\
-			case '\v':															\
+			case ' ': /* FALLTHROUGH */											\
+			case '\t':/* FALLTHROUGH */											\
+			case '\r':/* FALLTHROUGH */											\
+			case '\n':/* FALLTHROUGH */											\
+			case '\v':/* FALLTHROUGH */											\
 			case '\f':															\
 				token_len = 0;													\
 				tmp = line_ptr[ii];												\
 				line_ptr[ii] = '\0'; /*make a token string by null terminating*/\
-				printf("token%s\n",token ); 									\
 				value = (*fn_ptr)(token);										\
-				printf("value: %d\n",value );									\
 				line_ptr[ii] = tmp; 											\
 				vector_push_back(TYPE, out_ptr, value);							\
 				break;															\
@@ -107,9 +100,7 @@
 					tmp = line_ptr[ii];											\
 					/*make a token string by null terminating*/					\
 					line_ptr[ii] = '\0'; 										\
-					printf("token%s\n",token ); 								\
 					value = (*fn_ptr)(token);									\
-					printf("value: %d\n",value );								\
 					line_ptr[ii] = tmp; 										\
 					vector_push_back(TYPE, out_ptr, value);						\
 				} else {														\
@@ -119,7 +110,6 @@
 			}																	\
 			/*started new token*/												\
 			if(token_len == 1) {												\
-				printf("Token started\n" );										\
 				token = line_ptr + ii;											\
 			}																	\
 		}																		\

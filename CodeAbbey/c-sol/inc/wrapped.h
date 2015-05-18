@@ -21,7 +21,6 @@ ssize_t wrap_getline(char** lineptr, size_t* nbytes, FILE * stream) {
 }
 
 int wrap_atoi(char* str) {
-	printf("in wrapper\n");
 	return atoi(str);
 }
 
