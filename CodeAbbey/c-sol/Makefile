@@ -3,7 +3,7 @@ SRC = ./src
 OBJ = ./obj
 INC = ./inc
 
-CC = gcc
+CC = clang
 CFLAGS = -Wall -Wextra --pedantic-errors -O3 -g
 
 
@@ -20,12 +20,17 @@ $(BIN)/2.out : $(SRC)/2.c
 3 : $(BIN)/3.out
 
 $(BIN)/3.out : $(SRC)/3.c
-	clang $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
 4 : $(BIN)/4.out
 
 $(BIN)/4.out : $(SRC)/4.c
-	clang $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
+5 : $(BIN)/5.out
+
+$(BIN)/5.out : $(SRC)/5.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
 clean : 
 	rm -f $(BIN)/* $(OBJ)/*
