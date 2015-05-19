@@ -62,6 +62,11 @@ $(BIN)/28.out : $(SRC)/28.c
 $(BIN)/41.out : $(SRC)/41.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
+43 : $(BIN)/43.out
+
+$(BIN)/43.out : $(SRC)/43.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
 clean : 
 	rm -f $(BIN)/* $(OBJ)/*
 	
