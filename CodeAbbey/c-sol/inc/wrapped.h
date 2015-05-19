@@ -24,4 +24,16 @@ int wrap_atoi(char* str) {
 	return atoi(str);
 }
 
+double wrap_atof(char* str) {
+	return atof(str);
+}
+
+char* string_duplicate(char* input) {
+	char* out;
+	unsigned len;
+	len = strlen(input);
+	out = (char*)malloc(sizeof(char)*(len+1));
+	return strcpy(out, input);
+}
+
 #endif
