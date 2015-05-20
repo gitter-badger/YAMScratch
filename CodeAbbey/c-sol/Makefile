@@ -57,6 +57,11 @@ $(BIN)/13.out : $(SRC)/13.c
 $(BIN)/15.out : $(SRC)/15.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
+16 : $(BIN)/16.out
+
+$(BIN)/16.out : $(SRC)/16.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
 20 : $(BIN)/20.out
 
 $(BIN)/20.out : $(SRC)/20.c
