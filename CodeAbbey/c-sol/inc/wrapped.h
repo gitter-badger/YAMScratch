@@ -1,6 +1,8 @@
 #ifndef _WRAPPERS_
 #define _WRAPPERS_
 
+#include <string.h>
+
 ssize_t wrap_getline(char** lineptr, size_t* nbytes, FILE * stream) {
 	ssize_t bytes_read;
 	bytes_read = getline(lineptr, nbytes, stream);
