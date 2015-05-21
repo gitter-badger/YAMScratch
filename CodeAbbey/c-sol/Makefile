@@ -87,6 +87,11 @@ $(BIN)/20.out : $(SRC)/20.c
 $(BIN)/21.out : $(SRC)/21.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
+27 : $(BIN)/27.out
+
+$(BIN)/27.out : $(SRC)/27.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
 28 : $(BIN)/28.out
 
 $(BIN)/28.out : $(SRC)/28.c
