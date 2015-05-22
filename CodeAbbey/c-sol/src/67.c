@@ -16,7 +16,8 @@ VECTOR_INIT(BigInt_ptr)
 int main(int argc, char* argv[]) {
 	unsigned N;
 	int rc;
-	rc = scanf("%u", &N);
+	/*be sure to each up the trailing whitespace on first line*/
+	rc = scanf("%u ", &N);
 	if(rc != 1 || !rc) {
 		errno = EINVAL;
 		perror("Enter only one integer > 0 on the first line.");
@@ -41,12 +42,22 @@ int main(int argc, char* argv[]) {
 		}
 		fib_num = NULL;
 		fib_num = newBigInt;
-		
-		printf("Input: %s\n",lineptr);
+		big_int_from_str(fib_num, lineptr);
+		char* new_rep;
+		new_rep = NULL;
+		size_t bytes_written;
+		bytes_written = big_int_to_str(&new_rep, fib_num);
+
+		printf("%s\n", new_rep );
+		printf("%s",lineptr);
 		free(lineptr);
+		free(new_rep);
+		vector_push_back(BigInt_ptr, fib_memo, fib_num);
 	}
 	/*clean up the vector of fibonacci numbers*/
 	for(ii = 0; ii < fib_memo->elms; ++ii) {
+		BigInt_destroy(fib_memo->items[ii]);
 	}
+	vector_destroy(BigInt_ptr, fib_memo);
 	return 0;
 }
