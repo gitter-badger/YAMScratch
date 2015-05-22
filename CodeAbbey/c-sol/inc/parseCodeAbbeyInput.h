@@ -45,13 +45,46 @@
 		out_ptr->elms += 1;														\
 	}																			\
 	void clear_##TYPE(vec_##TYPE##_t * p) {										\
-		if(p){																	\
+		if(p != NULL){															\
 			if(p->items) {														\
 				free(p->items);													\
 				p->items = NULL;												\
 			}																	\
 			p->_size = 0;														\
 			p->elms = 0;														\
+		}																		\
+	}																			\
+	void resize_##TYPE(size_t n, vec_##TYPE##_t *p) {							\
+		/*check for null*/														\
+		if(p != NULL){															\
+			TYPE* new_items = realloc(p->items, n);							\
+			if(new_items == NULL) {												\
+				if(errno == ENOMEM) {											\
+					perror("Not enough memory to allocate new element");		\
+					exit(-1);													\
+				} else {														\
+ 				 	perror("Inderminate error");								\
+ 			 		exit(-1);													\
+				}																\
+			}																	\
+			p->items = new_items;												\
+			if(n < p->elms) {													\
+				p->elms = n;													\
+			}																	\
+			p->_size = n;														\
+		}																		\
+	}																			\
+	TYPE pop_##TYPE(vec_##TYPE##_t *p) {										\
+		if(p != NULL) {															\
+			TYPE tmp;															\
+			tmp = p->items[p->elms -1];											\
+			p->items[p->elms - 1] = 0;											\
+			p->elms--;															\
+			return tmp;															\
+		} else {																\
+			/*indicate failure*/												\
+			errno = EDESTADDRREQ;												\
+			return 0;															\
 		}																		\
 	}
 
@@ -64,6 +97,8 @@
 #define vector_push_back(TYPE, out_ptr, val) push_back_##TYPE ( out_ptr, val)
 #define vector_clear(TYPE, ptr) clear_##TYPE(ptr)
 #define vector_destroy(TYPE, ptr) destroy_##TYPE(ptr)
+#define vector_resize(TYPE, ptr, n) resize_##TYPE(n, ptr)
+#define vector_pop(TYPE, ptr) pop_##TYPE(ptr)
 
 /*=========================================================
 			INPUT PARSER TEMPLATE
