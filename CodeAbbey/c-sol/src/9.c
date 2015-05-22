@@ -47,7 +47,6 @@ int main(int argc, char* argv[]) {
 		if(A+B >= C) {
 			result[ii] = 1;
 		}
-		printf("%ld %ld %ld\n",A , B, C);
 	}
 	for(ii = 0; ii < N; ++ii) {
 		printf("%d ", result[ii]);
