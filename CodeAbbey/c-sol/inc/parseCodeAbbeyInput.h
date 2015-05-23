@@ -1,3 +1,7 @@
+#ifndef __cplusplus
+extern "C" {
+#endif
+
 #ifndef _PARSE_CODE_ABBEY_
 #define _PARSE_CODE_ABBEY_
 
@@ -57,7 +61,7 @@
 	void resize_##TYPE(size_t n, vec_##TYPE##_t *p) {							\
 		/*check for null*/														\
 		if(p != NULL){															\
-			TYPE* new_items = realloc(p->items, n);							\
+			TYPE* new_items = realloc(p->items, n);								\
 			if(new_items == NULL) {												\
 				if(errno == ENOMEM) {											\
 					perror("Not enough memory to allocate new element");		\
@@ -162,4 +166,8 @@
 #define tokenizeLine(TYPE, out_ptr, fn_ptr, line_ptr, n_bytes, delimeter) \
 	tokenize_##TYPE(out_ptr, fn_ptr, line_ptr, n_bytes, delimeter)\
 	
+#endif
+
+#ifndef __cplusplus
+}
 #endif

@@ -1,6 +1,11 @@
+#ifndef __cplusplus
+extern "C" {
+#endif
+
 #ifndef _YAM_BIG_INT_
 #define _YAM_BIG_INT_ 
 #include <strings.h>
+#include <stdlib.h>
 
 #include "parseCodeAbbeyInput.h"
 
@@ -13,59 +18,26 @@ typedef Vector_t(char) BigInt;
 #define BigInt_destroy(ptr) vector_destroy(char, ptr)
 #define BigInt_clear(ptr) vector_clear(char, ptr)
 
-void big_int_from_str(BigInt* dest, const char* src) {
-	vector_clear(char, dest);
-	char curs;
-	while((curs = *src++)) {
-		if((curs >= '0') && (curs <= '9')) {
-			vector_push_back(char, dest, (curs - '0'));
-		}
-	}
+/*Big Int is little Endian, stores least significant in lowest adress space*/
+
+void big_int_from_str(BigInt* dest, const char* src);
+
+char* big_int_to_str(BigInt* src, size_t* bytes_written);
+
+int big_int_equality(BigInt* A, BigInt* B);
+
+int big_int_less_than(BigInt* A, BigInt* B);
+
+void big_int_add_heap(const BigInt* A, const BigInt* B, BigInt* result);
+
+BigInt big_int_add_stack(const BigInt* A, const BigInt* B);
+
+void compute_fibonacci(BigInt* fib_n, Vector_t(BigInt_ptr)* fib_memo);
+
+unsigned find_fibonacci_index(BigInt* fib_n, Vector_t(BigInt_ptr)* fib_memo);
+
+#endif
+
+#ifndef __cplusplus
 }
-
-size_t big_int_to_str(char** dest, BigInt* src) {
-	char* string;
-	if(src != NULL){
-		*dest = realloc(*dest, (src->elms + 1)*sizeof(char));
-		string = *dest;
-		if(dest == NULL) {
-			return 0;
-		}
-		unsigned ii;
-		for(ii = 0; ii < src->elms; ++ii) {
-			*string++ = src->items[ii] + '0';
-		}
-		/*null terminate*/
-		*string = '\0';
-		/*returns length up to but not including null terminator*/
-		return src->elms;
-	}
-	else {
-		*dest = NULL;
-		return 0;
-	}
-}
-
-int big_int_equality(BigInt* A, BigInt* B) {
-	return 0;
-}
-
-void big_int_add_heap(const BigInt* A, const BigInt* B, BigInt* result) {
-	BigInt_clear(result);
-	
-}
-
-BigInt big_int_add_stack(const BigInt* A, const BigInt* B) {
-	printf("Here\n");
-	BigInt x;
-	bzero(&x, sizeof(BigInt));
-	unsigned ii;
-	for(ii = 0; ii < 50; ++ii) {
-		printf("pushing back %d\n",x.elms );
-
-		vector_push_back(char, &x, 1);
-	}
-	return x;
-}
-
 #endif

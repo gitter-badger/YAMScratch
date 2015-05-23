@@ -2,11 +2,97 @@ BIN = ./bin
 SRC = ./src
 OBJ = ./obj
 INC = ./inc
+LDIR = ./lib
 
 CC = clang
 #-Werror
-CFLAGS = -Wall -Wextra --pedantic-errors -O3 -g
+CFLAGS = -Wall -Wextra --pedantic-errors -g
 
+
+LIBS = -L $(LDIR)
+
+# Points to the root of Google Test, relative to where this file is.
+# Remember to tweak this if you move this file.
+GTEST_DIR =  ~/Documents/GitHub/googletest
+
+# Where to find user code.
+USER_DIR = $(GTEST_DIR)/samples
+
+# Flags passed to the preprocessor.
+# Set Google Test's header directory as a system directory, such that
+# the compiler doesn't generate warnings in Google Test headers.
+CPPFLAGS += -isystem $(GTEST_DIR)/include -isystem $(GTEST_DIR)
+
+# Flags passed to the C++ compiler.
+CXXFLAGS += -g -Wall -Wextra -pthread --pedantic-errors
+
+# All tests produced by this Makefile.  Remember to add new tests you
+# created to the list.
+# TESTS = $(BIN)/big_int_unittest 
+TESTS =  $(BIN)/BigIntTest.out
+
+# All Google Test headers.  Usually you shouldn't change this
+# definition.
+GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
+				$(GTEST_DIR)/include/gtest/internal/*.h
+
+# House-keeping build targets.
+
+test : $(TESTS)
+
+# Builds gtest.a and gtest_main.a.
+
+# Usually you shouldn't tweak such internal variables, indicated by a
+# trailing _.
+GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
+
+# For simplicity and to avoid depending on Google Test's
+# implementation details, the dependencies specified below are
+# conservative and not optimized.  This is fine as Google Test
+# compiles fast and for ordinary users its source rarely changes.
+$(OBJ)/gtest-all.o : $(GTEST_SRCS_)
+	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
+			$(GTEST_DIR)/src/gtest-all.cc -o $@
+
+$(OBJ)/gtest_main.o : $(GTEST_SRCS_)
+	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
+			$(GTEST_DIR)/src/gtest_main.cc -o $@
+
+$(LDIR)/gtest.a : $(OBJ)/gtest-all.o
+	$(AR) $(ARFLAGS) $@ $^
+
+$(LDIR)/gtest_main.a : $(OBJ)/gtest-all.o $(OBJ)/gtest_main.o
+	$(AR) $(ARFLAGS) $@ $^
+
+
+# $(OBJ)/big_int.o : $(SRC)/big_int.cc $(INC)/sample1.h $(GTEST_HEADERS)
+# 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I $(INC) -c $< -o $@
+
+# $(OBJ)/big_int_unittest.o : $(SRC)/big_int_unittest.cc \
+#                      $(INC)/sample1.h $(GTEST_HEADERS)
+# 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I $(INC) -c $< -o $@
+
+# $(BIN)/big_int_unittest : $(OBJ)/big_int.o $(OBJ)/big_int_unittest.o $(LDIR)/gtest_main.a
+# 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+#========================================
+# 			BIG INT TEST
+
+
+#========================================
+
+$(OBJ)/yam_big_int.o : $(SRC)/yam_big_int.c $(INC)/yam_big_int.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I $(INC) -c $< -o $@
+
+$(OBJ)/yam_big_int_unittest.o : $(SRC)/yam_big_int_unittest.cc \
+					  $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I $(INC) -c $< -o $@
+
+$(BIN)/BigIntTest.out : $(OBJ)/yam_big_int.o $(OBJ)/yam_big_int_unittest.o  \
+						$(LDIR)/gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+######################################
 
 1 : $(BIN)/1.out
 
@@ -133,6 +219,5 @@ $(BIN)/48.out : $(SRC)/48.c
 $(BIN)/67.out : $(SRC)/67.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
-clean : 
-	rm -f $(BIN)/* $(OBJ)/*
-	
+clean :
+	rm -vf $(TESTS) $(LDIR)/gtest.a $(LDIR)/gtest_main.a $(OBJ)/*.o $(BIN)/*
