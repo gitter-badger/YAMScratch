@@ -1,5 +1,6 @@
 #ifndef _YAM_BIG_INT_
 #define _YAM_BIG_INT_ 
+#include <strings.h>
 
 #include "parseCodeAbbeyInput.h"
 
@@ -10,6 +11,7 @@ typedef Vector_t(char) BigInt;
 
 #define newBigInt newVector(char)
 #define BigInt_destroy(ptr) vector_destroy(char, ptr)
+#define BigInt_clear(ptr) vector_clear(char, ptr)
 
 void big_int_from_str(BigInt* dest, const char* src) {
 	vector_clear(char, dest);
@@ -44,6 +46,26 @@ size_t big_int_to_str(char** dest, BigInt* src) {
 	}
 }
 
+int big_int_equality(BigInt* A, BigInt* B) {
+	return 0;
+}
 
+void big_int_add_heap(const BigInt* A, const BigInt* B, BigInt* result) {
+	BigInt_clear(result);
+	
+}
+
+BigInt big_int_add_stack(const BigInt* A, const BigInt* B) {
+	printf("Here\n");
+	BigInt x;
+	bzero(&x, sizeof(BigInt));
+	unsigned ii;
+	for(ii = 0; ii < 50; ++ii) {
+		printf("pushing back %d\n",x.elms );
+
+		vector_push_back(char, &x, 1);
+	}
+	return x;
+}
 
 #endif
