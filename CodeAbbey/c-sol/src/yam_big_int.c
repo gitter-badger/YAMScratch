@@ -2,13 +2,20 @@
 #define _YAM_BIG_INT_ 
 #include <strings.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
+#include <string.h>
 
-#include "yam_big_int.h"
+#include <assert.h>
+
 #include "parseCodeAbbeyInput.h"
+#include "yam_big_int.h"
+
+VECTOR_INIT(char)
 
 /*Big Int is little Endian, stores least significant in lowest adress space*/
 
-void big_int_from_str(BigInt* dest, const char* src) {
+void big_int_from_str(BigInt* dest, char* src) {
 	vector_clear(char, dest);
 	char curs, * end;
 	unsigned length = strlen(src);
@@ -20,7 +27,7 @@ void big_int_from_str(BigInt* dest, const char* src) {
 	}
 }
 
-char* big_int_to_str(BigInt* src, size_t* bytes_written,) {
+char* big_int_to_str(BigInt* src, size_t* bytes_written) {
 	char* string;
 	if(src != NULL){
 		*dest = realloc(*dest, (src->elms + 1)*sizeof(char));
@@ -138,7 +145,6 @@ unsigned find_fibonacci_index(BigInt* fib_n, Vector_t(BigInt_ptr)* fib_memo) {
 		/*make sure that we succeded*/
 		assert(big_int_equality(fib_n, fib_memo->items[fib_memo->elms-1]) == 1);	
 	}
-
 }
 
 #endif

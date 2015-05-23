@@ -1,17 +1,13 @@
-#ifndef __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
 #ifndef _YAM_BIG_INT_
 #define _YAM_BIG_INT_ 
-#include <strings.h>
-#include <stdlib.h>
 
 #include "parseCodeAbbeyInput.h"
 
 /*we will use a vector as our big integer*/
-VECTOR_INIT(char)
-
 typedef Vector_t(char) BigInt;
 
 #define newBigInt newVector(char)
@@ -20,7 +16,7 @@ typedef Vector_t(char) BigInt;
 
 /*Big Int is little Endian, stores least significant in lowest adress space*/
 
-void big_int_from_str(BigInt* dest, const char* src);
+void big_int_from_str(BigInt* dest, char* src);
 
 char* big_int_to_str(BigInt* src, size_t* bytes_written);
 
@@ -38,6 +34,6 @@ unsigned find_fibonacci_index(BigInt* fib_n, Vector_t(BigInt_ptr)* fib_memo);
 
 #endif
 
-#ifndef __cplusplus
+#ifdef __cplusplus
 }
 #endif

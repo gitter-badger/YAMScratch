@@ -1,4 +1,4 @@
-#ifndef __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -168,6 +168,6 @@ extern "C" {
 	
 #endif
 
-#ifndef __cplusplus
+#ifdef __cplusplus
 }
 #endif
