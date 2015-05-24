@@ -6,6 +6,7 @@ extern "C" {
 #define _PARSE_CODE_ABBEY_
 
 #include <errno.h>
+#include <stdlib.h>
 
 #ifndef VECTOR_INIT
 #define VECTOR_INIT(TYPE) 														\
@@ -14,16 +15,16 @@ extern "C" {
 		unsigned _size; 														\
 		unsigned elms;															\
 	} vec_##TYPE##_t; 															\
-	static inline vec_##TYPE##_t *init_##TYPE() { 								\
+	static inline vec_##TYPE##_t *init_vec_##TYPE() { 								\
 		return (vec_##TYPE##_t*)calloc(1, sizeof(vec_##TYPE##_t)); 				\
 	} 																			\
-	static inline void destroy_##TYPE(vec_##TYPE##_t *p) { 						\
+	static inline void destroy_vec_##TYPE(vec_##TYPE##_t *p) { 						\
 		if(p) {																	\
 			if(p->items){free(p->items);}										\
 			free(p); 															\
 		} 																		\
 	}																			\
-	void push_back_##TYPE(vec_##TYPE##_t* out_ptr, const TYPE val) {			\
+	static void push_back_##TYPE(vec_##TYPE##_t* out_ptr, const TYPE val) {			\
 		unsigned new_size;														\
 		/*resize the array to accomodate more elements*/						\
 		if(out_ptr->elms == out_ptr->_size) {									\
@@ -32,7 +33,7 @@ extern "C" {
 		 	} else {															\
 		 		new_size = 2 ;													\
 		 	}																	\
-			TYPE* new_ptr = realloc(out_ptr->items, new_size * sizeof(TYPE));	\
+			TYPE* new_ptr = (TYPE*)realloc(out_ptr->items, new_size * sizeof(TYPE));	\
 			if(new_ptr == NULL) {												\
 				if(errno == ENOMEM) {											\
 					perror("Not enough memory to allocate new element");		\
@@ -48,7 +49,7 @@ extern "C" {
 		out_ptr->items[out_ptr->elms] = val;									\
 		out_ptr->elms += 1;														\
 	}																			\
-	void clear_##TYPE(vec_##TYPE##_t * p) {										\
+	static void clear_##TYPE(vec_##TYPE##_t * p) {										\
 		if(p != NULL){															\
 			if(p->items) {														\
 				free(p->items);													\
@@ -58,10 +59,10 @@ extern "C" {
 			p->elms = 0;														\
 		}																		\
 	}																			\
-	void resize_##TYPE(size_t n, vec_##TYPE##_t *p) {							\
+	static void resize_vec_##TYPE(size_t n, vec_##TYPE##_t *p) {							\
 		/*check for null*/														\
 		if(p != NULL){															\
-			TYPE* new_items = realloc(p->items, n);								\
+			TYPE* new_items = (TYPE*)realloc(p->items, n);						\
 			if(new_items == NULL) {												\
 				if(errno == ENOMEM) {											\
 					perror("Not enough memory to allocate new element");		\
@@ -78,7 +79,7 @@ extern "C" {
 			p->_size = n;														\
 		}																		\
 	}																			\
-	TYPE pop_##TYPE(vec_##TYPE##_t *p) {										\
+	static TYPE pop_##TYPE(vec_##TYPE##_t *p) {										\
 		if(p != NULL) {															\
 			TYPE tmp;															\
 			tmp = p->items[p->elms -1];											\
@@ -91,17 +92,16 @@ extern "C" {
 			return 0;															\
 		}																		\
 	}
-
 #endif
 
 /*operations*/
 
 #define Vector_t(TYPE) vec_##TYPE##_t
-#define newVector(TYPE) init_##TYPE()
+#define newVector(TYPE) init_vec_##TYPE()
 #define vector_push_back(TYPE, out_ptr, val) push_back_##TYPE ( out_ptr, val)
 #define vector_clear(TYPE, ptr) clear_##TYPE(ptr)
-#define vector_destroy(TYPE, ptr) destroy_##TYPE(ptr)
-#define vector_resize(TYPE, ptr, n) resize_##TYPE(n, ptr)
+#define vector_destroy(TYPE, ptr) destroy_vec_##TYPE(ptr)
+#define vector_resize(TYPE, ptr, n) resize_vec_##TYPE(n, ptr)
 #define vector_pop(TYPE, ptr) pop_##TYPE(ptr)
 
 /*=========================================================

@@ -1,5 +1,3 @@
-#ifndef _YAM_BIG_INT_
-#define _YAM_BIG_INT_ 
 #include <strings.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -10,8 +8,6 @@
 
 #include "parseCodeAbbeyInput.h"
 #include "yam_big_int.h"
-
-VECTOR_INIT(char)
 
 /*Big Int is little Endian, stores least significant in lowest adress space*/
 
@@ -28,24 +24,25 @@ void big_int_from_str(BigInt* dest, char* src) {
 }
 
 char* big_int_to_str(BigInt* src, size_t* bytes_written) {
-	char* string;
+	char* dest;
+	dest = NULL;
 	if(src != NULL){
-		*dest = realloc(*dest, (src->elms + 1)*sizeof(char));
-		string = *dest;
+		dest = (char*)realloc(dest, (src->elms + 1)*sizeof(char));
 		if(dest == NULL) {
 			return 0;
 		}
 		unsigned ii;
 		for(ii = 0; ii < src->elms; ++ii) {
-			*string++ = src->items[ii] + '0';
+			*dest++ = src->items[ii] + '0';
 		}
 		/*null terminate*/
-		*string = '\0';
+		*dest = '\0';
 		/*returns length up to but not including null terminator*/
-		return src->elms;
+		*bytes_written = src->elms;
+		return dest;
 	}
 	else {
-		*dest = NULL;
+		dest = NULL;
 		return 0;
 	}
 }
@@ -112,39 +109,3 @@ BigInt big_int_add_stack(const BigInt* A, const BigInt* B) {
 	}
 	return x;
 }
-
-
-void compute_fibonacci(BigInt* fib_n, Vector_t(BigInt_ptr)* fib_memo) {
-	char* new_rep;
-	/*the biggest element is pushed to the back*/
-	while( !(big_int_equality(fib_n, fib_memo->items[fib_memo->elms-1]))) {
-		BigInt* fib_next;
-		fib_next = newBigInt;
-
-		big_int_add_heap(fib_memo->items[fib_memo->elms-1],fib_memo->items[fib_memo->elms-2], fib_next);
-		bytes_written = big_int_to_str(&new_rep, fib_num);
-		printf("Created: %s\n",new_rep);
-		vector_push_back(BigInt_ptr, fib_memo, fib_next);
-	}
-}
-
-unsigned find_fibonacci_index(BigInt* fib_n, Vector_t(BigInt_ptr)* fib_memo) {
-	/*check if the input is in the memo structure already by binary search*/
-	unsigned memo_index, found;
-	found = 0;
-	unsigned left, right;
-	left = 0;
-	right = fib_memo->elms - 1;
-	while(right >= left){
-
-	}
-	if(found) {
-		return memo_index;
-	} else {
-		compute_fibonacci(fib_n, fib_memo);
-		/*make sure that we succeded*/
-		assert(big_int_equality(fib_n, fib_memo->items[fib_memo->elms-1]) == 1);	
-	}
-}
-
-#endif

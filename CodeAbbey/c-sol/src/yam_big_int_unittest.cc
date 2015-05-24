@@ -8,23 +8,34 @@
 #include "gtest/gtest.h"
 
 
-TEST(BigIntTest, FromString) {
+class BigIntTest : public testing::Test
+{
+protected:
+
+	virtual void SetUp() {
+	}
+
+	virtual void TearDown() {
+	}
+
+};
+
+TEST_F(BigIntTest, FromString) {
 	unsigned ii, jj;
 	ii = 6;
 	jj = 7;
 	printf("\n Foo= %d\n", ii+jj);
-	unsigned ff
 }
 
-TEST(BigIntTest, ToString) {
+TEST_F(BigIntTest, ToString) {
 	printf("\nMade it!\n");
 }
 
-TEST(BigIntTest, AddOnStack) {
+TEST_F(BigIntTest, AddOnStack) {
 	printf("\nMade it!\n");
 }
 
-TEST(BigIntTest, AddOnHeap) {
+TEST_F(BigIntTest, AddOnHeap) {
 	printf("\nMade it!\n");
 }
 

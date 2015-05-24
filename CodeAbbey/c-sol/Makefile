@@ -1,8 +1,8 @@
-BIN = ./bin
-SRC = ./src
-OBJ = ./obj
-INC = ./inc
-LDIR = ./lib
+BIN = bin
+SRC = src
+OBJ = obj
+INC = inc
+LDIR = lib
 
 CC = clang
 #-Werror
@@ -29,7 +29,7 @@ CXXFLAGS += -g -Wall -Wextra -pthread --pedantic-errors
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
 # TESTS = $(BIN)/big_int_unittest 
-TESTS =  $(BIN)/BigIntTest.out
+TESTS =  $(BIN)/big_int_unittest.out
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -88,7 +88,7 @@ $(OBJ)/yam_big_int_unittest.o : $(SRC)/yam_big_int_unittest.cc \
 					  $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I $(INC) -c $< -o $@
 
-$(BIN)/BigIntTest.out : $(OBJ)/yam_big_int.o $(OBJ)/yam_big_int_unittest.o  \
+$(BIN)/big_int_unittest.out : $(OBJ)/yam_big_int.o $(OBJ)/yam_big_int_unittest.o  \
 						$(LDIR)/gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
