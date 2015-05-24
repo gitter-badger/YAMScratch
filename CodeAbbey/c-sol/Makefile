@@ -5,6 +5,7 @@ INC = inc
 LDIR = lib
 
 CC = clang
+CXX = clang++
 #-Werror
 CFLAGS = -Wall -Wextra --pedantic-errors -g
 
@@ -24,7 +25,9 @@ USER_DIR = $(GTEST_DIR)/samples
 CPPFLAGS += -isystem $(GTEST_DIR)/include -isystem $(GTEST_DIR)
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -pthread --pedantic-errors
+# 	Unused function is turned off because of the macros which implement generic types
+# 	define everythin even if we only want to use one
+CXXFLAGS += -g -Wall -Wextra -pthread --pedantic-errors -Wno-unused-function -Wc++-compat
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
@@ -82,7 +85,7 @@ $(LDIR)/gtest_main.a : $(OBJ)/gtest-all.o $(OBJ)/gtest_main.o
 #========================================
 
 $(OBJ)/yam_big_int.o : $(SRC)/yam_big_int.c $(INC)/yam_big_int.h $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I $(INC) -c $< -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++ -I $(INC) -c $< -o $@
 
 $(OBJ)/yam_big_int_unittest.o : $(SRC)/yam_big_int_unittest.cc \
 					  $(GTEST_HEADERS)
