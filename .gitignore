@@ -8,6 +8,7 @@
 *.sublime-package*
 
 bin/
+lib/
 motivator/Matlab/
 Data\ Structures/
 c-misc/DS\ projects/*.txt
