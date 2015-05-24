@@ -9,7 +9,6 @@ CXX = clang++
 #-Werror
 CFLAGS = -Wall -Wextra --pedantic-errors -g
 
-
 LIBS = -L $(LDIR)
 
 # Points to the root of Google Test, relative to where this file is.
@@ -40,7 +39,6 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 				$(GTEST_DIR)/include/gtest/internal/*.h
 
 # House-keeping build targets.
-
 test : $(TESTS)
 
 # Builds gtest.a and gtest_main.a.
@@ -67,25 +65,10 @@ $(LDIR)/gtest.a : $(OBJ)/gtest-all.o
 $(LDIR)/gtest_main.a : $(OBJ)/gtest-all.o $(OBJ)/gtest_main.o
 	$(AR) $(ARFLAGS) $@ $^
 
-
-# $(OBJ)/big_int.o : $(SRC)/big_int.cc $(INC)/sample1.h $(GTEST_HEADERS)
-# 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I $(INC) -c $< -o $@
-
-# $(OBJ)/big_int_unittest.o : $(SRC)/big_int_unittest.cc \
-#                      $(INC)/sample1.h $(GTEST_HEADERS)
-# 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I $(INC) -c $< -o $@
-
-# $(BIN)/big_int_unittest : $(OBJ)/big_int.o $(OBJ)/big_int_unittest.o $(LDIR)/gtest_main.a
-# 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
-
 #========================================
 # 			BIG INT TEST
-
-
 #========================================
-
-$(OBJ)/yam_big_int.o : $(SRC)/yam_big_int.c $(INC)/yam_big_int.h $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++ -I $(INC) -c $< -o $@
+#	depends on yam_big_int in UTILITY FUNCTIONS
 
 $(OBJ)/yam_big_int_unittest.o : $(SRC)/yam_big_int_unittest.cc \
 					  $(GTEST_HEADERS)
@@ -95,7 +78,16 @@ $(BIN)/big_int_unittest.out : $(OBJ)/yam_big_int.o $(OBJ)/yam_big_int_unittest.o
 						$(LDIR)/gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
-######################################
+#========================================
+# 			UTILITY FUNCTIONS
+#========================================
+
+$(OBJ)/yam_big_int.o : $(SRC)/yam_big_int.c $(INC)/yam_big_int.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++ -I $(INC) -c $< -o $@
+
+#========================================
+# 		CODE ABBEY PROBLEMS SETS
+#========================================
 
 1 : $(BIN)/1.out
 
