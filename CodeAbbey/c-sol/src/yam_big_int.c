@@ -24,26 +24,27 @@ void big_int_from_str(BigInt* dest, char* src) {
 }
 
 char* big_int_to_str(BigInt* src, size_t* bytes_written) {
-	char* dest;
+	char* dest, * curs;
 	dest = NULL;
 	if(src != NULL){
-		dest = (char*)realloc(dest, (src->elms + 1)*sizeof(char));
-		if(dest == NULL) {
-			return 0;
+		dest = (char*)malloc((src->elms + 1)*sizeof(char));
+		printf("dest pointer = %x\n", dest);
+		if(dest != NULL) {
+			curs = dest;
+			unsigned ii;
+			for(ii = 0; ii < src->elms; ++ii) {
+				*curs++ = src->items[ii] + '0';
+			}
+			/*null terminate*/
+			*curs = '\0';
+			/*returns length up to but not including null terminator*/
+			*bytes_written = src->elms;
 		}
-		unsigned ii;
-		for(ii = 0; ii < src->elms; ++ii) {
-			*dest++ = src->items[ii] + '0';
-		}
-		/*null terminate*/
-		*dest = '\0';
-		/*returns length up to but not including null terminator*/
-		*bytes_written = src->elms;
 		return dest;
 	}
 	else {
-		dest = NULL;
-		return 0;
+		errno = EINVAL;
+		return NULL;
 	}
 }
 

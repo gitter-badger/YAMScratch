@@ -59,20 +59,22 @@ int main(int argc, char* argv[]) {
 		char* new_rep;
 		new_rep = NULL;
 		size_t bytes_written;
-		bytes_written = big_int_to_str(&new_rep, fib_num);
+		new_rep = big_int_to_str(fib_num, &bytes_written);
 
 		BigInt test; 
 		test = big_int_add_stack(fib_num, fib_num);
-		printf("%d\n", test.elms);
+		printf("FINAl elms %d\n", test.elms);
 
-		bytes_written = big_int_to_str(&new_rep, &test);
+		new_rep = big_int_to_str(&test, &bytes_written);
 
-		printf("%s\n", new_rep);
+		printf("%s %d\n", new_rep, bytes_written);
 		/*printf("%s",lineptr); */
 		free(lineptr);
+		printf("Other here\n");
 		free(new_rep);
 
 	}
+	printf("Near end\n");
 	/*clean up the vector of fibonacci numbers*/
 	for(ii = 0; ii < fib_memo->elms; ++ii) {
 		BigInt_destroy(fib_memo->items[ii]);

@@ -211,8 +211,11 @@ $(BIN)/48.out : $(SRC)/48.c
 
 67 : $(BIN)/67.out
 
-$(BIN)/67.out : $(SRC)/67.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+$(OBJ)/67.o : $(SRC)/67.c
+	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
 
+$(BIN)/67.out : $(OBJ)/yam_big_int.o $(OBJ)/67.o 
+	$(CC) $(CFLAGS) $^ -o $@
+	
 clean :
 	rm -vf $(TESTS) $(LDIR)/gtest.a $(LDIR)/gtest_main.a $(OBJ)/*.o $(BIN)/*
