@@ -87,8 +87,7 @@ int big_int_less_than(BigInt* A, BigInt* B) {
 			}
 		}
 	}
-	/*catch all*/
-	errno = EINVAL;
+	/*the items are equal and so they are not less than*/
 	return 0;
 }
 

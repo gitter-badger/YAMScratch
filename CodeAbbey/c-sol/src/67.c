@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 
 		new_rep = big_int_to_str(&test, &bytes_written);
 
-		printf("%s %d\n", new_rep, bytes_written);
+		printf("%s %zu\n", new_rep, bytes_written);
 		/*printf("%s",lineptr); */
 		free(lineptr);
 		printf("Other here\n");

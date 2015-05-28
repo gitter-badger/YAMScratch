@@ -212,7 +212,7 @@ $(BIN)/48.out : $(SRC)/48.c
 67 : $(BIN)/67.out
 
 $(OBJ)/67.o : $(SRC)/67.c
-	$(CC) $(CFLAGS) -I $(INC) -c $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) -c $< -o $@
 
 $(BIN)/67.out : $(OBJ)/yam_big_int.o $(OBJ)/67.o 
 	$(CC) $(CFLAGS) $^ -o $@
