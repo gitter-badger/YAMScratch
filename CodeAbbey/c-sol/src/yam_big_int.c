@@ -4,8 +4,6 @@
 #include <errno.h>
 #include <string.h>
 
-#include <assert.h>
-
 #include "parseCodeAbbeyInput.h"
 #include "yam_big_int.h"
 
@@ -15,8 +13,10 @@ void big_int_from_str(BigInt* dest, char* src) {
 	vector_clear(char, dest);
 	char curs, * end;
 	unsigned length = strlen(src);
-	end = src + length;
-	while((curs = *src++)) {
+	end = src + length - 1 ;
+	unsigned ii;
+	for(ii = 0; ii < length; ++ii) {
+		curs = *end--;
 		if((curs >= '0') && (curs <= '9')) {
 			vector_push_back(char, dest, (curs - '0'));
 		}
@@ -28,12 +28,11 @@ char* big_int_to_str(BigInt* src, size_t* bytes_written) {
 	dest = NULL;
 	if(src != NULL){
 		dest = (char*)malloc((src->elms + 1)*sizeof(char));
-		printf("dest pointer = %x\n", dest);
 		if(dest != NULL) {
 			curs = dest;
 			unsigned ii;
 			for(ii = 0; ii < src->elms; ++ii) {
-				*curs++ = src->items[ii] + '0';
+				*curs++ = src->items[src->elms - ii - 1] + '0';
 			}
 			/*null terminate*/
 			*curs = '\0';
