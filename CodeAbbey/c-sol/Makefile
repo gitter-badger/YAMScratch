@@ -85,6 +85,8 @@ $(BIN)/big_int_unittest.out : $(OBJ)/yam_big_int.o $(OBJ)/yam_big_int_unittest.o
 $(OBJ)/yam_big_int.o : $(SRC)/yam_big_int.c $(INC)/yam_big_int.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++ -I $(INC) -c $< -o $@
 
+$(OBJ)/yam_fibonacci.o : $(SRC)/yam_fibonacci.c $(INC)/yam_fibonacci.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++ -I $(INC) -c $< -o $@
 #========================================
 # 		CODE ABBEY PROBLEMS SETS
 #========================================
@@ -214,7 +216,7 @@ $(BIN)/48.out : $(SRC)/48.c
 $(OBJ)/67.o : $(SRC)/67.c
 	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) -c $< -o $@
 
-$(BIN)/67.out : $(OBJ)/yam_big_int.o $(OBJ)/67.o 
+$(BIN)/67.out : $(OBJ)/yam_big_int.o $(OBJ)/yam_fibonacci.o $(OBJ)/67.o 
 	$(CC) $(CFLAGS) $^ -o $@
 	
 clean :

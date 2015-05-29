@@ -67,7 +67,6 @@ int big_int_equality(BigInt* A, BigInt* B) {
 	}
 	/*all of the elements are the same so we return true*/
 	return 1;
-
 }
 
 int big_int_less_than(BigInt* A, BigInt* B) {

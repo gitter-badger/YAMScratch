@@ -9,12 +9,7 @@
 #include "parseCodeAbbeyInput.h"
 #include "wrapped.h"
 #include "yam_big_int.h"
-
-/*hack to get around macro tokenization*/
-typedef BigInt* BigInt_ptr;
-VECTOR_INIT(BigInt_ptr)
-
-#define DELIMETER ' '
+#include "yam_fibonacci.h"
 
 int main(int argc, char* argv[]) {
 	unsigned N;
@@ -27,23 +22,17 @@ int main(int argc, char* argv[]) {
 		exit(-1);
 	}
 
-	Vector_t(BigInt_ptr)* fib_memo = newVector(BigInt_ptr);
+	Vector_t(BigInt_ptr)* fib_memo = init_fib_memo();
+	unsigned* result;
+	result = (unsigned*)calloc(N, sizeof(unsigned));
 	/*setup our parser template*/
 	size_t nbytes;
 	ssize_t bytes_read;
 	char* lineptr;
 	unsigned ii;
+	signed index;
 	BigInt* fib_num;
-	/*initialize the structure with the base case*/
-	fib_num = NULL;
-	fib_num = newBigInt;
-	big_int_from_str(fib_num, "0");
-	vector_push_back(BigInt_ptr, fib_memo, fib_num);
-	fib_num = newBigInt;
-	big_int_from_str(fib_num, "1");
-	vector_push_back(BigInt_ptr, fib_memo, fib_num);
-
-
+	/*read each fibonacci number in*/
 	for(ii = 0; ii < N; ++ii) {
 		lineptr = NULL;
 		nbytes = 0;
@@ -53,32 +42,25 @@ int main(int argc, char* argv[]) {
 			perror("invalid input, nothing on line");
 			exit(-1);
 		}
-		fib_num = NULL;
 		fib_num = newBigInt;
 		big_int_from_str(fib_num, lineptr);
-		char* new_rep;
-		new_rep = NULL;
-		size_t bytes_written;
-		new_rep = big_int_to_str(fib_num, &bytes_written);
-
-		BigInt test; 
-		test = big_int_add_stack(fib_num, fib_num);
-		printf("FINAl elms %d\n", test.elms);
-
-		new_rep = big_int_to_str(&test, &bytes_written);
-
-		printf("%s %zu\n", new_rep, bytes_written);
+		index = find_fibonacci_index(fib_num, fib_memo);
+		/*if it does not exist yet, fill in the memo up to this one*/
+		if(index < 0) {
+			fill_in_up_to_fibonacci(fib_num, fib_memo);
+			index = fib_memo->elms - 1;
+		}
 		/*printf("%s",lineptr); */
+		result[ii] = index;
 		free(lineptr);
-		printf("Other here\n");
-		free(new_rep);
 
 	}
-	printf("Near end\n");
-	/*clean up the vector of fibonacci numbers*/
-	for(ii = 0; ii < fib_memo->elms; ++ii) {
-		BigInt_destroy(fib_memo->items[ii]);
+	for(ii = 0; ii < N; ++ii) {
+		printf("%d ", result[ii]);
 	}
-	vector_destroy(BigInt_ptr, fib_memo);
+	printf("\n");
+	BigInt_destroy(fib_num);
+	/*cleans up vector of BigInts*/
+	destroy_fib_memo(fib_memo);
 	return 0;
 }
