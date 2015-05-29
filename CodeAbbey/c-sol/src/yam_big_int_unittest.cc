@@ -95,7 +95,28 @@ TEST_F(BigIntTest, AddOnStack) {
 }
 
 TEST_F(BigIntTest, AddOnHeap) {
-	printf("\nMade it!\n");
+	BigInt* A, * B, * C, *D, *E;
+	A = newBigInt;
+	B = newBigInt;
+	C = newBigInt;
+	D = newBigInt;
+	E = newBigInt;
+	big_int_from_str(A, const_cast<char*>(a));
+	big_int_from_str(B, const_cast<char*>(b));
+	/*hold what the result should be*/
+	big_int_from_str(C, const_cast<char*>(c));
+	size_t nbytes;
+	nbytes = 0;
+	/*test that operation is associative*/
+	big_int_add_heap(A, B, D);
+	big_int_add_heap(B, A, E);
+	ASSERT_EQ(1, big_int_equality(D, C));
+	ASSERT_EQ(1, big_int_equality(E, C));
+	BigInt_destroy(A);
+	BigInt_destroy(B);
+	BigInt_destroy(C);
+	BigInt_destroy(D);
+	BigInt_destroy(E);
 }
 
 TEST_F(BigIntTest, LessThan) {

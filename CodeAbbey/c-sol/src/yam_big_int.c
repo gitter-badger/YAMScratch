@@ -93,7 +93,31 @@ int big_int_less_than(BigInt* A, BigInt* B) {
 
 void big_int_add_heap(BigInt* A, BigInt* B, BigInt* result) {
 	BigInt_clear(result);
-
+	BigInt* tmp;
+	if(A->elms > B->elms) {
+		tmp = A;
+		A = B;
+		B = tmp;
+	}
+	unsigned ii, jj, carry;
+	carry = 0;
+	for(ii = 0; ii < A->elms; ++ii) {
+		carry += A->items[ii];
+		carry += B->items[ii];
+		/*this is base 10*/
+		vector_push_back(char, result, (carry % 10));
+		carry /= 10;
+	}
+	/*continue with the remaining digits of B*/
+	for(jj = ii; jj < B->elms; ++jj) {
+		carry += B->items[jj];
+		/*this is base 10*/
+		vector_push_back(char, result, (carry % 10));
+		carry /= 10;
+	}
+	if(carry) {
+		vector_push_back(char, result, carry);
+	}
 }
 
 BigInt big_int_add_stack(BigInt* A, BigInt* B) {
