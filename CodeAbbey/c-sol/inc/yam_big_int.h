@@ -27,9 +27,9 @@ int big_int_equality(BigInt* A, BigInt* B);
 
 int big_int_less_than(BigInt* A, BigInt* B);
 
-void big_int_add_heap(const BigInt* A, const BigInt* B, BigInt* result);
+void big_int_add_heap(BigInt* A, BigInt* B, BigInt* result);
 
-BigInt big_int_add_stack(const BigInt* A, const BigInt* B);
+BigInt big_int_add_stack(BigInt* A, BigInt* B);
 
 #endif
 

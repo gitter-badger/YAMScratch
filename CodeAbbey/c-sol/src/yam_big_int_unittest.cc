@@ -72,18 +72,23 @@ TEST_F(BigIntTest, ToString) {
 }
 
 TEST_F(BigIntTest, AddOnStack) {
-	/*this test depends on big_int_from_str, big_int_to_str, and big_int_equality*/
-	BigInt* A,* B, * C;
+	/*this test depends on big_int_to_str, and big_int_equality*/
+	BigInt* A, * B, * C;
 	A = newBigInt;
 	B = newBigInt;
 	C = newBigInt;
+	BigInt D, E;
 	big_int_from_str(A, const_cast<char*>(a));
 	big_int_from_str(B, const_cast<char*>(b));
+	/*hold what the result should be*/
 	big_int_from_str(C, const_cast<char*>(c));
 	size_t nbytes;
 	nbytes = 0;
-
-	printf("\nMade it!\n");
+	/*test that operation is associative*/
+	D = big_int_add_stack(A, B);
+	E = big_int_add_stack(B, A);
+	ASSERT_EQ(1, big_int_equality(&D, C));
+	ASSERT_EQ(1, big_int_equality(&E, C));
 	BigInt_destroy(A);
 	BigInt_destroy(B);
 	BigInt_destroy(C);
