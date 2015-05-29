@@ -156,5 +156,3 @@ TEST_F(BigIntTest, Equals) {
 	BigInt_destroy(A);
 	BigInt_destroy(B);
 }
-
-/*=======================================*/
