@@ -19,6 +19,6 @@ RUN cd /home/leap/LeapDeveloperKit*  \
 RUN apt-get update
 
 
-USER developer
-ENV HOME /home/developer
+USER leap
+ENV HOME /home/leap
 ENTRYPOINT ["/bin/bash"]
