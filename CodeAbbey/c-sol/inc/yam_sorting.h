@@ -9,13 +9,15 @@ extern "C" {
 	void yam_quicksort_##TYPE(TYPE * list, unsigned left, unsigned right, unsigned (*less_than)(TYPE*, TYPE*)) {\
 		/*find recursive case when len(list) > 3*/							\
 		printf("left = %d, right = %d\n",left, right); 	\
-		unsigned ii, jj;													\
+		unsigned ii, jj, kk;												\
 		TYPE* pivot;														\
-		if(left+2 < right){													\
+		TYPE tmp;															\
+		if(left+9 < right){													\
+			for(kk = left; kk <= right; ++kk) { printf("%d ",list[kk]);} \
+			printf("\n Done \n" ); 	\
 			/*find median of three for pivot*/								\
 			unsigned center;												\
 			center = left + (right - left)/2;								\
-			TYPE tmp;														\
 			if(less_than(list+center, list+left)) {							\
 				swap(list, center, left, tmp)								\
 			}																\
@@ -49,6 +51,7 @@ extern "C" {
 			/*restore pivot*/												\
 			swap(list, ii, right - 1, tmp)									\
 			/*now recurse on smaller paritions*/							\
+			for(kk = left; kk <= right; ++kk) { printf("%d ",list[kk]);} \
 			yam_quicksort_##TYPE(list, left, ii - 1, less_than); 			\
 			yam_quicksort_##TYPE(list, ii + 1, right, less_than); 			\
 		} else {															\
@@ -57,19 +60,17 @@ extern "C" {
 			* perform simple insertion sort, we recycle the pivot variable 	\
 			* here it is really just a temp var to save on swaps 			\
 			*/																\
-			unsigned offset;												\
-			offset = (right - left);							\
-			printf("offset %d\n", offset);	\
-			for(ii = 1; ii <= offset; ++ii) {								\
+			for(ii = left+1; ii <= right; ++ii) {							\
 				jj = ii;													\
-				pivot = list + ii;											\
-				while(jj > 0 && less_than(pivot, list+jj-1)) {				\
+				tmp = list[ii];											\
+				printf("j = %d, A[i] = %d A[j-1] = %d\n", jj, tmp, list[jj -1] ); \
+				while(jj > 0 && less_than(&tmp, list+jj-1)) {				\
 					list[jj] = list[jj-1];									\
 					printf("swapped element\n");	\
 					--jj;													\
 				}															\
 				/*get the actual value of the pivot to copy in*/			\
-				list[jj] = *pivot;											\
+				list[jj] = tmp;											\
 			}																\
 		}																	\
 	}
