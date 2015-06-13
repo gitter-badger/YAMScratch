@@ -58,7 +58,8 @@ extern "C" {
 			* here it is really just a temp var to save on swaps 			\
 			*/																\
 			unsigned offset;												\
-			offset = (right - left) * sizeof(TYPE);							\
+			offset = (right - left);							\
+			printf("offset %d\n", offset);	\
 			for(ii = 1; ii <= offset; ++ii) {								\
 				jj = ii;													\
 				pivot = list + ii;											\
