@@ -16,6 +16,7 @@ void bad_qsort(int * list, unsigned left, unsigned right) {
 	jj = right;
 	enum State dir;
 	dir = LEFT;
+	/*not a great choice of pivot but required by their rules*/
 	pivot = list[left];
 	while(ii < jj){ 
 		if(dir == LEFT) {
