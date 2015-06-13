@@ -8,13 +8,10 @@ extern "C" {
 #define QUICKSORT_INIT(TYPE) \
 	void yam_quicksort_##TYPE(TYPE * list, unsigned left, unsigned right, unsigned (*less_than)(TYPE*, TYPE*)) {\
 		/*find recursive case when len(list) > 3*/							\
-		printf("left = %d, right = %d\n",left, right); 	\
-		unsigned ii, jj, kk;												\
+		unsigned ii, jj;													\
 		TYPE* pivot;														\
 		TYPE tmp;															\
 		if(left+9 < right){													\
-			for(kk = left; kk <= right; ++kk) { printf("%d ",list[kk]);} \
-			printf("\n Done \n" ); 	\
 			/*find median of three for pivot*/								\
 			unsigned center;												\
 			center = left + (right - left)/2;								\
@@ -34,7 +31,6 @@ extern "C" {
 			swap(list, center, right-1, tmp)								\
 			/*pivot is the pointer to the array elements*/					\
 			pivot = list + right - 1;										\
-			printf("pivot = %d\n", *pivot); 	\
 			/*begin partitioning array*/									\
 			ii = left;														\
 			jj = right - 1;													\
@@ -51,26 +47,22 @@ extern "C" {
 			/*restore pivot*/												\
 			swap(list, ii, right - 1, tmp)									\
 			/*now recurse on smaller paritions*/							\
-			for(kk = left; kk <= right; ++kk) { printf("%d ",list[kk]);} \
 			yam_quicksort_##TYPE(list, left, ii - 1, less_than); 			\
 			yam_quicksort_##TYPE(list, ii + 1, right, less_than); 			\
 		} else {															\
-			printf("calling insertion sort\n"); \
 			/* 																\
 			* perform simple insertion sort, we recycle the pivot variable 	\
 			* here it is really just a temp var to save on swaps 			\
 			*/																\
 			for(ii = left+1; ii <= right; ++ii) {							\
 				jj = ii;													\
-				tmp = list[ii];											\
-				printf("j = %d, A[i] = %d A[j-1] = %d\n", jj, tmp, list[jj -1] ); \
+				tmp = list[ii];												\
 				while(jj > 0 && less_than(&tmp, list+jj-1)) {				\
 					list[jj] = list[jj-1];									\
-					printf("swapped element\n");	\
 					--jj;													\
 				}															\
 				/*get the actual value of the pivot to copy in*/			\
-				list[jj] = tmp;											\
+				list[jj] = tmp;												\
 			}																\
 		}																	\
 	}
