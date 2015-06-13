@@ -236,6 +236,7 @@ $(BIN)/43.out : $(SRC)/43.c
 $(BIN)/48.out : $(SRC)/48.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
+
 67 : $(BIN)/67.out
 
 $(OBJ)/67.o : $(SRC)/67.c
@@ -244,5 +245,10 @@ $(OBJ)/67.o : $(SRC)/67.c
 $(BIN)/67.out : $(OBJ)/yam_big_int.o $(OBJ)/yam_fibonacci.o $(OBJ)/67.o 
 	$(CC) $(CFLAGS) $^ -o $@
 	
+112 : $(BIN)/112.out
+
+$(BIN)/112.out : $(SRC)/112.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
 clean :
 	rm -vf $(TESTS) $(LDIR)/gtest.a $(LDIR)/gtest_main.a $(OBJ)/*.o $(BIN)/*
