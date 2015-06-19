@@ -31,7 +31,7 @@ struct TapeNodeDebug {
 	struct TapeNodeDebug* next;
 	struct TapeNodeDebug* prev;
 	int cell;
-	long index;
+	signed long index;
 };
 
 
@@ -45,7 +45,7 @@ signed _eval_buffer(char* src, size_t nbytes, struct TapeNode* cursor, Vector_t(
 
 /*
 * debug version will check for overflows and underflows data cells and emmit warning
-* to stderr
+* to stderr, debug version also outputs action
 */
 signed _evaluate_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor, Vector_t(int)* stack);
 
