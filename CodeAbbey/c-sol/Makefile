@@ -21,12 +21,12 @@ USER_DIR = $(GTEST_DIR)/samples
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that
 # the compiler doesn't generate warnings in Google Test headers.
-CPPFLAGS += -isystem $(GTEST_DIR)/include -isystem $(GTEST_DIR)
+CPPFLAGS += -isystem $(GTEST_DIR)/include -isystem $(GTEST_DIR) 
 
 # Flags passed to the C++ compiler.
 # 	Unused function is turned off because of the macros which implement generic types
 # 	define everythin even if we only want to use one
-CXXFLAGS += -g -Wall -Wextra -pthread --pedantic-errors -Wno-unused-function -Wc++-compat
+CXXFLAGS += -g -Wall -Wextra -pthread --pedantic-errors -Wno-unused-function -Wc++-compat -Wextern-c-compat
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
@@ -87,6 +87,10 @@ $(OBJ)/yam_big_int.o : $(SRC)/yam_big_int.c $(INC)/yam_big_int.h $(GTEST_HEADERS
 
 $(OBJ)/yam_fibonacci.o : $(SRC)/yam_fibonacci.c $(INC)/yam_fibonacci.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++ -I $(INC) -c $< -o $@
+
+$(OBJ)/brainfuck_interpreter.o : $(SRC)/brainfuck_interpreter.c $(INC)/brainfuck_interpreter.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++ -I $(INC) -c $< -o $@
+
 #========================================
 # 		CODE ABBEY PROBLEMS SETS
 #========================================
