@@ -35,11 +35,12 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 	/*dereference the instruction pointer each time*/
 	switch(*instr_ptr) {
 		case '+': /*increment current value of cell*/
-		case '-':
-		case '>':
-		case '[':
-		case ']':
-		case ',':
+		case '-': /*decrement current value of cell*/
+		case '>': /*increment the memory cell under the pointer*/
+		case '<': /*decrement the memory cell under the pointer*/
+		case '[': /*JZ to just past matching ]*/
+		case ']': /*JNZ to matching [*/
+		case ',': /*Input a character and store it in the cell at the pointer*/
 			errno = 0;
 			rc = scanf("%c", &in_char);
 			if(rc != 1) {
@@ -57,8 +58,8 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 		case '.':
 		case ';':
 		case ':':
-		case '#':
-		case '$':
+		case '#': /*pushes the current value in cell under pointer to stack*/
+		case '$': /*pops the value from stack and overwrites the cell under the pointer*/
 			break;
 	}
 	return 0;
