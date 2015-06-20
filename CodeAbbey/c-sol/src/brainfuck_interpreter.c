@@ -60,7 +60,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 		case ':':
 		case '#': /*pushes the current value in cell under pointer to stack*/
 		case '$': /*pops the value from stack and overwrites the cell under the pointer*/
-			break;
+			break;git 
 	}
 	return 0;
 }
