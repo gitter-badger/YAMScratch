@@ -18,8 +18,8 @@ signed _eval_buffer(char* src, size_t nbytes, struct TapeNode* cursor, Vector_t(
 /*only adds to atape, will not remove any nodes*/
 signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor, Vector_t(int)* stack ) {
 	/*keep track of where in the data buffer we are*/
-	size_t instruction_offset;
-	instruction_offset = 0;
+	size_t instr_offset;
+	instr_offset = 0;
 	/*keep track of where in the tape we are, using the cursor position */
 	signed long data_offset;
 	data_offset = cursor->index;
@@ -100,13 +100,18 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				instr_ptr++;
 				break;
 			case '[': /*JZ to just past matching ]*/
+				size_t old_instr_offset;
+				old_instr_offset = instr_offset;
 				if(cursor->cell == 0) {
 					/*search for the matching tag in the buffer*/
 					/*this is a strict interpreter, we don't store tags for jumps*/
 					while(*instr_ptr++ != ']') {
 						/*check for buffer overflow, it is legal c to point one past end
 						* of buffer but we cannot dereference*/
-
+						if(instr_ptr == instr_end) {
+							fprintf(stdout, "reached end of program without matching ]\n");
+							break;
+						}
 					}
 				} else {
 
@@ -121,7 +126,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 						/*if errno is not set, we set it*/
 						errno = EINVAL;
 					}
-					fprintf(stderr, "Input read of single char failed, instruction_offset = %lu", instruction_offset);
+					fprintf(stderr, "Input read of single char failed, instr_offset = %lu", instr_offset);
 					perror("input read of single char failed\n");
 					exit(-1);
 				}
