@@ -35,8 +35,31 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 	/*dereference the instruction pointer each time*/
 	switch(*instr_ptr) {
 		case '+': /*increment current value of cell*/
+			if(cursor->cell + 1 < cursor->cell) {
+				fprintf(stdout, "Overflow detected\n");
+			}
+			cursor->cell++;
+			fprintf(stdout, "a[%ld]= %ld\n", cursor->index, cursor->cell );
+			break;
 		case '-': /*decrement current value of cell*/
+			if(cursor->cell - 1 > cursor->cell) {
+				fprintf(stdout, "Underflow detected\n");
+			}
+			cursor->cell--;
+			fprintf(stdout,"a[%ld] = %ld\n", cursor->index, cursor->cell);
+			break;
 		case '>': /*increment the memory cell under the pointer*/
+			/*look ahead and allocate a new block if necessary*/
+			if(cursor->next == NULL) {
+				errno = 0;
+				struct TapeNode* node = malloc()
+				/*right now I don't know all the failure modes 
+				* so just indicate failure mode and exit */
+				if(!errno) {
+
+				}
+
+			}
 		case '<': /*decrement the memory cell under the pointer*/
 		case '[': /*JZ to just past matching ]*/
 		case ']': /*JNZ to matching [*/
@@ -52,15 +75,17 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				perror("input read of single char failed\n");
 				exit(-1);
 			}
-			printf("input  = %c\n", in_char);
-			printf("a[%ld] = %u", data_offset, (unsigned)in_char);
+			/*print quickly*/
+			fprintf(stdout, "input  = %c\n", in_char);
+			fprintf(stdout, "a[%ld] = %u", cursor->index, (unsigned)in_char);
+
 			break;
 		case '.':
 		case ';':
 		case ':':
 		case '#': /*pushes the current value in cell under pointer to stack*/
 		case '$': /*pops the value from stack and overwrites the cell under the pointer*/
-			break;git 
+			break;
 	}
 	return 0;
 }
