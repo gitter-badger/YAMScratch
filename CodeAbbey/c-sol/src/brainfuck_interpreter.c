@@ -28,12 +28,15 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 	/*declare some variables to take input from fscanf*/
 	char in_char;
 	unsigned long in_unsigned;
+	signed long in_signed;
 
 	/*declare the internal variables*/
-	char* instr_ptr, *instr_end;
+	char* instr_ptr;
+	const char* instr_end, * instr_begin;
 	int rc;
 	/*end is the element one past end of buffer*/
 	instr_end = src + nbytes;
+	instr_begin = src;
 	instr_ptr = src;
 	/*dereference the instruction pointer each time*/
 	while(instr_ptr != instr_end) {
@@ -53,6 +56,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				cursor->cell--;
 				fprintf(out_stream,"a[%ld] = %ld\n", cursor->index, cursor->cell);
 				instr_ptr++;
+				instr_offset++;
 				break;
 			case '>': /*increment the memory cell under the pointer*/
 				/*look ahead and allocate a new block if necessary*/
@@ -77,6 +81,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				cursor->index++;
 				fprintf(out_stream, "a[%ld] = %ld\n", cursor->index, cursor->cell);
 				instr_ptr++;
+				instr_offset++;
 				break;
 			case '<': /*decrement the memory cell under the pointer*/
 				/*look behind and allocate a new block if necessary*/
@@ -100,6 +105,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				cursor->index--;
 				fprintf(out_stream, "a[%ld] = %ld\n", cursor->index, cursor->cell);
 				instr_ptr++;
+				instr_offset++;
 				break;
 			case '[': /*JZ to just past matching ]*/
 				size_t old_instr_offset;
@@ -110,18 +116,24 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 					while(*instr_ptr++ != ']') {
 						/*check for buffer overflow, it is legal c to point one past end
 						* of buffer but we cannot dereference*/
+						instr_offset++;
 						if(instr_ptr == instr_end) {
 							fprintf(out_stream, "reached end of program without matching ]\n");
 							break;
 						}
 					}
-				} else {
-
 				}
+				instr_ptr++;
+				instr_offset++;
 				break;
 			case ']': /*JNZ to matching [*/
 				if(cursor->cell != 0) {
+					while(*(--instr_ptr) == '[') {
+						instr_offset--;
+						if(instr_offset == 0) {
 
+						}
+					}
 				} else {
 					/*increment the instruction pointer*/
 					fprintf(stderr, "HI there\n" );
