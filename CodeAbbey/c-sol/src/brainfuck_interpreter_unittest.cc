@@ -1,13 +1,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <iomanip>
-
-#include <stdint.h>
-#include <stdio.h>
-#include <iomanip>
-
-
 #include <limits.h>
+#include <errno.h>
+
 #include "brainfuck_interpreter.h"
 #include "gtest/gtest.h"
 
@@ -20,7 +16,28 @@ protected:
 };
 
 TEST_F(InterpreterTest, Plus) {
-	printf("Plus test\n");
+	size_t ii;
+	signed rc;
+	errno = 0;
+	struct TapeNodeDebug* CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	if(errno != 0) {
+		perror("failed to allocate tape node");
+		FAIL();
+	}
+	#define BUFFER_LENGTH 5
+	size_t buff_len;
+
+	buff_len = BUFFER_LENGTH;
+	char in_buff[BUFFER_LENGTH];
+	for(ii = 0; ii < buff_len; ++ii) {
+		in_buff[ii] = '+';
+	}
+	_eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	EXPECT_EQ(buff_len, CellZero->cell);
+	EXPECT_EQ(NULL, CellZero->next);
+	EXPECT_EQ(NULL, CellZero->prev);
+	EXPECT_EQ(0, CellZero->index);
+	free(CellZero);
 }
 
 TEST_F(InterpreterTest, Minus) {

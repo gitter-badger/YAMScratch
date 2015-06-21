@@ -12,18 +12,20 @@ signed brainfuck_evaluate_buffer(char* src, size_t nbytes, int debug) {
 	return 0;
 }
 
-signed _eval_buffer(char* src, size_t nbytes, struct TapeNode* cursor, Vector_t(int)* stack) {
+signed _eval_buffer(char* src, size_t nbytes, struct TapeNode* cursor,
+					Vector_t(int)* stack, FILE* in_stream, FILE* out_stream) {
 	return 0;
 }
 /*only adds to atape, will not remove any nodes*/
-signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor, Vector_t(int)* stack ) {
+signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor,
+						  Vector_t(int)* stack, FILE* in_stream, FILE* out_stream) {
 	/*keep track of where in the data buffer we are*/
 	size_t instr_offset;
 	instr_offset = 0;
 	/*keep track of where in the tape we are, using the cursor position */
 	signed long data_offset;
 	data_offset = cursor->index;
-	/*declare some variables to take input from scanf*/
+	/*declare some variables to take input from fscanf*/
 	char in_char;
 	unsigned long in_unsigned;
 
@@ -38,18 +40,18 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 		switch(*instr_ptr) {
 			case '+': /*increment current value of cell*/
 				if(cursor->cell + 1 < cursor->cell) {
-					fprintf(stdout, "Overflow detected\n");
+					fprintf(out_stream, "Overflow detected\n");
 				}
 				cursor->cell++;
-				fprintf(stdout, "a[%ld]= %ld\n", cursor->index, cursor->cell );
+				fprintf(out_stream, "a[%ld]= %ld\n", cursor->index, cursor->cell );
 				instr_ptr++;
 				break;
 			case '-': /*decrement current value of cell*/
 				if(cursor->cell - 1 > cursor->cell) {
-					fprintf(stdout, "Underflow detected\n");
+					fprintf(out_stream, "Underflow detected\n");
 				}
 				cursor->cell--;
-				fprintf(stdout,"a[%ld] = %ld\n", cursor->index, cursor->cell);
+				fprintf(out_stream,"a[%ld] = %ld\n", cursor->index, cursor->cell);
 				instr_ptr++;
 				break;
 			case '>': /*increment the memory cell under the pointer*/
@@ -73,7 +75,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				/*we dont care as much about overflows in the data tape index*/
 				data_offset++;
 				cursor->index++;
-				fprintf(stdout, "a[%ld] = %ld\n", cursor->index, cursor->cell);
+				fprintf(out_stream, "a[%ld] = %ld\n", cursor->index, cursor->cell);
 				instr_ptr++;
 				break;
 			case '<': /*decrement the memory cell under the pointer*/
@@ -96,7 +98,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				/*we dont care as much about overflows in the data tape index*/
 				data_offset--;
 				cursor->index--;
-				fprintf(stdout, "a[%ld] = %ld\n", cursor->index, cursor->cell);
+				fprintf(out_stream, "a[%ld] = %ld\n", cursor->index, cursor->cell);
 				instr_ptr++;
 				break;
 			case '[': /*JZ to just past matching ]*/
@@ -109,7 +111,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 						/*check for buffer overflow, it is legal c to point one past end
 						* of buffer but we cannot dereference*/
 						if(instr_ptr == instr_end) {
-							fprintf(stdout, "reached end of program without matching ]\n");
+							fprintf(out_stream, "reached end of program without matching ]\n");
 							break;
 						}
 					}
@@ -118,9 +120,16 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				}
 				break;
 			case ']': /*JNZ to matching [*/
+				if(cursor->cell != 0) {
+
+				} else {
+					/*increment the instruction pointer*/
+					fprintf(stderr, "HI there\n" );
+					instr_ptr++;
+				}
 			case ',': /*Input a character and store it in the cell at the pointer*/
 				errno = 0;
-				rc = scanf("%c", &in_char);
+				rc = fscanf(in_stream, "%c", &in_char);
 				if(rc != 1) {
 					if(errno == 0) {
 						/*if errno is not set, we set it*/
@@ -131,8 +140,8 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 					exit(-1);
 				}
 				/*print quickly*/
-				fprintf(stdout, "input  = %c\n", in_char);
-				fprintf(stdout, "a[%ld] = %u", cursor->index, (unsigned)in_char);
+				fprintf(out_stream, "input  = %c\n", in_char);
+				fprintf(out_stream, "a[%ld] = %u", cursor->index, (unsigned)in_char);
 
 				break;
 			case '.':
