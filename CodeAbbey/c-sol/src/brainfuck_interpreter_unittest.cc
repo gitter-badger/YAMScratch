@@ -108,7 +108,28 @@ TEST_F(InterpreterTest, UnderflowCell) {
 }
 
 TEST_F(InterpreterTest, MoveLeftAlreadyAllocated) {
-	printf("Move ptr left already allocated test\n");
+	errno = 0;
+	struct TapeNodeDebug* tape = (struct TapeNodeDebug*)calloc(2, sizeof(struct TapeNodeDebug));
+	if(errno != 0) {
+		perror("failed to allocate tape node");
+		FAIL();
+	}
+	struct TapeNodeDebug* CellZero, * CellOne;
+	CellZero = tape + 0;
+	CellOne = tape + 1;
+	CellZero->next = CellOne;
+	CellOne->prev = CellZero;
+	CellOne->index = 1;
+	CellZero->index = 0;
+	size_t buff_len;
+	buff_len = 3;
+	char in_buff[3] = {'-','<', '+'};
+	_eval_buffer_debug(in_buff, buff_len, CellOne, NULL, stdin, stdout);
+	EXPECT_EQ(-1, CellOne->cell);
+	EXPECT_EQ(1, CellZero->cell);
+	EXPECT_EQ(1, CellOne->index);
+	EXPECT_EQ(0, CellZero->index);
+	free(tape);
 }
 
 TEST_F(InterpreterTest, MoveRightAlreadyAllocated) {

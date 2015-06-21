@@ -102,7 +102,6 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				}
 				/*we dont care as much about overflows in the data tape index*/
 				data_offset--;
-				cursor->index--;
 				fprintf(out_stream, "a[%ld] = %ld\n", cursor->index, cursor->cell);
 				instr_ptr++;
 				instr_offset++;
