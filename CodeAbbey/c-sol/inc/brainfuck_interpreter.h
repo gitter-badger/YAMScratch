@@ -15,7 +15,7 @@ VECTOR_INIT(int)
 struct TapeNode {
 	struct TapeNode* next;
 	struct TapeNode* prev;
-	int cell;
+	signed long cell;
 };
 
 /*
@@ -30,7 +30,7 @@ struct TapeNode {
 struct TapeNodeDebug {
 	struct TapeNodeDebug* next;
 	struct TapeNodeDebug* prev;
-	int cell;
+	signed long cell;
 	signed long index;
 };
 
