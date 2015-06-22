@@ -34,27 +34,30 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 	char* instr_ptr;
 	const char* instr_end, * instr_begin;
 	int rc;
+	unsigned long instr_count;
+	instr_count = 0;
 	/*end is the element one past end of buffer*/
 	instr_end = src + nbytes;
 	instr_begin = src;
 	instr_ptr = src;
-	/*dereference the instruction pointer each time*/
-	while(instr_ptr != instr_end) {
+	/*uses short circuit evaluation, but make sure we don't walk off end of buffer*/
+	while(instr_ptr != instr_end && instr_offset < nbytes) {
 		switch(*instr_ptr) {
 			case '+': /*increment current value of cell*/
 				if(cursor->cell + 1 < cursor->cell) {
-					fprintf(out_stream, "Overflow detected\n");
+					fprintf(out_stream, "a[%ld] Overflow!\n", cursor->index);
 				}
 				cursor->cell++;
-				fprintf(out_stream, "a[%ld]= %ld\n", cursor->index, cursor->cell );
+				fprintf(out_stream, "%ld (%lu): %c | a[%ld]= %ld\n",instr_count, instr_offset, *instr_ptr, cursor->index, cursor->cell );
 				instr_ptr++;
+				instr_offset++;
 				break;
 			case '-': /*decrement current value of cell*/
 				if(cursor->cell - 1 > cursor->cell) {
 					fprintf(out_stream, "Underflow detected\n");
 				}
 				cursor->cell--;
-				fprintf(out_stream,"a[%ld] = %ld\n", cursor->index, cursor->cell);
+				fprintf(out_stream,"%ld (%lu): %c | a[%ld] = %ld\n",instr_count, instr_offset, *instr_ptr, cursor->index, cursor->cell);
 				instr_ptr++;
 				instr_offset++;
 				break;
@@ -79,7 +82,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				/*we dont care as much about overflows in the data tape index*/
 				data_offset++;
 				cursor->index++;
-				fprintf(out_stream, "a[%ld] = %ld\n", cursor->index, cursor->cell);
+				fprintf(out_stream, "%ld (%lu): %c | array pos. now %ld\n", instr_count, instr_offset, *instr_ptr, cursor->index);
 				instr_ptr++;
 				instr_offset++;
 				break;
@@ -102,7 +105,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				}
 				/*we dont care as much about overflows in the data tape index*/
 				data_offset--;
-				fprintf(out_stream, "a[%ld] = %ld\n", cursor->index, cursor->cell);
+				fprintf(out_stream, "%ld (%lu): %c | array pos. now %ld\n", instr_count, instr_offset, *instr_ptr, cursor->index);
 				instr_ptr++;
 				instr_offset++;
 				break;
@@ -121,9 +124,17 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 							break;
 						}
 					}
+					fprintf(out_stream, "found matching ] at instr_offset = %lu\n", instr_offset );
+				} else {
+					/*
+					* in the other case the instruction pointer is incremented
+					* one past the closing ], so we have have to explicitly handle
+					* the other case
+					*/
+					instr_ptr++;
+					instr_offset++;
 				}
-				instr_ptr++;
-				instr_offset++;
+
 				break;
 			case ']': /*JNZ to matching [*/
 				if(cursor->cell != 0) {
@@ -151,7 +162,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 					exit(-1);
 				}
 				/*print quickly*/
-				fprintf(out_stream, "input  = %c\n", in_char);
+				fprintf(out_stream, "read in %c (%d)\n", in_char, (unsigned)in_char);
 				fprintf(out_stream, "a[%ld] = %u", cursor->index, (unsigned)in_char);
 
 				break;
@@ -162,6 +173,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 			case '$': /*pops the value from stack and overwrites the cell under the pointer*/
 				break;
 		}
+		instr_count++;
 	}
 	return 0;
 }
