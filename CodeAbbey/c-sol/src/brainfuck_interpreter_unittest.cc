@@ -151,4 +151,47 @@ TEST_F(InterpreterTest, StackPush) {
 TEST_F(InterpreterTest, StackPop) {
 	printf("Stack popping test\n");
 }
+
+TEST_F(InterpreterTest, LoopOvershootTest) {
+	printf("Stack popping test\n");
+}
 /*test the input facilites from stdin and stdout using some other method*/
+TEST_F(InterpreterTest, CharacterInputTest) {
+	FILE* test_input;
+	errno = 0;
+	test_input = tmpfile();
+	if(test_input == NULL) {
+		/*we failed to open an input*/
+		perror("failed to create a tmpfile");
+		FAIL();
+	}	
+	/*send all ascii characters to the file*/
+	for(ii = 1; ii < 128; ++ii) {
+		fprintf(test_input, "%c", ii);
+	}
+	/*construct test program*/
+	size_t buff_len;
+	buff_len = 5;
+
+	rewind(test_input);
+
+	fclose(test_input);
+}
+
+TEST_F(InterpreterTest, PositiveIntegerInputTest) {
+	FILE* test_input;
+	errno = 0;
+	test_input = tmpfile();
+	if(test_input == NULL) {
+		/*we failed to open an input*/
+		perror("failed to create a tmpfile");
+		FAIL();
+	}	
+	/*send some positive integers to the file*/
+
+
+	fclose(test_input);
+}
+
+TEST_F(InterpreterTest, NegativeIntegerInputTest) {
+}

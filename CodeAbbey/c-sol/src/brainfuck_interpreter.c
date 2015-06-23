@@ -45,7 +45,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 		switch(*instr_ptr) {
 			case '+': /*increment current value of cell*/
 				if(cursor->cell + 1 < cursor->cell) {
-					fprintf(out_stream, "a[%ld] Overflow!\n", cursor->index);
+					fprintf(out_stream, "\t| a[%ld] Overflow!\n", cursor->index);
 				}
 				cursor->cell++;
 				fprintf(out_stream, "%ld (%lu): %c | a[%ld]= %ld\n",instr_count, instr_offset, *instr_ptr, cursor->index, cursor->cell );
@@ -54,7 +54,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				break;
 			case '-': /*decrement current value of cell*/
 				if(cursor->cell - 1 > cursor->cell) {
-					fprintf(out_stream, "Underflow detected\n");
+					fprintf(out_stream, "\t| a[%ld] Underflow!\n", cursor->index);
 				}
 				cursor->cell--;
 				fprintf(out_stream,"%ld (%lu): %c | a[%ld] = %ld\n",instr_count, instr_offset, *instr_ptr, cursor->index, cursor->cell);
