@@ -36,6 +36,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 	int rc;
 	unsigned long instr_count;
 	instr_count = 0;
+	signed long prev_index;
 	/*end is the element one past end of buffer*/
 	instr_end = src + nbytes;
 	instr_begin = src;
@@ -45,7 +46,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 		switch(*instr_ptr) {
 			case '+': /*increment current value of cell*/
 				if(cursor->cell + 1 < cursor->cell) {
-					fprintf(out_stream, "\t| a[%ld] Overflow!\n", cursor->index);
+					fprintf(out_stream, "%ld (%lu): %c | a[%ld] Overflow!\n", instr_count, instr_offset, *instr_ptr, cursor->index);
 				}
 				cursor->cell++;
 				fprintf(out_stream, "%ld (%lu): %c | a[%ld]= %ld\n",instr_count, instr_offset, *instr_ptr, cursor->index, cursor->cell );
@@ -54,7 +55,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				break;
 			case '-': /*decrement current value of cell*/
 				if(cursor->cell - 1 > cursor->cell) {
-					fprintf(out_stream, "\t| a[%ld] Underflow!\n", cursor->index);
+					fprintf(out_stream, "%ld (%lu): %c | a[%ld] Underflow!\n",instr_count, instr_offset, *instr_ptr, cursor->index);
 				}
 				cursor->cell--;
 				fprintf(out_stream,"%ld (%lu): %c | a[%ld] = %ld\n",instr_count, instr_offset, *instr_ptr, cursor->index, cursor->cell);
@@ -63,6 +64,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				break;
 			case '>': /*increment the memory cell under the pointer*/
 				/*look ahead and allocate a new block if necessary*/
+				prev_index = cursor->index;
 				if(cursor->next == NULL) {
 					errno = 0;
 					struct TapeNodeDebug* node = (struct TapeNodeDebug*)malloc(sizeof(TapeNodeDebug));
@@ -81,13 +83,14 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				}
 				/*we dont care as much about overflows in the data tape index*/
 				data_offset++;
-				cursor->index++;
+				cursor->index = prev_index + 1;
 				fprintf(out_stream, "%ld (%lu): %c | array pos. now %ld\n", instr_count, instr_offset, *instr_ptr, cursor->index);
 				instr_ptr++;
 				instr_offset++;
 				break;
 			case '<': /*decrement the memory cell under the pointer*/
 				/*look behind and allocate a new block if necessary*/
+				prev_index = cursor->index;
 				if(cursor->prev == NULL) {
 					errno = 0;
 					struct TapeNodeDebug* node = (struct TapeNodeDebug*)malloc(sizeof(TapeNodeDebug));
@@ -105,6 +108,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				}
 				/*we dont care as much about overflows in the data tape index*/
 				data_offset--;
+				cursor->index = prev_index - 1;
 				fprintf(out_stream, "%ld (%lu): %c | array pos. now %ld\n", instr_count, instr_offset, *instr_ptr, cursor->index);
 				instr_ptr++;
 				instr_offset++;

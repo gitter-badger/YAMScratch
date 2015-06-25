@@ -210,7 +210,7 @@ TEST_F(InterpreterTest, PositiveIntegerInputTest) {
 	signed long A, B, C;
 	A = 0;
 	B = 37;
-	C = UINT_MAX;
+	C = LONG_MAX;
 	/*send some positive integers to the file*/
 	fprintf(test_input, "%ld\n%ld\n%ld\n", A, B, C);
 	rewind(test_input);
@@ -247,8 +247,7 @@ TEST_F(InterpreterTest, NegativeIntegerInputTest) {
 	signed long A, B, C;
 	A = -1;
 	B = -377;
-	C = UINT_MAX;
-	C *= -1;
+	C = LONG_MIN;
 	/*send some positive integers to the file*/
 	fprintf(test_input, "%ld\n%ld\n%ld\n", A, B, C);
 	rewind(test_input);
