@@ -1,11 +1,11 @@
 >>>>>>>>>>>>                we cant get data pointer below zero so get way out
-+++++[->+++++++++<]>+#    write a 46 to B this is the dot terminating character
++++++[->+++++++++<]>+    write a 46 to B this is the dot terminating character
 <<<<<<+                     move back to position 0
 [                           main loop
     -                       remove the continue flag bit at position negative 1
     >+                      set new loop flag
     >>+                    set up flag bit at postion 2
-    >>,#                     9 in A is less than 10
+    >>,                     9 in A is less than 10
     [
         -<<<<<+>>>>>        if A is non zero copy A to negative 1
         >->>+<<             copy B to the cell on the far right

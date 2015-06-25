@@ -1,5 +1,5 @@
 >>>>>>>>>>>>                we cant get data pointer below zero so get way out
-++++++++++                  write a 10 to B this is the newline
++++[->+++<]>+                  write a 10 to B this is the newline
 <<<<<<+                     move back to position 0
 [                           main loop
     -                       remove the continue flag bit at position negative 1
