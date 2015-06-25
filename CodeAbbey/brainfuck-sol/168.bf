@@ -1,4 +1,4 @@
->>>>>>>>>>>>>>>              we cant get data pointer below zero so get way out
+>>>>>>>>>>>>>>>             we cant get data pointer below zero so get way out
 +++++[->+++++++++<]>+       write a 46 to B this is the dot terminating character
 <<<<<<+                     move back to position 0
 [                           main loop

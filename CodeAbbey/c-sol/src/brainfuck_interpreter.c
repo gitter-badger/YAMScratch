@@ -112,7 +112,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 			case '[': /*JZ to just past matching ]*/
 				size_t old_instr_offset;
 				old_instr_offset = instr_offset;
-				if(cursor->cell == 0) {
+				if(cursor->cell != 0) {
 					/*search for the matching tag in the buffer*/
 					/*this is a strict interpreter, we don't store tags for jumps*/
 					while(*instr_ptr++ != ']') {
@@ -129,19 +129,18 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 					/*
 					* in the other case the instruction pointer is incremented
 					* one past the closing ], so we have have to explicitly handle
-					* the other case
+					* the other case where we move into the loop body, increasing nesting level
 					*/
 					instr_ptr++;
 					instr_offset++;
 				}
-
 				break;
 			case ']': /*JNZ to matching [*/
 				if(cursor->cell != 0) {
-					while(*(--instr_ptr) == '[') {
+					while(*(--instr_ptr) != '[') {
 						instr_offset--;
 						if(instr_offset == 0) {
-
+							/*make sure*/
 						}
 					}
 				} else {
@@ -157,17 +156,38 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 						/*if errno is not set, we set it*/
 						errno = EINVAL;
 					}
-					fprintf(stderr, "Input read of single char failed, instr_offset = %lu", instr_offset);
+					fprintf(stderr, "Input read of single char failed, instr_offset = %lu\n", instr_offset);
 					perror("input read of single char failed\n");
 					exit(-1);
 				}
 				/*print quickly*/
-				fprintf(out_stream, "read in %c (%d)\n", in_char, (unsigned)in_char);
-				fprintf(out_stream, "a[%ld] = %u", cursor->index, (unsigned)in_char);
-
+				fprintf(out_stream, "%ld (%lu): %c | read in %c (%d)\n",instr_count, instr_offset, *instr_ptr, in_char, (unsigned)in_char);
+				fprintf(out_stream, "%ld (%lu): %c | a[%ld] = %u\n", instr_count, instr_offset, *instr_ptr, cursor->index, (unsigned)in_char);
+				cursor->cell = in_char;
+				instr_ptr++;
+				instr_offset++;
 				break;
 			case '.':
 			case ';':
+				errno = 0;
+				rc = fscanf(in_stream, " %ld", &in_signed);
+				if(rc != 1) {
+					if(errno == 0) {
+						/*if errno is not set, we set it*/
+						errno = EINVAL;
+					}
+					fprintf(stderr, "rc = %d\n",rc );
+					fprintf(stderr, "Input read of single long integer failed, instr_offset = %lu\n", instr_offset);
+					perror("input read of single long int failed\n");
+					exit(-1);
+				}
+				/*print quickly*/
+				fprintf(out_stream, "%ld (%lu): %c | read in %ld\n", instr_count, instr_offset, *instr_ptr,in_signed );
+				fprintf(out_stream, "%ld (%lu): %c | a[%ld] = %ld\n", instr_count, instr_offset, *instr_ptr, cursor->index, in_signed);
+				cursor->cell = in_signed;
+				instr_ptr++;
+				instr_offset++;
+				break;
 			case ':':
 			case '#': /*pushes the current value in cell under pointer to stack*/
 			case '$': /*pops the value from stack and overwrites the cell under the pointer*/
