@@ -207,7 +207,7 @@ TEST_F(InterpreterTest, PositiveIntegerInputTest) {
 		perror("failed to create a tmpfile");
 		FAIL();
 	}
-	unsigned long A, B, C;
+	signed long A, B, C;
 	A = 0;
 	B = 37;
 	C = UINT_MAX;
@@ -231,10 +231,44 @@ TEST_F(InterpreterTest, PositiveIntegerInputTest) {
 	EXPECT_EQ(A, tape->cell);
 	EXPECT_EQ(B, (tape+1)->cell);
 	EXPECT_EQ(C, (tape+2)->cell);
-
 	free(tape);
 	fclose(test_input);
 }
 
 TEST_F(InterpreterTest, NegativeIntegerInputTest) {
+	FILE* test_input;
+	errno = 0;
+	test_input = tmpfile();
+	if(test_input == NULL) {
+		/*we failed to open an input*/
+		perror("failed to create a tmpfile");
+		FAIL();
+	}
+	signed long A, B, C;
+	A = -1;
+	B = -377;
+	C = UINT_MAX;
+	C *= -1;
+	/*send some positive integers to the file*/
+	fprintf(test_input, "%ld\n%ld\n%ld\n", A, B, C);
+	rewind(test_input);
+	errno = 0;
+	struct TapeNodeDebug* tape = (struct TapeNodeDebug*)calloc(3, sizeof(struct TapeNodeDebug));
+	if(errno != 0) {
+		perror("failed to allocate tape node");
+		FAIL();
+	}
+	/*link up the list*/
+	(tape+0)->next = (tape+1);
+	(tape+1)->prev = (tape+0);
+	(tape+1)->next = (tape+2);
+	(tape+2)->prev = (tape+1);
+	char in_buff[5] = {';','>',';','>',';'};
+	size_t buff_len = 5;
+	_eval_buffer_debug(in_buff, buff_len, tape, NULL, test_input, stdout);
+	EXPECT_EQ(A, tape->cell);
+	EXPECT_EQ(B, (tape+1)->cell);
+	EXPECT_EQ(C, (tape+2)->cell);
+	free(tape);
+	fclose(test_input);
 }
