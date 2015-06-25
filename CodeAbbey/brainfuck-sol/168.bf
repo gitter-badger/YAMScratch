@@ -29,6 +29,7 @@
                             if position 1 is 2 then this makes main loop repeat
                             otherwise the position is negative one which makes main loop terminate
 ]
+>>>>>>[-]<<<<<<             remove the value of B from previous runs
 <                           move back to where terminating dot is
 [-]                         remove dot
 <[<]                        move to front of string
@@ -53,14 +54,13 @@
         [                       
             [-<<<<+>>>>]    if A is nonempty move remainder of A
         ]
-        <<<<#.               move to A and print it
-        >>                  return to position 2
+        <<                  return to position 2
     ]
 
     <[-<  A_LT_B
       >>>>[->+<]<<<<        copy leftover portion of orginal B one cell to left
                             THIS IS CONFIGURABLE LINE FOR CAESAR CIPHER
-      <+.>                  move to new location of A and shift by 1 letter
+      <+>                  move to new location of A and shift up by 1 letter
     ]
     >>>>>>[-<+>]<<<<<<<     copy remaing portion of B at 7 to 6
     >>>>>>>>>                 return to string character
