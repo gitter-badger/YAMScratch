@@ -83,6 +83,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				}
 				/*we dont care as much about overflows in the data tape index*/
 				data_offset++;
+				/*DANGER this line overwrites the exisiting index for preallocated arrays*/
 				cursor->index = prev_index + 1;
 				fprintf(out_stream, "%ld (%lu): %c | array pos. now %ld\n", instr_count, instr_offset, *instr_ptr, cursor->index);
 				instr_ptr++;
@@ -108,6 +109,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				}
 				/*we dont care as much about overflows in the data tape index*/
 				data_offset--;
+				/*DANGER this line overwrites the exisiting index for preallocated arrays*/
 				cursor->index = prev_index - 1;
 				fprintf(out_stream, "%ld (%lu): %c | array pos. now %ld\n", instr_count, instr_offset, *instr_ptr, cursor->index);
 				instr_ptr++;

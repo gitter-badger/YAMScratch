@@ -132,6 +132,7 @@ TEST_F(InterpreterTest, MoveLeftAlreadyAllocated) {
 	free(tape);
 }
 
+
 TEST_F(InterpreterTest, MoveRightAlreadyAllocated) {
 	printf("Move ptr right already allocated test\n");
 }
@@ -142,6 +143,46 @@ TEST_F(InterpreterTest, MoveLeftNotAllocated) {
 
 TEST_F(InterpreterTest, MoveRightNotAllocated) {
 	printf("Move ptr right not allocated test\n");
+}
+
+TEST_F(InterpreterTest, MoveLeftIndexIncrementingTest) {
+	errno = 0;
+	struct TapeNodeDebug* tape = (struct TapeNodeDebug*)calloc(5, sizeof(struct TapeNodeDebug));
+	if(errno != 0) {
+		perror("failed to allocate tape node");
+		FAIL();
+	}
+	/*link up the list*/
+	(tape+0)->next = (tape+1);
+	(tape+1)->prev = (tape+0);
+	(tape+1)->next = (tape+2);
+	(tape+2)->prev = (tape+1);
+	(tape+2)->next = (tape+3);
+	(tape+3)->prev = (tape+2);
+	(tape+3)->next = (tape+4);
+	(tape+4)->prev = (tape+3);
+	/*start at end of tape with positive index to test both pos and negative indices*/
+	(tape+4)->index = 2;
+	char in_buff[5] = {'<','<','<','<','+'};
+	size_t buff_len = 5;
+	_eval_buffer_debug(in_buff, buff_len, (tape+4), NULL, stdin, stdout);
+	EXPECT_EQ(2, (tape+4)->index);
+	EXPECT_EQ(1, (tape+3)->index);
+	EXPECT_EQ(0, (tape+2)->index);
+	EXPECT_EQ(-1, (tape+1)->index);
+	EXPECT_EQ(-2, (tape+0)->index);
+	/*checking that we transferred as far as was expected*/
+	EXPECT_EQ(1, (tape+0)->cell);
+	/*the move instructions should not change value of passed over cell*/
+	EXPECT_EQ(0, (tape+1)->cell);
+	EXPECT_EQ(0, (tape+2)->cell);
+	EXPECT_EQ(0, (tape+3)->cell);
+	EXPECT_EQ(0, (tape+4)->cell);
+	free(tape);
+}
+
+TEST_F(InterpreterTest, MoveRightIndexIncrementingTest) {
+
 }
 
 TEST_F(InterpreterTest, StackPush) {
