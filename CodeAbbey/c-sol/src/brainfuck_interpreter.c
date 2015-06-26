@@ -60,6 +60,9 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 	unsigned long instr_count;
 	instr_count = 0;
 	signed long prev_index;
+	signed long loop_nesting_level;
+	loop_nesting_level = 0;
+	signed long old_nesting_level;
 	/*end is the element one past end of buffer*/
 	instr_end = src + nbytes;
 	instr_begin = src;
@@ -138,12 +141,14 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				instr_offset++;
 				break;
 			case '[': /*JZ to just past matching ]*/
+				old_nesting_level = loop_nesting_level;
+				loop_nesting_level++;
 				size_t old_instr_offset;
 				old_instr_offset = instr_offset;
-				if(cursor->cell != 0) {
+				if(cursor->cell == 0) {
 					/*search for the matching tag in the buffer*/
 					/*this is a strict interpreter, we don't store tags for jumps*/
-					while(*instr_ptr++ != ']') {
+					while(*instr_ptr++ != ']' || old_nesting_level != loop_nesting_level) {
 						/*check for buffer overflow, it is legal c to point one past end
 						* of buffer but we cannot dereference. instr_end is one past end
 						of buffer so we can use it to check */
@@ -152,9 +157,17 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 							fprintf(out_stream, "reached end of program without matching ]\n");
 							return -8;
 						}
+						/*because the pointer looks ahead one, we can update the nesting levels for the
+						* conditional in the while loop*/
+						if(*instr_ptr == '[') {
+							loop_nesting_level++;
+						} else if(*instr_ptr == ']') {
+							loop_nesting_level--;
+						}
 					}
 					fprintf(out_stream, "found matching ] at instr_offset = %lu\n", instr_offset );
 				} else {
+					fprintf(out_stream, "%ld (%lu): %c | a[%ld] = %ld, loop nesting level %ld\n",instr_count, instr_offset, *instr_ptr, cursor->index, cursor->cell, loop_nesting_level-1);
 					/*
 					* in the other case the instruction pointer is incremented
 					* one past the closing ], so we have have to explicitly handle
@@ -165,22 +178,31 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				}
 				break;
 			case ']': /*JNZ to matching [*/
+				old_nesting_level = loop_nesting_level;
+				loop_nesting_level--;
 				if(cursor->cell != 0) {
 					/*
 					* we check the instr_ptr one more time, by post decrementing just so that 
 					* we can catch the case where it is the first character in the buffer
 					* which is not a valid program 
 					*/
-					while(*instr_ptr-- != '[') {
+					while(*instr_ptr != '[' || old_nesting_level != loop_nesting_level) {
+						instr_ptr--;
 						if(instr_offset == 0) {
 							/*if the offset is zero, it means that we did not find a matching offset*/
 							return -9;
+						}
+						if(*instr_ptr == '[') {
+							loop_nesting_level++;
+						} else if(*instr_ptr == ']') {
+							loop_nesting_level--;
 						}
 						instr_offset--;
 					}
 					fprintf(out_stream, "%ld (%lu): %c | matching bracket found\n",instr_count, instr_offset, *instr_ptr);
 
 				} else {
+					fprintf(out_stream, "%ld (%lu): %c | a[%ld] = %ld, loop nesting level %ld\n",instr_count, instr_offset, *instr_ptr, cursor->index, cursor->cell, loop_nesting_level);
 					/*increment the instruction pointer*/
 					instr_ptr++;
 				}
@@ -245,7 +267,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				break;
 			case '#': /*pushes the current value in cell under pointer to stack*/
 				vector_push_back(long, stack, cursor->cell);
-				fprintf(out_stream, "%ld (%lu): %c | Push down %ld, size = %ld\n",instr_count, instr_offset, *instr_ptr, cursor->cell, stack->elms);
+				fprintf(out_stream, "%ld (%lu): %c | Push down %ld, size = %u\n",instr_count, instr_offset, *instr_ptr, cursor->cell, stack->elms);
 				instr_ptr++;
 				instr_offset++;
 				break;

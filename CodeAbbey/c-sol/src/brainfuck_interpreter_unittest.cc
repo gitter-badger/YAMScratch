@@ -137,7 +137,6 @@ TEST_F(InterpreterTest, MoveRightAlreadyAllocated) {
 		perror("failed to allocate tape node");
 		FAIL();
 	}
-	struct TapeNodeDebug* CellZero, * CellOne;
 	CellZero = tape;
 	CellOne = (tape+1);
 	CellZero->next = CellOne;
@@ -516,22 +515,65 @@ TEST_F(InterpreterTest, DanglingRightBracketTest) {
 }
 
 TEST_F(InterpreterTest, RighBracketJumpIfZeroTest) {
-
+	errno = 0;
+	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	if(errno != 0) {
+		perror("failed to allocate tape node");
+		FAIL();
+	}
+	char in_buff[2] = {']','+'};
+	buff_len = 2;
+	EXPECT_EQ(0, CellZero->cell);
+	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	EXPECT_EQ(0, rc);
+	EXPECT_EQ(1, CellZero->cell);
+	free(CellZero);
 }
 
 TEST_F(InterpreterTest, LeftBracketJumpIfNotZeroTest) {
-
+	errno = 0;
+	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	if(errno != 0) {
+		perror("failed to allocate tape node");
+		FAIL();
+	}
+	char in_buff[3] = {'+','[','+'};
+	buff_len = 3;
+	EXPECT_EQ(0, CellZero->cell);
+	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	EXPECT_EQ(0, rc);
+	EXPECT_EQ(2, CellZero->cell);
+	free(CellZero);
 }
 
 TEST_F(InterpreterTest, DanglingLeftBracketTest) {
+	errno = 0;
+	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	if(errno != 0) {
+		perror("failed to allocate tape node");
+		FAIL();
+	}
+	char in_buff[2] = {'+','['};
+	buff_len = 2;
+	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
 
 }
 
 TEST_F(InterpreterTest, BracketLoopingTest) {
+	errno = 0;
+	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	if(errno != 0) {
+		perror("failed to allocate tape node");
+		FAIL();
+	}
 	/*simplest loop*/
-	char in_buff[4] = {'+','[','-',']'};
-	buff_len = 4;
+	char in_buff[9] = {'+','+','+','+','[','-',']','+', '+'};
+	buff_len = 9;
 
+	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	EXPECT_EQ(0, rc);
+	EXPECT_EQ(2, CellZero->cell);
+	free(CellZero);
 }
 
 TEST_F(InterpreterTest, LoopNestingTest) {
