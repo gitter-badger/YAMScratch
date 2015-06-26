@@ -92,10 +92,10 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 					errno = 0;
 					struct TapeNodeDebug* node = (struct TapeNodeDebug*)calloc(1, sizeof(TapeNodeDebug));
 					/*right now I don't know all the failure modes 
-					* so just indicate failure mode and exit */
+					* so just indicate failure mode and return  */
 					if(errno != 0) {
 						perror("failed to allocate new tape data struct\n");
-						exit(-1);
+						return (-1);
 					}
 					cursor->next = node;
 					node->prev = cursor;
@@ -118,10 +118,10 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 					errno = 0;
 					struct TapeNodeDebug* node = (struct TapeNodeDebug*)calloc(1, sizeof(TapeNodeDebug));
 					/*right now I don't know all the failure modes 
-					* so just indicate failure mode and exit */
+					* so just indicate failure mode and return  */
 					if(errno != 0) {
 						perror("failed to allocate new tape data struct\n");
-						exit(-1);
+						return (-1);
 					}
 					cursor->prev = node;
 					node->next = cursor;
@@ -191,12 +191,12 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 							in_char = EOF;
 					} else {
 					perror("input read of single char failed\n");
-					exit(-1);
+					return (-1);
 					}
 				} else {
 					fprintf(stderr, "Input read of single char failed, instr_offset = %lu\n", instr_offset);
 					perror("input read of single char failed\n");
-					exit(-1);
+					return (-1);
 				}
 				/*print quickly*/
 				fprintf(out_stream, "%ld (%lu): %c | read in %c (%d)\n",instr_count, instr_offset, *instr_ptr, in_char, (signed)in_char);
@@ -205,7 +205,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				instr_offset++;
 				break;
 			case '.':
-				fprintf(out_stream, "%c", (char)cursor->cell);
+				fprintf(out_stream, "%ld (%lu): %c | %c", instr_count, instr_offset, *instr_ptr, (char)cursor->cell);
 				instr_ptr++;
 				instr_offset++;
 				break;
@@ -220,7 +220,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 					fprintf(stderr, "rc = %d\n",rc );
 					fprintf(stderr, "Input read of single long integer failed, instr_offset = %lu\n", instr_offset);
 					perror("input read of single long int failed\n");
-					exit(-1);
+					return (-1);
 				}
 				/*print quickly*/
 				fprintf(out_stream, "%ld (%lu): %c | read in %ld\n", instr_count, instr_offset, *instr_ptr,in_signed );
@@ -230,14 +230,22 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				instr_offset++;
 				break;
 			case ':':
-				fprintf(out_stream, "%ld\n", cursor->cell);
+				fprintf(out_stream, "%ld (%lu): %c | Output %ld\n",instr_count, instr_offset, *instr_ptr, cursor->cell);
 				instr_ptr++;
 				instr_offset++;
 				break;
 			case '#': /*pushes the current value in cell under pointer to stack*/
-
+				vector_push_back(long, stack, cursor->index);
+				instr_ptr++;
+				instr_offset++;
 				break;
 			case '$': /*pops the value from stack and overwrites the cell under the pointer*/
+				if(stack->elms == 0) {
+					/*stack is empty*/
+					fprintf(stderr, "%ld (%lu): %c | Cannot pop, Stack Empty\n", );
+					return (-1);
+				}
+				cursor->index = vector_pop(long, stack);
 				break;
 		}
 		instr_count++;
