@@ -15,13 +15,13 @@ protected:
 	size_t ii;
 	signed rc;
 	size_t buff_len;
+	struct TapeNodeDebug* CellZero, * CellOne, * tape;
 	virtual void SetUp() {}
 	virtual void TearDown() {}
 };
 
 TEST_F(InterpreterTest, Plus) {
 	errno = 0;
-	struct TapeNodeDebug* CellZero;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
@@ -43,7 +43,6 @@ TEST_F(InterpreterTest, Plus) {
 
 TEST_F(InterpreterTest, Minus) {
 	errno = 0;
-	struct TapeNodeDebug* CellZero;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
@@ -65,7 +64,6 @@ TEST_F(InterpreterTest, Minus) {
 
 TEST_F(InterpreterTest, OverflowCell) {
 	errno = 0;
-	struct TapeNodeDebug* CellZero;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
@@ -88,7 +86,6 @@ TEST_F(InterpreterTest, OverflowCell) {
 
 TEST_F(InterpreterTest, UnderflowCell) {
 	errno = 0;
-	struct TapeNodeDebug* CellZero;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
@@ -111,13 +108,11 @@ TEST_F(InterpreterTest, UnderflowCell) {
 
 TEST_F(InterpreterTest, MoveLeftAlreadyAllocated) {
 	errno = 0;
-	struct TapeNodeDebug* tape;
 	tape = (struct TapeNodeDebug*)calloc(2, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
 	}
-	struct TapeNodeDebug* CellZero, * CellOne;
 	CellZero = tape + 0;
 	CellOne = tape + 1;
 	CellZero->next = CellOne;
@@ -137,7 +132,6 @@ TEST_F(InterpreterTest, MoveLeftAlreadyAllocated) {
 
 TEST_F(InterpreterTest, MoveRightAlreadyAllocated) {
 	errno = 0;
-	struct TapeNodeDebug* tape;
 	tape = (struct TapeNodeDebug*)calloc(2, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
@@ -171,7 +165,6 @@ TEST_F(InterpreterTest, MoveLeftNotAllocated) {
 		perror("failed to create a tmpfile");
 		FAIL();
 	}
-	struct TapeNodeDebug* tape;
 	tape = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	buff_len = 1000000;
 	char* in_buff;
@@ -212,7 +205,6 @@ TEST_F(InterpreterTest, MoveRightNotAllocated) {
 		perror("failed to create a tmpfile");
 		FAIL();
 	}
-	struct TapeNodeDebug* tape;
 	tape = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	buff_len = 1000000;
 	char* in_buff;
@@ -244,7 +236,6 @@ TEST_F(InterpreterTest, MoveRightNotAllocated) {
 
 TEST_F(InterpreterTest, MoveLeftIndexIncrementingTest) {
 	errno = 0;
-	struct TapeNodeDebug* tape;
 	tape = (struct TapeNodeDebug*)calloc(5, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
@@ -280,7 +271,6 @@ TEST_F(InterpreterTest, MoveLeftIndexIncrementingTest) {
 
 TEST_F(InterpreterTest, MoveRightIndexIncrementingTest) {
 	errno = 0;
-	struct TapeNodeDebug* tape;
 	tape = (struct TapeNodeDebug*)calloc(5, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
@@ -318,7 +308,6 @@ TEST_F(InterpreterTest, MoveRightIndexIncrementingTest) {
 TEST_F(InterpreterTest, StackPush) {
 	Vector_t(long)* stack;
 	stack = newVector(long);
-	struct TapeNodeDebug* CellZero;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	buff_len = 6;
 	char in_buff[6] = {'+','+','#','#','#','#'};
@@ -335,7 +324,6 @@ TEST_F(InterpreterTest, StackPush) {
 TEST_F(InterpreterTest, StackPop) {
 	Vector_t(long)* stack;
 	stack = newVector(long);
-	struct TapeNodeDebug* CellZero;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	buff_len = 1;
 	char in_buff[1];
@@ -409,7 +397,6 @@ TEST_F(InterpreterTest, CharacterInputTest) {
 	rewind(test_input);
 	/*construct test program*/
 	errno = 0;
-	struct TapeNodeDebug* CellZero;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
@@ -506,7 +493,34 @@ TEST_F(InterpreterTest, NegativeIntegerInputTest) {
 }
 
 TEST_F(InterpreterTest, DanglingRightBracketTest) {
-	struct TapeNodeDebug* CellZero, *CellOne, * tape;
+	errno = 0;
+	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	if(errno != 0) {
+		perror("failed to allocate tape node");
+		FAIL();
+	}
+	char in_buff[5] = {'+','+',']','+','+'};
+	buff_len = 5;
+
+	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	EXPECT_EQ(-9, rc);
+	EXPECT_EQ(2, CellZero->cell);
+	/*now repeat with the first character being the dangling*/
+	in_buff[0] = ']';
+	in_buff[2] = '+';
+	/*leave a nonzero value in the cell so we continue to*/
+	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	EXPECT_EQ(-9, rc);
+	EXPECT_EQ(2, CellZero->cell);
+	free(CellZero);
+}
+
+TEST_F(InterpreterTest, RighBracketJumpIfZeroTest) {
+
+}
+
+TEST_F(InterpreterTest, LeftBracketJumpIfNotZeroTest) {
+
 }
 
 TEST_F(InterpreterTest, DanglingLeftBracketTest) {
@@ -514,7 +528,6 @@ TEST_F(InterpreterTest, DanglingLeftBracketTest) {
 }
 
 TEST_F(InterpreterTest, BracketLoopingTest) {
-	struct TapeNodeDebug* CellZero;
 	/*simplest loop*/
 	char in_buff[4] = {'+','[','-',']'};
 	buff_len = 4;

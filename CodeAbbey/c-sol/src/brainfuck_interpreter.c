@@ -178,11 +178,13 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 						}
 						instr_offset--;
 					}
+					fprintf(out_stream, "%ld (%lu): %c | matching bracket found\n",instr_count, instr_offset, *instr_ptr);
+
 				} else {
 					/*increment the instruction pointer*/
-					fprintf(out_stream, "%ld (%lu): %c | matching bracket found\n",instr_count, instr_offset, *instr_ptr);
 					instr_ptr++;
 				}
+				break;
 			case ',': /*Input a character and store it in the cell at the pointer*/
 				errno = 0;
 				rc = fscanf(in_stream, "%c", &in_char);
