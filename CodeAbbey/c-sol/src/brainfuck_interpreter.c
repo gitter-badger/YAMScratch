@@ -145,7 +145,8 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 					/*this is a strict interpreter, we don't store tags for jumps*/
 					while(*instr_ptr++ != ']') {
 						/*check for buffer overflow, it is legal c to point one past end
-						* of buffer but we cannot dereference*/
+						* of buffer but we cannot dereference. instr_end is one past end
+						of buffer so we can use it to check */
 						instr_offset++;
 						if(instr_ptr == instr_end) {
 							fprintf(out_stream, "reached end of program without matching ]\n");
@@ -165,12 +166,17 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				break;
 			case ']': /*JNZ to matching [*/
 				if(cursor->cell != 0) {
-					while(*(--instr_ptr) != '[') {
-						instr_offset--;
+					/*
+					* we check the instr_ptr one more time, by post decrementing just so that 
+					* we can catch the case where it is the first character in the buffer
+					* which is not a valid program 
+					*/
+					while(*instr_ptr-- != '[') {
 						if(instr_offset == 0) {
 							/*if the offset is zero, it means that we did not find a matching offset*/
 							return -9;
 						}
+						instr_offset--;
 					}
 				} else {
 					/*increment the instruction pointer*/

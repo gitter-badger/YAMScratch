@@ -504,3 +504,24 @@ TEST_F(InterpreterTest, NegativeIntegerInputTest) {
 	free(tape);
 	fclose(test_input);
 }
+
+TEST_F(InterpreterTest, DanglingRightBracketTest) {
+	struct TapeNodeDebug* CellZero, *CellOne, * tape;
+}
+
+TEST_F(InterpreterTest, DanglingLeftBracketTest) {
+
+}
+
+TEST_F(InterpreterTest, BracketLoopingTest) {
+	struct TapeNodeDebug* CellZero;
+	/*simplest loop*/
+	char in_buff[4] = {'+','[','-',']'};
+	buff_len = 4;
+
+}
+
+TEST_F(InterpreterTest, LoopNestingTest) {
+
+}
+
