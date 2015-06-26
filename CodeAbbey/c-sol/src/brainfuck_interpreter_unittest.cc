@@ -366,11 +366,26 @@ TEST_F(InterpreterTest, CharacterInputTest) {
 	}
 	rewind(test_input);
 	/*construct test program*/
+	errno = 0;
+	struct TapeNodeDebug* CellZero;
+	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	if(errno != 0) {
+		perror("failed to allocate tape node");
+		FAIL();
+	}
 	size_t buff_len;
-	buff_len = 5;
-
-
-
+	buff_len = 1;
+	char in_buff[1];
+	in_buff[0] = ',';
+	/*read in each character from file*/
+	for(ii = 1; ii < 128; ++ii) {
+		_eval_buffer_debug(in_buff, buff_len, CellZero, NULL, test_input, stdout);
+		EXPECT_EQ(ii, CellZero->cell);
+	}
+	/*now try to read past the input of the file*/
+	_eval_buffer_debug(in_buff, buff_len, CellZero, NULL, test_input, stdout);
+	EXPECT_EQ(-1, CellZero->cell);
+	free(CellZero);
 	fclose(test_input);
 }
 

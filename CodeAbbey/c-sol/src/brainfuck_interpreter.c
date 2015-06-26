@@ -179,19 +179,28 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 			case ',': /*Input a character and store it in the cell at the pointer*/
 				errno = 0;
 				rc = fscanf(in_stream, "%c", &in_char);
-				if(rc != 1) {
+				if(rc == 1) {
+					cursor->cell = in_char;
+				} else if(rc == EOF) {
 					if(errno == 0) {
-						/*if errno is not set, we set it*/
-						errno = EINVAL;
+						/*nothing was wrong, there was just no characters to read*/
+							/*we will pass this value on the the brainfuck tape
+							* and keep running */
+							cursor->cell = -1;
+							/*this assignment is for below printing only*/
+							in_char = EOF;
+					} else {
+					perror("input read of single char failed\n");
+					exit(-1);
 					}
+				} else {
 					fprintf(stderr, "Input read of single char failed, instr_offset = %lu\n", instr_offset);
 					perror("input read of single char failed\n");
 					exit(-1);
 				}
 				/*print quickly*/
-				fprintf(out_stream, "%ld (%lu): %c | read in %c (%d)\n",instr_count, instr_offset, *instr_ptr, in_char, (unsigned)in_char);
-				fprintf(out_stream, "%ld (%lu): %c | a[%ld] = %u\n", instr_count, instr_offset, *instr_ptr, cursor->index, (unsigned)in_char);
-				cursor->cell = in_char;
+				fprintf(out_stream, "%ld (%lu): %c | read in %c (%d)\n",instr_count, instr_offset, *instr_ptr, in_char, (signed)in_char);
+				fprintf(out_stream, "%ld (%lu): %c | a[%ld] = %ld\n", instr_count, instr_offset, *instr_ptr, cursor->index, cursor->cell);
 				instr_ptr++;
 				instr_offset++;
 				break;
