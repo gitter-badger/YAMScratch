@@ -388,14 +388,20 @@ TEST_F(InterpreterTest, BufferOvershootTest) {
 }
 /*test the input facilites from stdin and stdout using some other method*/
 TEST_F(InterpreterTest, CharacterInputTest) {
-	FILE* test_input;
+	FILE* test_input, * test_output;
 	errno = 0;
 	test_input = tmpfile();
 	if(test_input == NULL) {
 		/*we failed to open an input*/
-		perror("failed to create a tmpfile");
+		perror("failed to create input tmpfile");
 		FAIL();
-	}	
+	}
+	test_output = tmpfile();
+	if(test_output == NULL) {
+		/*we failed to open an input*/
+		perror("failed to create output tmpfile");
+		FAIL();
+	}		
 	/*send all ascii characters to the file*/
 	for(ii = 1; ii < 128; ++ii) {
 		fprintf(test_input, "%c", (char)ii);
@@ -414,7 +420,7 @@ TEST_F(InterpreterTest, CharacterInputTest) {
 	in_buff[0] = ',';
 	/*read in each character from file*/
 	for(ii = 1; ii < 128; ++ii) {
-		_eval_buffer_debug(in_buff, buff_len, CellZero, NULL, test_input, stdout);
+		_eval_buffer_debug(in_buff, buff_len, CellZero, NULL, test_input, test_output);
 		EXPECT_EQ(ii, CellZero->cell);
 	}
 	/*now try to read past the input of the file*/
@@ -422,6 +428,7 @@ TEST_F(InterpreterTest, CharacterInputTest) {
 	EXPECT_EQ(-1, CellZero->cell);
 	free(CellZero);
 	fclose(test_input);
+	fclose(test_output);
 }
 
 TEST_F(InterpreterTest, PositiveIntegerInputTest) {
