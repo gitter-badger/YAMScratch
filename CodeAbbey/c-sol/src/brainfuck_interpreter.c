@@ -181,6 +181,8 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				old_nesting_level = loop_nesting_level;
 				loop_nesting_level--;
 				if(cursor->cell != 0) {
+					fprintf(out_stream, "%ld (%lu): %c | a[%ld] = %ld, loop nesting level %ld\n",instr_count, instr_offset, *instr_ptr, cursor->index, cursor->cell, loop_nesting_level);
+
 					/*
 					* we check the instr_ptr one more time, by post decrementing just so that 
 					* we can catch the case where it is the first character in the buffer
@@ -199,8 +201,8 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 						}
 						instr_offset--;
 					}
-					fprintf(out_stream, "%ld (%lu): %c | matching bracket found\n",instr_count, instr_offset, *instr_ptr);
-
+					/*decrement the loop nesting level since we did reach a [*/
+					loop_nesting_level--;
 				} else {
 					fprintf(out_stream, "%ld (%lu): %c | a[%ld] = %ld, loop nesting level %ld\n",instr_count, instr_offset, *instr_ptr, cursor->index, cursor->cell, loop_nesting_level);
 					/*increment the instruction pointer*/
