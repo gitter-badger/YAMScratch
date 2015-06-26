@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <limits.h>
 #include <errno.h>
+#include <cstring>
 
 #include "brainfuck_interpreter.h"
 #include "gtest/gtest.h"
@@ -19,7 +20,8 @@ protected:
 
 TEST_F(InterpreterTest, Plus) {
 	errno = 0;
-	struct TapeNodeDebug* CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	struct TapeNodeDebug* CellZero;
+	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -41,7 +43,8 @@ TEST_F(InterpreterTest, Plus) {
 
 TEST_F(InterpreterTest, Minus) {
 	errno = 0;
-	struct TapeNodeDebug* CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	struct TapeNodeDebug* CellZero;
+	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -63,7 +66,8 @@ TEST_F(InterpreterTest, Minus) {
 
 TEST_F(InterpreterTest, OverflowCell) {
 	errno = 0;
-	struct TapeNodeDebug* CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	struct TapeNodeDebug* CellZero;
+	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -86,7 +90,8 @@ TEST_F(InterpreterTest, OverflowCell) {
 
 TEST_F(InterpreterTest, UnderflowCell) {
 	errno = 0;
-	struct TapeNodeDebug* CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	struct TapeNodeDebug* CellZero;
+	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -109,7 +114,8 @@ TEST_F(InterpreterTest, UnderflowCell) {
 
 TEST_F(InterpreterTest, MoveLeftAlreadyAllocated) {
 	errno = 0;
-	struct TapeNodeDebug* tape = (struct TapeNodeDebug*)calloc(2, sizeof(struct TapeNodeDebug));
+	struct TapeNodeDebug* tape;
+	tape = (struct TapeNodeDebug*)calloc(2, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -134,20 +140,117 @@ TEST_F(InterpreterTest, MoveLeftAlreadyAllocated) {
 
 
 TEST_F(InterpreterTest, MoveRightAlreadyAllocated) {
-	printf("Move ptr right already allocated test\n");
+	errno = 0;
+	struct TapeNodeDebug* tape;
+	tape = (struct TapeNodeDebug*)calloc(2, sizeof(struct TapeNodeDebug));
+	if(errno != 0) {
+		perror("failed to allocate tape node");
+		FAIL();
+	}
+	struct TapeNodeDebug* CellZero, * CellOne;
+	CellZero = tape;
+	CellOne = (tape+1);
+	CellZero->next = CellOne;
+	CellOne->prev = CellZero;
+	CellOne->index = 1;
+	CellZero->index = 0;
+	size_t buff_len;
+	buff_len = 3;
+	char in_buff[3] = {'-','>', '+'};
+	_eval_buffer_debug(in_buff, buff_len, tape, NULL, stdin, stdout);
+	EXPECT_EQ(-1, CellZero->cell);
+	EXPECT_EQ(1, CellOne->cell);
+	EXPECT_EQ(1, CellOne->index);
+	EXPECT_EQ(0, CellZero->index);
+	free(tape);
 }
 
 TEST_F(InterpreterTest, MoveLeftNotAllocated) {
-	printf("Move ptr left not allocated test \n");
+	/*output here is not expected be be that large (<100MB)so we are 
+	* justified by keeping in memory*/
+	FILE* test_output;
+	errno = 0;
+	test_output = tmpfile();
+	if(test_output == NULL) {
+		/*we failed to open an input*/
+		perror("failed to create a tmpfile");
+		FAIL();
+	}
+	struct TapeNodeDebug* tape;
+	tape = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	size_t buff_len = 1000000;
+	char* in_buff;
+	in_buff = (char*)malloc(sizeof(char)*buff_len);
+	errno = 0;
+	in_buff = (char*)memset(in_buff, '<', buff_len);
+
+	_eval_buffer_debug(in_buff, buff_len, tape, NULL, stdin, test_output);
+	struct TapeNodeDebug* right, * left;
+	right = tape;
+	left = tape;
+	/*move to end of tape*/
+	for(;;) {
+		if(left->prev != NULL) {
+			left = left->prev;
+		} else {
+			break;
+		}
+	}
+	EXPECT_EQ(0, right->index);
+	EXPECT_EQ((-1*buff_len), left->index);
+	fprintf(stdout,"Allocated %ld nodes to left of a[0]\n",buff_len);
+	rc = _destroy_tape_debug(left);
+	/*make sure clean up of tape succeded*/
+	EXPECT_EQ(0, rc);
+	fclose(test_output);
+	free(in_buff);
 }
 
 TEST_F(InterpreterTest, MoveRightNotAllocated) {
-	printf("Move ptr right not allocated test\n");
+	/*output here is not expected be be that large (<100MB)so we are 
+	* justified by keeping in memory*/
+	FILE* test_output;
+	errno = 0;
+	test_output = tmpfile();
+	if(test_output == NULL) {
+		/*we failed to open an input*/
+		perror("failed to create a tmpfile");
+		FAIL();
+	}
+	struct TapeNodeDebug* tape;
+	tape = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	size_t buff_len = 1000000;
+	char* in_buff;
+	in_buff = (char*)malloc(sizeof(char)*buff_len);
+	errno = 0;
+	in_buff = (char*)memset(in_buff, '>', buff_len);
+
+	_eval_buffer_debug(in_buff, buff_len, tape, NULL, stdin, test_output);
+	struct TapeNodeDebug* right, * left;
+	right = tape;
+	left = tape;
+	/*move to end of tape*/
+	for(;;) {
+		if(right->next != NULL) {
+			right = right->next;
+		} else {
+			break;
+		}
+	}
+	EXPECT_EQ(0, left->index);
+	EXPECT_EQ(buff_len, right->index);
+	fprintf(stdout,"Allocated %ld nodes to right of a[0]\n",buff_len);
+	rc = _destroy_tape_debug(left);
+	/*make sure clean up of tape succeded*/
+	EXPECT_EQ(0, rc);
+	fclose(test_output);
+	free(in_buff);
 }
 
 TEST_F(InterpreterTest, MoveLeftIndexIncrementingTest) {
 	errno = 0;
-	struct TapeNodeDebug* tape = (struct TapeNodeDebug*)calloc(5, sizeof(struct TapeNodeDebug));
+	struct TapeNodeDebug* tape;
+	tape = (struct TapeNodeDebug*)calloc(5, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();

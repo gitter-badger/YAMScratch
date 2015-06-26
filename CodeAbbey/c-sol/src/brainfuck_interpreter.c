@@ -4,6 +4,25 @@
 #include "brainfuck_interpreter.h"
 /*remember the Vector_t macro was imported in the header for this file*/
 
+signed _destroy_tape_debug(struct TapeNodeDebug* cursor) {
+	struct TapeNodeDebug* left, * right, * tmp;
+	left = cursor->prev;
+	right = cursor->next;
+	/*clean up left side*/
+	while(left != NULL) {
+		tmp = left;
+		left = tmp->prev;
+		free(tmp);
+	}
+	while(right != NULL) {
+		tmp = right;
+		right = tmp->next;
+		free(tmp);
+	}
+	free(cursor);
+	return 0;
+}
+
 signed brainfuck_evaluate_file(FILE* fp, int debug) {
 	return 0;
 }
@@ -12,13 +31,17 @@ signed brainfuck_evaluate_buffer(char* src, size_t nbytes, int debug) {
 	return 0;
 }
 
+signed _parse_buffer(char** buff, size_t* nbytes) {
+	return 0;
+}
+
 signed _eval_buffer(char* src, size_t nbytes, struct TapeNode* cursor,
-					Vector_t(int)* stack, FILE* in_stream, FILE* out_stream) {
+					Vector_t(long)* stack, FILE* in_stream, FILE* out_stream) {
 	return 0;
 }
 /*only adds to atape, will not remove any nodes*/
 signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor,
-						  Vector_t(int)* stack, FILE* in_stream, FILE* out_stream) {
+						  Vector_t(long)* stack, FILE* in_stream, FILE* out_stream) {
 	/*keep track of where in the data buffer we are*/
 	size_t instr_offset;
 	instr_offset = 0;
@@ -67,10 +90,10 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				prev_index = cursor->index;
 				if(cursor->next == NULL) {
 					errno = 0;
-					struct TapeNodeDebug* node = (struct TapeNodeDebug*)malloc(sizeof(TapeNodeDebug));
+					struct TapeNodeDebug* node = (struct TapeNodeDebug*)calloc(1, sizeof(TapeNodeDebug));
 					/*right now I don't know all the failure modes 
 					* so just indicate failure mode and exit */
-					if(!errno) {
+					if(errno != 0) {
 						perror("failed to allocate new tape data struct\n");
 						exit(-1);
 					}
@@ -79,7 +102,6 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 					cursor = node;
 				} else {
 					cursor = cursor->next;
-
 				}
 				/*we dont care as much about overflows in the data tape index*/
 				data_offset++;
@@ -94,10 +116,10 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				prev_index = cursor->index;
 				if(cursor->prev == NULL) {
 					errno = 0;
-					struct TapeNodeDebug* node = (struct TapeNodeDebug*)malloc(sizeof(TapeNodeDebug));
+					struct TapeNodeDebug* node = (struct TapeNodeDebug*)calloc(1, sizeof(TapeNodeDebug));
 					/*right now I don't know all the failure modes 
 					* so just indicate failure mode and exit */
-					if(!errno) {
+					if(errno != 0) {
 						perror("failed to allocate new tape data struct\n");
 						exit(-1);
 					}
@@ -174,6 +196,10 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				instr_offset++;
 				break;
 			case '.':
+				fprintf(out_stream, "%c", (char)cursor->cell);
+				instr_ptr++;
+				instr_offset++;
+				break;
 			case ';':
 				errno = 0;
 				rc = fscanf(in_stream, " %ld", &in_signed);
@@ -195,7 +221,13 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				instr_offset++;
 				break;
 			case ':':
+				fprintf(out_stream, "%ld\n", cursor->cell);
+				instr_ptr++;
+				instr_offset++;
+				break;
 			case '#': /*pushes the current value in cell under pointer to stack*/
+
+				break;
 			case '$': /*pops the value from stack and overwrites the cell under the pointer*/
 				break;
 		}

@@ -9,7 +9,7 @@ extern "C" {
 
 /*use the vector as the stack for the extended mode*/
 #include "parseCodeAbbeyInput.h"
-VECTOR_INIT(int)
+VECTOR_INIT(long)
 
 /*use a linked list for the data tape*/
 struct TapeNode {
@@ -41,14 +41,21 @@ signed brainfuck_evaluate_buffer(char* src, size_t nbytes, int debug);
 
 /*private implementation of interpreter*/
 signed _eval_buffer(char* src, size_t nbytes, struct TapeNode* cursor,
-					Vector_t(int)* stack, FILE* in_stream, FILE* out_stream);
+					Vector_t(long)* stack, FILE* in_stream, FILE* out_stream);
 
 /*
 * debug version will check for overflows and underflows data cells and emmit warning
 * to stderr, debug version also outputs action
 */
 signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor,
-						  Vector_t(int)* stack, FILE* in_stream, FILE* out_stream);
+						  Vector_t(long)* stack, FILE* in_stream, FILE* out_stream);
+
+
+/*walk along the tape and free it*/
+signed _destroy_tape_debug(struct TapeNodeDebug* cursor);
+
+/*remove all non opcodes from file*/
+signed _parse_buffer(char** buff, size_t* nbytes);
 
 #endif
 
