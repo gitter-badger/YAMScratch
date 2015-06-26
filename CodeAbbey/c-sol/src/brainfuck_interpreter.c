@@ -149,7 +149,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 						instr_offset++;
 						if(instr_ptr == instr_end) {
 							fprintf(out_stream, "reached end of program without matching ]\n");
-							break;
+							return -8;
 						}
 					}
 					fprintf(out_stream, "found matching ] at instr_offset = %lu\n", instr_offset );
@@ -168,12 +168,13 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 					while(*(--instr_ptr) != '[') {
 						instr_offset--;
 						if(instr_offset == 0) {
-							/*make sure*/
+							/*if the offset is zero, it means that we did not find a matching offset*/
+							return -9;
 						}
 					}
 				} else {
 					/*increment the instruction pointer*/
-					fprintf(stderr, "HI there\n" );
+					fprintf(out_stream, "%ld (%lu): %c | matching bracket found\n",instr_count, instr_offset, *instr_ptr);
 					instr_ptr++;
 				}
 			case ',': /*Input a character and store it in the cell at the pointer*/
@@ -244,9 +245,11 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				if(stack->elms == 0) {
 					/*stack is empty*/
 					fprintf(stderr, "%ld (%lu): %c | Cannot pop, Stack Empty\n", instr_count, instr_offset, *instr_ptr );
-					return (-1);
+					return -6;
 				}
-				cursor->index = vector_pop(long, stack);
+				fprintf(stderr, "%ld (%lu): %c | a[%ld] <= %ld \n", instr_count, instr_offset, *instr_ptr, cursor->index, cursor->cell);
+				cursor->cell = vector_pop(long, stack);
+				instr_ptr++;
 				break;
 		}
 		instr_count++;

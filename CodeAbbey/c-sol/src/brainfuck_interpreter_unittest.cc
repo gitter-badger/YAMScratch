@@ -329,11 +329,40 @@ TEST_F(InterpreterTest, StackPush) {
 	EXPECT_EQ(2, stack->items[2]);
 	EXPECT_EQ(2, stack->items[3]);
 	free(CellZero);
-
+	vector_destroy(long, stack);
 }
 
 TEST_F(InterpreterTest, StackPop) {
-	printf("Stack popping test\n");
+	Vector_t(long)* stack;
+	stack = newVector(long);
+	struct TapeNodeDebug* CellZero;
+	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	buff_len = 1;
+	char in_buff[1];
+	in_buff[0] = '$';
+	vector_push_back(long, stack, 0);
+	vector_push_back(long, stack, LONG_MAX);
+	vector_push_back(long, stack, LONG_MIN);
+	EXPECT_EQ(3, stack->elms);
+	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, stack, stdin, stdout);
+	EXPECT_EQ(LONG_MIN, CellZero->cell);
+	EXPECT_EQ(0, rc);
+	EXPECT_EQ(2, stack->elms);
+	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, stack, stdin, stdout);
+	EXPECT_EQ(LONG_MAX, CellZero->cell);
+	EXPECT_EQ(0, rc);
+	EXPECT_EQ(1, stack->elms);
+	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, stack, stdin, stdout);
+	EXPECT_EQ(0, CellZero->cell);
+	EXPECT_EQ(0, rc);
+	EXPECT_EQ(0, stack->elms);
+	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, stack, stdin, stdout);
+	/*-6 is the return code for failed to pop stack, stack is empty*/
+	EXPECT_EQ(-6, rc);
+	EXPECT_EQ(0, stack->elms);
+
+	free(CellZero);
+	vector_destroy(long, stack);
 }
 
 TEST_F(InterpreterTest, BufferOvershootTest) {
