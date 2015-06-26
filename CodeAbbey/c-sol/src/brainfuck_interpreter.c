@@ -223,7 +223,7 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 					return (-1);
 				}
 				/*print quickly*/
-				fprintf(out_stream, "%ld (%lu): %c | read in %ld\n", instr_count, instr_offset, *instr_ptr,in_signed );
+				fprintf(out_stream, "%ld (%lu): %c | read in %ld\n", instr_count, instr_offset, *instr_ptr, in_signed );
 				fprintf(out_stream, "%ld (%lu): %c | a[%ld] = %ld\n", instr_count, instr_offset, *instr_ptr, cursor->index, in_signed);
 				cursor->cell = in_signed;
 				instr_ptr++;
@@ -235,14 +235,15 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				instr_offset++;
 				break;
 			case '#': /*pushes the current value in cell under pointer to stack*/
-				vector_push_back(long, stack, cursor->index);
+				vector_push_back(long, stack, cursor->cell);
+				fprintf(out_stream, "%ld (%lu): %c | Push down %ld, size = %ld\n",instr_count, instr_offset, *instr_ptr, cursor->cell, stack->elms);
 				instr_ptr++;
 				instr_offset++;
 				break;
 			case '$': /*pops the value from stack and overwrites the cell under the pointer*/
 				if(stack->elms == 0) {
 					/*stack is empty*/
-					fprintf(stderr, "%ld (%lu): %c | Cannot pop, Stack Empty\n", );
+					fprintf(stderr, "%ld (%lu): %c | Cannot pop, Stack Empty\n", instr_count, instr_offset, *instr_ptr );
 					return (-1);
 				}
 				cursor->index = vector_pop(long, stack);

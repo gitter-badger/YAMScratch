@@ -14,6 +14,7 @@ class InterpreterTest : public testing::Test
 protected:
 	size_t ii;
 	signed rc;
+	size_t buff_len;
 	virtual void SetUp() {}
 	virtual void TearDown() {}
 };
@@ -27,7 +28,6 @@ TEST_F(InterpreterTest, Plus) {
 		FAIL();
 	}
 	#define PLUS_BUFFER_LENGTH 5
-	size_t buff_len;
 	buff_len = PLUS_BUFFER_LENGTH;
 	char in_buff[PLUS_BUFFER_LENGTH];
 	for(ii = 0; ii < buff_len; ++ii) {
@@ -50,7 +50,6 @@ TEST_F(InterpreterTest, Minus) {
 		FAIL();
 	}
 	#define MINUS_BUFFER_LENGTH 5
-	size_t buff_len;
 	buff_len = MINUS_BUFFER_LENGTH;
 	char in_buff[MINUS_BUFFER_LENGTH];
 	for(ii = 0; ii < buff_len; ++ii) {
@@ -73,7 +72,6 @@ TEST_F(InterpreterTest, OverflowCell) {
 		FAIL();
 	}
 	#define OVERFLOWCELL_BUFFER_LENGTH 1
-	size_t buff_len;
 	buff_len = OVERFLOWCELL_BUFFER_LENGTH;
 	char in_buff[OVERFLOWCELL_BUFFER_LENGTH];
 	for(ii = 0; ii < buff_len; ++ii) {
@@ -97,7 +95,6 @@ TEST_F(InterpreterTest, UnderflowCell) {
 		FAIL();
 	}
 	#define UNDERFLOWCELL_BUFFER_LENGTH 1
-	size_t buff_len;
 	buff_len = UNDERFLOWCELL_BUFFER_LENGTH;
 	char in_buff[UNDERFLOWCELL_BUFFER_LENGTH];
 	for(ii = 0; ii < buff_len; ++ii) {
@@ -127,7 +124,6 @@ TEST_F(InterpreterTest, MoveLeftAlreadyAllocated) {
 	CellOne->prev = CellZero;
 	CellOne->index = 1;
 	CellZero->index = 0;
-	size_t buff_len;
 	buff_len = 3;
 	char in_buff[3] = {'-','<', '+'};
 	_eval_buffer_debug(in_buff, buff_len, CellOne, NULL, stdin, stdout);
@@ -154,7 +150,6 @@ TEST_F(InterpreterTest, MoveRightAlreadyAllocated) {
 	CellOne->prev = CellZero;
 	CellOne->index = 1;
 	CellZero->index = 0;
-	size_t buff_len;
 	buff_len = 3;
 	char in_buff[3] = {'-','>', '+'};
 	_eval_buffer_debug(in_buff, buff_len, tape, NULL, stdin, stdout);
@@ -178,7 +173,7 @@ TEST_F(InterpreterTest, MoveLeftNotAllocated) {
 	}
 	struct TapeNodeDebug* tape;
 	tape = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
-	size_t buff_len = 1000000;
+	buff_len = 1000000;
 	char* in_buff;
 	in_buff = (char*)malloc(sizeof(char)*buff_len);
 	errno = 0;
@@ -219,7 +214,7 @@ TEST_F(InterpreterTest, MoveRightNotAllocated) {
 	}
 	struct TapeNodeDebug* tape;
 	tape = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
-	size_t buff_len = 1000000;
+	buff_len = 1000000;
 	char* in_buff;
 	in_buff = (char*)malloc(sizeof(char)*buff_len);
 	errno = 0;
@@ -240,11 +235,11 @@ TEST_F(InterpreterTest, MoveRightNotAllocated) {
 	EXPECT_EQ(0, left->index);
 	EXPECT_EQ(buff_len, right->index);
 	fprintf(stdout,"Allocated %ld nodes to right of a[0]\n",buff_len);
+	fclose(test_output);
+	free(in_buff);
 	rc = _destroy_tape_debug(left);
 	/*make sure clean up of tape succeded*/
 	EXPECT_EQ(0, rc);
-	fclose(test_output);
-	free(in_buff);
 }
 
 TEST_F(InterpreterTest, MoveLeftIndexIncrementingTest) {
@@ -266,8 +261,7 @@ TEST_F(InterpreterTest, MoveLeftIndexIncrementingTest) {
 	(tape+4)->prev = (tape+3);
 	/*start at end of tape with positive index to test both pos and negative indices*/
 	(tape+4)->index = 2;
-	char in_buff[5] = {'<','<','<','<','+'};
-	size_t buff_len = 5;
+	char in_buff[5] = {'<','<','<','<','+'};	buff_len = 5;
 	_eval_buffer_debug(in_buff, buff_len, (tape+4), NULL, stdin, stdout);
 	EXPECT_EQ(2, (tape+4)->index);
 	EXPECT_EQ(1, (tape+3)->index);
@@ -286,7 +280,8 @@ TEST_F(InterpreterTest, MoveLeftIndexIncrementingTest) {
 
 TEST_F(InterpreterTest, MoveRightIndexIncrementingTest) {
 	errno = 0;
-	struct TapeNodeDebug* tape = (struct TapeNodeDebug*)calloc(5, sizeof(struct TapeNodeDebug));
+	struct TapeNodeDebug* tape;
+	tape = (struct TapeNodeDebug*)calloc(5, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -303,7 +298,7 @@ TEST_F(InterpreterTest, MoveRightIndexIncrementingTest) {
 	/*start at end of tape with positive index to test both pos and negative indices*/
 	(tape+0)->index = -2;
 	char in_buff[5] = {'>','>','>','>','+'};
-	size_t buff_len = 5;
+	buff_len = 5;
 	_eval_buffer_debug(in_buff, buff_len, tape, NULL, stdin, stdout);
 	EXPECT_EQ(2, (tape+4)->index);
 	EXPECT_EQ(1, (tape+3)->index);
@@ -321,7 +316,20 @@ TEST_F(InterpreterTest, MoveRightIndexIncrementingTest) {
 }
 
 TEST_F(InterpreterTest, StackPush) {
-	printf("Stack pushing test\n");
+	Vector_t(long)* stack;
+	stack = newVector(long);
+	struct TapeNodeDebug* CellZero;
+	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	buff_len = 6;
+	char in_buff[6] = {'+','+','#','#','#','#'};
+	_eval_buffer_debug(in_buff, buff_len, CellZero, stack, stdin, stdout);
+	EXPECT_EQ(4, stack->elms);
+	EXPECT_EQ(2, stack->items[0]);
+	EXPECT_EQ(2, stack->items[1]);
+	EXPECT_EQ(2, stack->items[2]);
+	EXPECT_EQ(2, stack->items[3]);
+	free(CellZero);
+
 }
 
 TEST_F(InterpreterTest, StackPop) {
@@ -337,7 +345,6 @@ TEST_F(InterpreterTest, BufferOvershootTest) {
 		perror("failed to allocate tape node");
 		FAIL();
 	}
-	size_t buff_len;
 	buff_len = 3;
 	char in_buff[3];
 	for(ii = 0; ii < buff_len; ++ii) {
@@ -348,7 +355,7 @@ TEST_F(InterpreterTest, BufferOvershootTest) {
 	EXPECT_EQ(0, CellZero->index);
 	EXPECT_EQ(NULL, CellZero->next);
 	EXPECT_EQ(NULL, CellZero->prev);
-
+	free(CellZero);
 }
 /*test the input facilites from stdin and stdout using some other method*/
 TEST_F(InterpreterTest, CharacterInputTest) {
@@ -373,7 +380,6 @@ TEST_F(InterpreterTest, CharacterInputTest) {
 		perror("failed to allocate tape node");
 		FAIL();
 	}
-	size_t buff_len;
 	buff_len = 1;
 	char in_buff[1];
 	in_buff[0] = ',';
@@ -417,7 +423,7 @@ TEST_F(InterpreterTest, PositiveIntegerInputTest) {
 	(tape+1)->next = (tape+2);
 	(tape+2)->prev = (tape+1);
 	char in_buff[5] = {';','>',';','>',';'};
-	size_t buff_len = 5;
+	buff_len = 5;
 	_eval_buffer_debug(in_buff, buff_len, tape, NULL, test_input, stdout);
 	EXPECT_EQ(A, tape->cell);
 	EXPECT_EQ(B, (tape+1)->cell);
@@ -454,7 +460,7 @@ TEST_F(InterpreterTest, NegativeIntegerInputTest) {
 	(tape+1)->next = (tape+2);
 	(tape+2)->prev = (tape+1);
 	char in_buff[5] = {';','>',';','>',';'};
-	size_t buff_len = 5;
+	buff_len = 5;
 	_eval_buffer_debug(in_buff, buff_len, tape, NULL, test_input, stdout);
 	EXPECT_EQ(A, tape->cell);
 	EXPECT_EQ(B, (tape+1)->cell);
