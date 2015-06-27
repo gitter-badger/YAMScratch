@@ -8,107 +8,142 @@
 #include "brainfuck_interpreter.h"
 #include "gtest/gtest.h"
 
+/*use overloading to allow inferring of type*/
+signed buffer_eval(char* src, size_t nbytes, struct TapeNode* cursor, 
+				   Vector_t(long)* stack, FILE* in_st, FILE* out_st) {
+	return _eval_buffer(src, nbytes, cursor, stack, in_st, out_st);
+}
 
-class DebugInterpreterTest : public testing::Test
+signed buffer_eval(char* src, size_t nbytes, struct TapeNodeDebug* cursor, 
+				   Vector_t(long)* stack, FILE* in_st, FILE* out_st) {
+	return _eval_buffer_debug(src, nbytes, cursor, stack, in_st, out_st);
+}
+
+signed tape_destroy(struct TapeNode* cursor) {
+	return _destroy_tape(cursor);
+}
+
+signed tape_destroy(struct TapeNodeDebug* cursor) {
+	return _destroy_tape_debug(cursor);
+}
+
+
+template <typename T>
+class InterpreterTest : public testing::Test
 {
 protected:
-	size_t ii;
-	signed rc;
-	size_t buff_len;
-	struct TapeNodeDebug* CellZero, * CellOne, * tape;
+	signed (*buffer_eval)(char* , size_t, T*, Vector_t(long)*, FILE*, FILE*);
 	virtual void SetUp() {}
 	virtual void TearDown() {}
 };
 
-TEST_F(DebugInterpreterTest, Plus) {
+typedef ::testing::Types<struct TapeNode, struct TapeNodeDebug> MyTypes;
+TYPED_TEST_CASE(InterpreterTest, MyTypes);
+
+TYPED_TEST(InterpreterTest, Plus) {
+	size_t ii;
+	signed rc;
+	size_t buff_len;
 	errno = 0;
-	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* CellZero;
+	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
 	}
-	#define PLUS_BUFFER_LENGTH 5
-	buff_len = PLUS_BUFFER_LENGTH;
-	char in_buff[PLUS_BUFFER_LENGTH];
+	buff_len = 5;
+	char in_buff[5];
 	for(ii = 0; ii < buff_len; ++ii) {
 		in_buff[ii] = '+';
 	}
-	_eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, NULL, stdin, stdout);
 	EXPECT_EQ(buff_len, CellZero->cell);
 	EXPECT_EQ(NULL, CellZero->next);
 	EXPECT_EQ(NULL, CellZero->prev);
-	EXPECT_EQ(0, CellZero->index);
 	free(CellZero);
 }
 
-TEST_F(DebugInterpreterTest, Minus) {
+TYPED_TEST(InterpreterTest, Minus) {
+	size_t ii;
+	signed rc;
+	size_t buff_len;
 	errno = 0;
-	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* CellZero;
+	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
 	}
-	#define MINUS_BUFFER_LENGTH 5
-	buff_len = MINUS_BUFFER_LENGTH;
-	char in_buff[MINUS_BUFFER_LENGTH];
+	buff_len = 5;
+	char in_buff[5];
 	for(ii = 0; ii < buff_len; ++ii) {
 		in_buff[ii] = '-';
 	}
-	_eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	EXPECT_EQ(0, rc);
 	EXPECT_EQ((signed)buff_len * (-1), CellZero->cell);
 	EXPECT_EQ(NULL, CellZero->next);
 	EXPECT_EQ(NULL, CellZero->prev);
-	EXPECT_EQ(0, CellZero->index);
 	free(CellZero);
 }
 
-TEST_F(DebugInterpreterTest, OverflowCell) {
+
+TYPED_TEST(InterpreterTest, OverflowCell) {
+	size_t ii;
+	signed rc;
+	size_t buff_len;
 	errno = 0;
-	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* CellZero;
+	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
 	}
-	#define OVERFLOWCELL_BUFFER_LENGTH 1
-	buff_len = OVERFLOWCELL_BUFFER_LENGTH;
-	char in_buff[OVERFLOWCELL_BUFFER_LENGTH];
+	buff_len = 1;
+	char in_buff[1];
 	for(ii = 0; ii < buff_len; ++ii) {
 		in_buff[ii] = '+';
 	}
 	CellZero->cell = LONG_MAX;
-	_eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	EXPECT_EQ(0, rc);
 	EXPECT_EQ(LONG_MIN, CellZero->cell);
 	EXPECT_EQ(NULL, CellZero->next);
 	EXPECT_EQ(NULL, CellZero->prev);
-	EXPECT_EQ(0, CellZero->index);
 	free(CellZero);
 }
 
-TEST_F(DebugInterpreterTest, UnderflowCell) {
+TYPED_TEST(InterpreterTest, UnderflowCell) {
+	size_t ii;
+	signed rc;
+	size_t buff_len;
 	errno = 0;
-	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* CellZero;
+	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
 	}
-	#define UNDERFLOWCELL_BUFFER_LENGTH 1
-	buff_len = UNDERFLOWCELL_BUFFER_LENGTH;
-	char in_buff[UNDERFLOWCELL_BUFFER_LENGTH];
+	buff_len = 1;
+	char in_buff[1];
 	for(ii = 0; ii < buff_len; ++ii) {
 		in_buff[ii] = '-';
 	}
 	CellZero->cell = LONG_MIN;
-	_eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	EXPECT_EQ(0, rc);
 	EXPECT_EQ(LONG_MAX, CellZero->cell);
 	EXPECT_EQ(NULL, CellZero->next);
 	EXPECT_EQ(NULL, CellZero->prev);
-	EXPECT_EQ(0, CellZero->index);
 	free(CellZero);
 }
 
-TEST_F(DebugInterpreterTest, MoveLeftAlreadyAllocated) {
+TYPED_TEST(InterpreterTest, MoveLeftAlreadyAllocated) {
+	signed rc;
+	size_t buff_len;
 	errno = 0;
-	tape = (struct TapeNodeDebug*)calloc(2, sizeof(struct TapeNodeDebug));
+	TypeParam* tape, * CellZero, * CellOne;
+	tape = (TypeParam*)calloc(2, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -117,22 +152,21 @@ TEST_F(DebugInterpreterTest, MoveLeftAlreadyAllocated) {
 	CellOne = tape + 1;
 	CellZero->next = CellOne;
 	CellOne->prev = CellZero;
-	CellOne->index = 1;
-	CellZero->index = 0;
 	buff_len = 3;
 	char in_buff[3] = {'-','<', '+'};
-	_eval_buffer_debug(in_buff, buff_len, CellOne, NULL, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellOne, NULL, stdin, stdout);
+	EXPECT_EQ(0, rc);
 	EXPECT_EQ(-1, CellOne->cell);
 	EXPECT_EQ(1, CellZero->cell);
-	EXPECT_EQ(1, CellOne->index);
-	EXPECT_EQ(0, CellZero->index);
 	free(tape);
 }
 
-
-TEST_F(DebugInterpreterTest, MoveRightAlreadyAllocated) {
+TYPED_TEST(InterpreterTest, MoveRightAlreadyAllocated) {
+	signed rc;
+	size_t buff_len;
 	errno = 0;
-	tape = (struct TapeNodeDebug*)calloc(2, sizeof(struct TapeNodeDebug));
+	TypeParam* tape, * CellZero, * CellOne;
+	tape = (TypeParam*)calloc(2, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -141,19 +175,18 @@ TEST_F(DebugInterpreterTest, MoveRightAlreadyAllocated) {
 	CellOne = (tape+1);
 	CellZero->next = CellOne;
 	CellOne->prev = CellZero;
-	CellOne->index = 1;
-	CellZero->index = 0;
 	buff_len = 3;
 	char in_buff[3] = {'-','>', '+'};
-	_eval_buffer_debug(in_buff, buff_len, tape, NULL, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, tape, NULL, stdin, stdout);
+	EXPECT_EQ(0, rc);
 	EXPECT_EQ(-1, CellZero->cell);
 	EXPECT_EQ(1, CellOne->cell);
-	EXPECT_EQ(1, CellOne->index);
-	EXPECT_EQ(0, CellZero->index);
 	free(tape);
 }
 
-TEST_F(DebugInterpreterTest, MoveLeftNotAllocated) {
+TYPED_TEST(InterpreterTest, MoveLeftNotAllocated) {
+	signed rc;
+	size_t buff_len;
 	/*output here is not expected be be that large (<100MB)so we are 
 	* justified by keeping in memory*/
 	FILE* test_output;
@@ -164,15 +197,16 @@ TEST_F(DebugInterpreterTest, MoveLeftNotAllocated) {
 		perror("failed to create a tmpfile");
 		FAIL();
 	}
-	tape = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* tape;
+	tape = (TypeParam*)calloc(1, sizeof(TypeParam));
 	buff_len = 1000000;
 	char* in_buff;
 	in_buff = (char*)malloc(sizeof(char)*buff_len);
 	errno = 0;
 	in_buff = (char*)memset(in_buff, '<', buff_len);
 
-	_eval_buffer_debug(in_buff, buff_len, tape, NULL, stdin, test_output);
-	struct TapeNodeDebug* right, * left;
+	rc = buffer_eval(in_buff, buff_len, tape, NULL, stdin, test_output);
+	TypeParam* right, * left;
 	right = tape;
 	left = tape;
 	/*move to end of tape*/
@@ -183,17 +217,17 @@ TEST_F(DebugInterpreterTest, MoveLeftNotAllocated) {
 			break;
 		}
 	}
-	EXPECT_EQ(0, right->index);
-	EXPECT_EQ((-1*buff_len), left->index);
 	fprintf(stdout,"Allocated %ld nodes to left of a[0]\n",buff_len);
-	rc = _destroy_tape_debug(left);
+	rc = tape_destroy(left);
 	/*make sure clean up of tape succeded*/
 	EXPECT_EQ(0, rc);
 	fclose(test_output);
 	free(in_buff);
 }
 
-TEST_F(DebugInterpreterTest, MoveRightNotAllocated) {
+TYPED_TEST(InterpreterTest, MoveRightNotAllocated) {
+	signed rc;
+	size_t buff_len;
 	/*output here is not expected be be that large (<100MB)so we are 
 	* justified by keeping in memory*/
 	FILE* test_output;
@@ -204,15 +238,17 @@ TEST_F(DebugInterpreterTest, MoveRightNotAllocated) {
 		perror("failed to create a tmpfile");
 		FAIL();
 	}
-	tape = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* tape;
+	tape = (TypeParam*)calloc(1, sizeof(TypeParam));
 	buff_len = 1000000;
 	char* in_buff;
 	in_buff = (char*)malloc(sizeof(char)*buff_len);
 	errno = 0;
 	in_buff = (char*)memset(in_buff, '>', buff_len);
 
-	_eval_buffer_debug(in_buff, buff_len, tape, NULL, stdin, test_output);
-	struct TapeNodeDebug* right, * left;
+	rc = buffer_eval(in_buff, buff_len, tape, NULL, stdin, test_output);
+	EXPECT_EQ(0, rc);
+	TypeParam* right, * left;
 	right = tape;
 	left = tape;
 	/*move to end of tape*/
@@ -223,19 +259,20 @@ TEST_F(DebugInterpreterTest, MoveRightNotAllocated) {
 			break;
 		}
 	}
-	EXPECT_EQ(0, left->index);
-	EXPECT_EQ(buff_len, right->index);
 	fprintf(stdout,"Allocated %ld nodes to right of a[0]\n",buff_len);
 	fclose(test_output);
 	free(in_buff);
-	rc = _destroy_tape_debug(left);
+	rc = tape_destroy(left);
 	/*make sure clean up of tape succeded*/
 	EXPECT_EQ(0, rc);
 }
 
-TEST_F(DebugInterpreterTest, MoveLeftIndexIncrementingTest) {
+TYPED_TEST(InterpreterTest, MoveLeftIndexIncrementingTest) {
+	signed rc;
+	size_t buff_len;
 	errno = 0;
-	tape = (struct TapeNodeDebug*)calloc(5, sizeof(struct TapeNodeDebug));
+	TypeParam* tape;
+	tape = (TypeParam*)calloc(5, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -249,15 +286,9 @@ TEST_F(DebugInterpreterTest, MoveLeftIndexIncrementingTest) {
 	(tape+3)->prev = (tape+2);
 	(tape+3)->next = (tape+4);
 	(tape+4)->prev = (tape+3);
-	/*start at end of tape with positive index to test both pos and negative indices*/
-	(tape+4)->index = 2;
 	char in_buff[5] = {'<','<','<','<','+'};	buff_len = 5;
-	_eval_buffer_debug(in_buff, buff_len, (tape+4), NULL, stdin, stdout);
-	EXPECT_EQ(2, (tape+4)->index);
-	EXPECT_EQ(1, (tape+3)->index);
-	EXPECT_EQ(0, (tape+2)->index);
-	EXPECT_EQ(-1, (tape+1)->index);
-	EXPECT_EQ(-2, (tape+0)->index);
+	rc = buffer_eval(in_buff, buff_len, (tape+4), NULL, stdin, stdout);
+	EXPECT_EQ(0, rc);
 	/*checking that we transferred as far as was expected*/
 	EXPECT_EQ(1, (tape+0)->cell);
 	/*the move instructions should not change value of passed over cell*/
@@ -268,9 +299,12 @@ TEST_F(DebugInterpreterTest, MoveLeftIndexIncrementingTest) {
 	free(tape);
 }
 
-TEST_F(DebugInterpreterTest, MoveRightIndexIncrementingTest) {
+TYPED_TEST(InterpreterTest, MoveRightIndexIncrementingTest) {
+	signed rc;
+	size_t buff_len;
 	errno = 0;
-	tape = (struct TapeNodeDebug*)calloc(5, sizeof(struct TapeNodeDebug));
+	TypeParam* tape;
+	tape = (TypeParam*)calloc(5, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -284,16 +318,10 @@ TEST_F(DebugInterpreterTest, MoveRightIndexIncrementingTest) {
 	(tape+3)->prev = (tape+2);
 	(tape+3)->next = (tape+4);
 	(tape+4)->prev = (tape+3);
-	/*start at end of tape with positive index to test both pos and negative indices*/
-	(tape+0)->index = -2;
 	char in_buff[5] = {'>','>','>','>','+'};
 	buff_len = 5;
-	_eval_buffer_debug(in_buff, buff_len, tape, NULL, stdin, stdout);
-	EXPECT_EQ(2, (tape+4)->index);
-	EXPECT_EQ(1, (tape+3)->index);
-	EXPECT_EQ(0, (tape+2)->index);
-	EXPECT_EQ(-1, (tape+1)->index);
-	EXPECT_EQ(-2, (tape+0)->index);
+	rc = buffer_eval(in_buff, buff_len, tape, NULL, stdin, stdout);
+	EXPECT_EQ(0, rc);
 	/*checking that we transferred as far as was expected*/
 	EXPECT_EQ(1, (tape+4)->cell);
 	/*the move instructions should not change value of passed over cell*/
@@ -304,13 +332,17 @@ TEST_F(DebugInterpreterTest, MoveRightIndexIncrementingTest) {
 	free(tape);
 }
 
-TEST_F(DebugInterpreterTest, StackPush) {
+TYPED_TEST(InterpreterTest, StackPush) {
+	signed rc;
+	size_t buff_len;
 	Vector_t(long)* stack;
 	stack = newVector(long);
-	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* CellZero;
+	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
 	buff_len = 6;
 	char in_buff[6] = {'+','+','#','#','#','#'};
-	_eval_buffer_debug(in_buff, buff_len, CellZero, stack, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, stack, stdin, stdout);
+	EXPECT_EQ(0, rc);
 	EXPECT_EQ(4, stack->elms);
 	EXPECT_EQ(2, stack->items[0]);
 	EXPECT_EQ(2, stack->items[1]);
@@ -320,10 +352,13 @@ TEST_F(DebugInterpreterTest, StackPush) {
 	vector_destroy(long, stack);
 }
 
-TEST_F(DebugInterpreterTest, StackPop) {
+TYPED_TEST(InterpreterTest, StackPop) {
+	signed rc;
+	size_t buff_len;
 	Vector_t(long)* stack;
 	stack = newVector(long);
-	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* CellZero;
+	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
 	buff_len = 1;
 	char in_buff[1];
 	in_buff[0] = '$';
@@ -331,19 +366,19 @@ TEST_F(DebugInterpreterTest, StackPop) {
 	vector_push_back(long, stack, LONG_MAX);
 	vector_push_back(long, stack, LONG_MIN);
 	EXPECT_EQ(3, stack->elms);
-	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, stack, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, stack, stdin, stdout);
 	EXPECT_EQ(LONG_MIN, CellZero->cell);
 	EXPECT_EQ(0, rc);
 	EXPECT_EQ(2, stack->elms);
-	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, stack, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, stack, stdin, stdout);
 	EXPECT_EQ(LONG_MAX, CellZero->cell);
 	EXPECT_EQ(0, rc);
 	EXPECT_EQ(1, stack->elms);
-	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, stack, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, stack, stdin, stdout);
 	EXPECT_EQ(0, CellZero->cell);
 	EXPECT_EQ(0, rc);
 	EXPECT_EQ(0, stack->elms);
-	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, stack, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, stack, stdin, stdout);
 	/*-6 is the return code for failed to pop stack, stack is empty*/
 	EXPECT_EQ(-6, rc);
 	EXPECT_EQ(0, stack->elms);
@@ -352,11 +387,15 @@ TEST_F(DebugInterpreterTest, StackPop) {
 	vector_destroy(long, stack);
 }
 
-TEST_F(DebugInterpreterTest, BufferOvershootTest) {
+TYPED_TEST(InterpreterTest, BufferOvershootTest) {
+	signed rc;
+	size_t buff_len;
+	size_t ii;
 	/*we will create a buffer of commands but artificially
 	shorten it so that going past end actually has valid commands*/
 	errno = 0;
-	struct TapeNodeDebug* CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* CellZero;
+	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -366,15 +405,19 @@ TEST_F(DebugInterpreterTest, BufferOvershootTest) {
 	for(ii = 0; ii < buff_len; ++ii) {
 		in_buff[ii] = '+';
 	}
-	_eval_buffer_debug(in_buff, buff_len-1, CellZero, NULL, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len-1, CellZero, NULL, stdin, stdout);
+	EXPECT_EQ(0, rc);
 	EXPECT_EQ(2, CellZero->cell);
-	EXPECT_EQ(0, CellZero->index);
 	EXPECT_EQ(NULL, CellZero->next);
 	EXPECT_EQ(NULL, CellZero->prev);
 	free(CellZero);
 }
+
 /*test the input facilites from stdin and stdout using some other method*/
-TEST_F(DebugInterpreterTest, CharacterInputTest) {
+TYPED_TEST(InterpreterTest, CharacterInputTest) {
+	signed rc;
+	size_t buff_len;
+	size_t ii;
 	FILE* test_input, * test_output;
 	errno = 0;
 	test_input = tmpfile();
@@ -396,7 +439,8 @@ TEST_F(DebugInterpreterTest, CharacterInputTest) {
 	rewind(test_input);
 	/*construct test program*/
 	errno = 0;
-	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* CellZero;
+	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -406,18 +450,22 @@ TEST_F(DebugInterpreterTest, CharacterInputTest) {
 	in_buff[0] = ',';
 	/*read in each character from file*/
 	for(ii = 1; ii < 128; ++ii) {
-		_eval_buffer_debug(in_buff, buff_len, CellZero, NULL, test_input, test_output);
+		rc = buffer_eval(in_buff, buff_len, CellZero, NULL, test_input, test_output);
+		EXPECT_EQ(0, rc);
 		EXPECT_EQ(ii, CellZero->cell);
 	}
 	/*now try to read past the input of the file*/
-	_eval_buffer_debug(in_buff, buff_len, CellZero, NULL, test_input, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, NULL, test_input, stdout);
+	EXPECT_EQ(0, rc);
 	EXPECT_EQ(-1, CellZero->cell);
 	free(CellZero);
 	fclose(test_input);
 	fclose(test_output);
 }
 
-TEST_F(DebugInterpreterTest, PositiveIntegerInputTest) {
+TYPED_TEST(InterpreterTest, PositiveIntegerInputTest) {
+	signed rc;
+	size_t buff_len;
 	FILE* test_input;
 	errno = 0;
 	test_input = tmpfile();
@@ -434,7 +482,8 @@ TEST_F(DebugInterpreterTest, PositiveIntegerInputTest) {
 	fprintf(test_input, "%ld\n%ld\n%ld\n", A, B, C);
 	rewind(test_input);
 	errno = 0;
-	struct TapeNodeDebug* tape = (struct TapeNodeDebug*)calloc(3, sizeof(struct TapeNodeDebug));
+	TypeParam* tape;
+	tape = (TypeParam*)calloc(3, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -446,7 +495,8 @@ TEST_F(DebugInterpreterTest, PositiveIntegerInputTest) {
 	(tape+2)->prev = (tape+1);
 	char in_buff[5] = {';','>',';','>',';'};
 	buff_len = 5;
-	_eval_buffer_debug(in_buff, buff_len, tape, NULL, test_input, stdout);
+	rc = buffer_eval(in_buff, buff_len, tape, NULL, test_input, stdout);
+	EXPECT_EQ(0, rc);
 	EXPECT_EQ(A, tape->cell);
 	EXPECT_EQ(B, (tape+1)->cell);
 	EXPECT_EQ(C, (tape+2)->cell);
@@ -454,7 +504,9 @@ TEST_F(DebugInterpreterTest, PositiveIntegerInputTest) {
 	fclose(test_input);
 }
 
-TEST_F(DebugInterpreterTest, NegativeIntegerInputTest) {
+TYPED_TEST(InterpreterTest, NegativeIntegerInputTest) {
+	signed rc;
+	size_t buff_len;
 	FILE* test_input;
 	errno = 0;
 	test_input = tmpfile();
@@ -471,7 +523,8 @@ TEST_F(DebugInterpreterTest, NegativeIntegerInputTest) {
 	fprintf(test_input, "%ld\n%ld\n%ld\n", A, B, C);
 	rewind(test_input);
 	errno = 0;
-	struct TapeNodeDebug* tape = (struct TapeNodeDebug*)calloc(3, sizeof(struct TapeNodeDebug));
+	TypeParam* tape;
+	tape = (TypeParam*)calloc(3, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -483,7 +536,8 @@ TEST_F(DebugInterpreterTest, NegativeIntegerInputTest) {
 	(tape+2)->prev = (tape+1);
 	char in_buff[5] = {';','>',';','>',';'};
 	buff_len = 5;
-	_eval_buffer_debug(in_buff, buff_len, tape, NULL, test_input, stdout);
+	rc = buffer_eval(in_buff, buff_len, tape, NULL, test_input, stdout);
+	EXPECT_EQ(0, rc);
 	EXPECT_EQ(A, tape->cell);
 	EXPECT_EQ(B, (tape+1)->cell);
 	EXPECT_EQ(C, (tape+2)->cell);
@@ -491,9 +545,12 @@ TEST_F(DebugInterpreterTest, NegativeIntegerInputTest) {
 	fclose(test_input);
 }
 
-TEST_F(DebugInterpreterTest, DanglingRightBracketTest) {
+TYPED_TEST(InterpreterTest, DanglingRightBracketTest) {
+	signed rc;
+	size_t buff_len;
 	errno = 0;
-	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* CellZero;
+	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -501,22 +558,25 @@ TEST_F(DebugInterpreterTest, DanglingRightBracketTest) {
 	char in_buff[5] = {'+','+',']','+','+'};
 	buff_len = 5;
 
-	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, NULL, stdin, stdout);
 	EXPECT_EQ(-9, rc);
 	EXPECT_EQ(2, CellZero->cell);
 	/*now repeat with the first character being the dangling*/
 	in_buff[0] = ']';
 	in_buff[2] = '+';
 	/*leave a nonzero value in the cell so we continue to*/
-	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, NULL, stdin, stdout);
 	EXPECT_EQ(-9, rc);
 	EXPECT_EQ(2, CellZero->cell);
 	free(CellZero);
 }
 
-TEST_F(DebugInterpreterTest, RighBracketJumpIfZeroTest) {
+TYPED_TEST(InterpreterTest, RighBracketJumpIfZeroTest) {
+	signed rc;
+	size_t buff_len;
 	errno = 0;
-	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* CellZero;
+	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -524,15 +584,18 @@ TEST_F(DebugInterpreterTest, RighBracketJumpIfZeroTest) {
 	char in_buff[2] = {']','+'};
 	buff_len = 2;
 	EXPECT_EQ(0, CellZero->cell);
-	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, NULL, stdin, stdout);
 	EXPECT_EQ(0, rc);
 	EXPECT_EQ(1, CellZero->cell);
 	free(CellZero);
 }
 
-TEST_F(DebugInterpreterTest, LeftBracketJumpIfNotZeroTest) {
+TYPED_TEST(InterpreterTest, LeftBracketJumpIfNotZeroTest) {
+	signed rc;
+	size_t buff_len;
 	errno = 0;
-	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* CellZero;
+	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -540,39 +603,44 @@ TEST_F(DebugInterpreterTest, LeftBracketJumpIfNotZeroTest) {
 	char in_buff[3] = {'+','[','+'};
 	buff_len = 3;
 	EXPECT_EQ(0, CellZero->cell);
-	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, NULL, stdin, stdout);
 	EXPECT_EQ(0, rc);
 	EXPECT_EQ(2, CellZero->cell);
 	free(CellZero);
 }
 
-TEST_F(DebugInterpreterTest, DanglingLeftBracketTest) {
+TYPED_TEST(InterpreterTest, DanglingLeftBracketTest) {
+	signed rc;
+	size_t buff_len;
 	errno = 0;
-	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* CellZero;
+	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
 	}
 	char in_buff[3] = {'[','+','+'};
 	buff_len = 3;
-	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, NULL, stdin, stdout);
 	EXPECT_EQ(-8, rc);
 	EXPECT_EQ(0, CellZero->cell);
-	fprintf(stdout, "======================================\n");
 	/*now repeart with the end of buffer as a dangling*/
 	in_buff[0] = '[';
 	in_buff[1] = '[';
 	in_buff[2] = '[';
-	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, NULL, stdin, stdout);
 	EXPECT_EQ(-8, rc);
 	EXPECT_EQ(0, CellZero->cell);
 
 	free(CellZero);
 }
 
-TEST_F(DebugInterpreterTest, BracketLoopingTest) {
+TYPED_TEST(InterpreterTest, BracketLoopingTest) {
+	signed rc;
+	size_t buff_len;
 	errno = 0;
-	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* CellZero;
+	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -581,15 +649,18 @@ TEST_F(DebugInterpreterTest, BracketLoopingTest) {
 	char in_buff[9] = {'+','+','+','+','[','-',']','+', '+'};
 	buff_len = 9;
 
-	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	rc = buffer_eval(in_buff, buff_len, CellZero, NULL, stdin, stdout);
 	EXPECT_EQ(0, rc);
 	EXPECT_EQ(2, CellZero->cell);
 	free(CellZero);
 }
 
-TEST_F(DebugInterpreterTest, LoopNestingTest) {
+TYPED_TEST(InterpreterTest, LoopNestingTest) {
+	signed rc;
+	size_t buff_len;
 	errno = 0;
-	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	TypeParam* CellZero;
+	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
@@ -599,7 +670,7 @@ TEST_F(DebugInterpreterTest, LoopNestingTest) {
 	in_buff = "+[[-]+[[-]+[-]]]++";
 	buff_len = 18;
 
-	rc = _eval_buffer_debug(const_cast<char*>(in_buff), buff_len, CellZero, NULL, stdin, stdout);
+	rc = buffer_eval(const_cast<char*>(in_buff), buff_len, CellZero, NULL, stdin, stdout);
 	EXPECT_EQ(0, rc);
 	EXPECT_EQ(2, CellZero->cell);
 	free(CellZero);
