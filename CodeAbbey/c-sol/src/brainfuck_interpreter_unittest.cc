@@ -9,7 +9,7 @@
 #include "gtest/gtest.h"
 
 
-class InterpreterTest : public testing::Test
+class DebugInterpreterTest : public testing::Test
 {
 protected:
 	size_t ii;
@@ -20,7 +20,7 @@ protected:
 	virtual void TearDown() {}
 };
 
-TEST_F(InterpreterTest, Plus) {
+TEST_F(DebugInterpreterTest, Plus) {
 	errno = 0;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
@@ -41,7 +41,7 @@ TEST_F(InterpreterTest, Plus) {
 	free(CellZero);
 }
 
-TEST_F(InterpreterTest, Minus) {
+TEST_F(DebugInterpreterTest, Minus) {
 	errno = 0;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
@@ -62,7 +62,7 @@ TEST_F(InterpreterTest, Minus) {
 	free(CellZero);
 }
 
-TEST_F(InterpreterTest, OverflowCell) {
+TEST_F(DebugInterpreterTest, OverflowCell) {
 	errno = 0;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
@@ -84,7 +84,7 @@ TEST_F(InterpreterTest, OverflowCell) {
 	free(CellZero);
 }
 
-TEST_F(InterpreterTest, UnderflowCell) {
+TEST_F(DebugInterpreterTest, UnderflowCell) {
 	errno = 0;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
@@ -106,7 +106,7 @@ TEST_F(InterpreterTest, UnderflowCell) {
 	free(CellZero);
 }
 
-TEST_F(InterpreterTest, MoveLeftAlreadyAllocated) {
+TEST_F(DebugInterpreterTest, MoveLeftAlreadyAllocated) {
 	errno = 0;
 	tape = (struct TapeNodeDebug*)calloc(2, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
@@ -130,7 +130,7 @@ TEST_F(InterpreterTest, MoveLeftAlreadyAllocated) {
 }
 
 
-TEST_F(InterpreterTest, MoveRightAlreadyAllocated) {
+TEST_F(DebugInterpreterTest, MoveRightAlreadyAllocated) {
 	errno = 0;
 	tape = (struct TapeNodeDebug*)calloc(2, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
@@ -153,7 +153,7 @@ TEST_F(InterpreterTest, MoveRightAlreadyAllocated) {
 	free(tape);
 }
 
-TEST_F(InterpreterTest, MoveLeftNotAllocated) {
+TEST_F(DebugInterpreterTest, MoveLeftNotAllocated) {
 	/*output here is not expected be be that large (<100MB)so we are 
 	* justified by keeping in memory*/
 	FILE* test_output;
@@ -193,7 +193,7 @@ TEST_F(InterpreterTest, MoveLeftNotAllocated) {
 	free(in_buff);
 }
 
-TEST_F(InterpreterTest, MoveRightNotAllocated) {
+TEST_F(DebugInterpreterTest, MoveRightNotAllocated) {
 	/*output here is not expected be be that large (<100MB)so we are 
 	* justified by keeping in memory*/
 	FILE* test_output;
@@ -233,7 +233,7 @@ TEST_F(InterpreterTest, MoveRightNotAllocated) {
 	EXPECT_EQ(0, rc);
 }
 
-TEST_F(InterpreterTest, MoveLeftIndexIncrementingTest) {
+TEST_F(DebugInterpreterTest, MoveLeftIndexIncrementingTest) {
 	errno = 0;
 	tape = (struct TapeNodeDebug*)calloc(5, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
@@ -268,7 +268,7 @@ TEST_F(InterpreterTest, MoveLeftIndexIncrementingTest) {
 	free(tape);
 }
 
-TEST_F(InterpreterTest, MoveRightIndexIncrementingTest) {
+TEST_F(DebugInterpreterTest, MoveRightIndexIncrementingTest) {
 	errno = 0;
 	tape = (struct TapeNodeDebug*)calloc(5, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
@@ -304,7 +304,7 @@ TEST_F(InterpreterTest, MoveRightIndexIncrementingTest) {
 	free(tape);
 }
 
-TEST_F(InterpreterTest, StackPush) {
+TEST_F(DebugInterpreterTest, StackPush) {
 	Vector_t(long)* stack;
 	stack = newVector(long);
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
@@ -320,7 +320,7 @@ TEST_F(InterpreterTest, StackPush) {
 	vector_destroy(long, stack);
 }
 
-TEST_F(InterpreterTest, StackPop) {
+TEST_F(DebugInterpreterTest, StackPop) {
 	Vector_t(long)* stack;
 	stack = newVector(long);
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
@@ -352,7 +352,7 @@ TEST_F(InterpreterTest, StackPop) {
 	vector_destroy(long, stack);
 }
 
-TEST_F(InterpreterTest, BufferOvershootTest) {
+TEST_F(DebugInterpreterTest, BufferOvershootTest) {
 	/*we will create a buffer of commands but artificially
 	shorten it so that going past end actually has valid commands*/
 	errno = 0;
@@ -374,7 +374,7 @@ TEST_F(InterpreterTest, BufferOvershootTest) {
 	free(CellZero);
 }
 /*test the input facilites from stdin and stdout using some other method*/
-TEST_F(InterpreterTest, CharacterInputTest) {
+TEST_F(DebugInterpreterTest, CharacterInputTest) {
 	FILE* test_input, * test_output;
 	errno = 0;
 	test_input = tmpfile();
@@ -417,7 +417,7 @@ TEST_F(InterpreterTest, CharacterInputTest) {
 	fclose(test_output);
 }
 
-TEST_F(InterpreterTest, PositiveIntegerInputTest) {
+TEST_F(DebugInterpreterTest, PositiveIntegerInputTest) {
 	FILE* test_input;
 	errno = 0;
 	test_input = tmpfile();
@@ -454,7 +454,7 @@ TEST_F(InterpreterTest, PositiveIntegerInputTest) {
 	fclose(test_input);
 }
 
-TEST_F(InterpreterTest, NegativeIntegerInputTest) {
+TEST_F(DebugInterpreterTest, NegativeIntegerInputTest) {
 	FILE* test_input;
 	errno = 0;
 	test_input = tmpfile();
@@ -491,7 +491,7 @@ TEST_F(InterpreterTest, NegativeIntegerInputTest) {
 	fclose(test_input);
 }
 
-TEST_F(InterpreterTest, DanglingRightBracketTest) {
+TEST_F(DebugInterpreterTest, DanglingRightBracketTest) {
 	errno = 0;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
@@ -514,7 +514,7 @@ TEST_F(InterpreterTest, DanglingRightBracketTest) {
 	free(CellZero);
 }
 
-TEST_F(InterpreterTest, RighBracketJumpIfZeroTest) {
+TEST_F(DebugInterpreterTest, RighBracketJumpIfZeroTest) {
 	errno = 0;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
@@ -530,7 +530,7 @@ TEST_F(InterpreterTest, RighBracketJumpIfZeroTest) {
 	free(CellZero);
 }
 
-TEST_F(InterpreterTest, LeftBracketJumpIfNotZeroTest) {
+TEST_F(DebugInterpreterTest, LeftBracketJumpIfNotZeroTest) {
 	errno = 0;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
@@ -546,20 +546,31 @@ TEST_F(InterpreterTest, LeftBracketJumpIfNotZeroTest) {
 	free(CellZero);
 }
 
-TEST_F(InterpreterTest, DanglingLeftBracketTest) {
+TEST_F(DebugInterpreterTest, DanglingLeftBracketTest) {
 	errno = 0;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
 		perror("failed to allocate tape node");
 		FAIL();
 	}
-	char in_buff[2] = {'+','['};
-	buff_len = 2;
+	char in_buff[3] = {'[','+','+'};
+	buff_len = 3;
 	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	EXPECT_EQ(-8, rc);
+	EXPECT_EQ(0, CellZero->cell);
+	fprintf(stdout, "======================================\n");
+	/*now repeart with the end of buffer as a dangling*/
+	in_buff[0] = '[';
+	in_buff[1] = '[';
+	in_buff[2] = '[';
+	rc = _eval_buffer_debug(in_buff, buff_len, CellZero, NULL, stdin, stdout);
+	EXPECT_EQ(-8, rc);
+	EXPECT_EQ(0, CellZero->cell);
 
+	free(CellZero);
 }
 
-TEST_F(InterpreterTest, BracketLoopingTest) {
+TEST_F(DebugInterpreterTest, BracketLoopingTest) {
 	errno = 0;
 	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
 	if(errno != 0) {
@@ -576,7 +587,20 @@ TEST_F(InterpreterTest, BracketLoopingTest) {
 	free(CellZero);
 }
 
-TEST_F(InterpreterTest, LoopNestingTest) {
+TEST_F(DebugInterpreterTest, LoopNestingTest) {
+	errno = 0;
+	CellZero = (struct TapeNodeDebug*)calloc(1, sizeof(struct TapeNodeDebug));
+	if(errno != 0) {
+		perror("failed to allocate tape node");
+		FAIL();
+	}
+	/*simplest loop*/
+	const char* in_buff;
+	in_buff = "+[[-]+[[-]+[-]]]++";
+	buff_len = 18;
 
+	rc = _eval_buffer_debug(const_cast<char*>(in_buff), buff_len, CellZero, NULL, stdin, stdout);
+	EXPECT_EQ(0, rc);
+	EXPECT_EQ(2, CellZero->cell);
+	free(CellZero);
 }
-

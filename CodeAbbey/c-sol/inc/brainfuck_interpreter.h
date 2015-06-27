@@ -54,6 +54,8 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 /*walk along the tape and free it*/
 signed _destroy_tape_debug(struct TapeNodeDebug* cursor);
 
+signed _destroy_tape(struct TapeNode* cursor);
+
 /*remove all non opcodes from file*/
 signed _parse_buffer(char** buff, size_t* nbytes);
 

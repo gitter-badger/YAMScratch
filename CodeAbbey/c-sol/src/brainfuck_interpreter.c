@@ -23,6 +23,25 @@ signed _destroy_tape_debug(struct TapeNodeDebug* cursor) {
 	return 0;
 }
 
+signed _destroy_tape(struct TapeNode* cursor) {
+	struct TapeNode* left, * right, * tmp;
+	left = cursor->prev;
+	right = cursor->next;
+	/*clean up left side*/
+	while(left != NULL) {
+		tmp = left;
+		left = tmp->prev;
+		free(tmp);
+	}
+	while(right != NULL) {
+		tmp = right;
+		right = tmp->next;
+		free(tmp);
+	}
+	free(cursor);
+	return 0;
+}
+
 signed brainfuck_evaluate_file(FILE* fp, int debug) {
 	return 0;
 }
@@ -37,6 +56,182 @@ signed _parse_buffer(char** buff, size_t* nbytes) {
 
 signed _eval_buffer(char* src, size_t nbytes, struct TapeNode* cursor,
 					Vector_t(long)* stack, FILE* in_stream, FILE* out_stream) {
+		/*keep track of where in the data buffer we are*/
+	size_t instr_offset;
+	instr_offset = 0;
+	/*declare some variables to take input from fscanf*/
+	char in_char;
+	unsigned long in_unsigned;
+	signed long in_signed;
+
+	/*declare the internal variables*/
+	char* instr_ptr;
+	const char* instr_end, * instr_begin;
+	int rc;
+	unsigned long instr_count;
+	instr_count = 0;
+	signed long prev_index;
+	signed long loop_nesting_level;
+	loop_nesting_level = 0;
+	signed long old_nesting_level;
+	/*end is the element one past end of buffer*/
+	instr_end = src + nbytes;
+	instr_begin = src;
+	instr_ptr = src;
+	/*uses short circuit evaluation, but make sure we don't walk off end of buffer*/
+	while(instr_ptr != instr_end && instr_offset < nbytes) {
+		switch(*instr_ptr) {
+			case '+': /*increment current value of cell*/
+				if(cursor->cell + 1 < cursor->cell) {
+				}
+				cursor->cell++;
+				instr_ptr++;
+				instr_offset++;
+				break;
+			case '-': /*decrement current value of cell*/
+				if(cursor->cell - 1 > cursor->cell) {
+				}
+				cursor->cell--;
+				instr_ptr++;
+				instr_offset++;
+				break;
+			case '>': /*increment the memory cell under the pointer*/
+				if(cursor->next == NULL) {
+					errno = 0;
+					struct TapeNode* node = (struct TapeNode*)calloc(1, sizeof(TapeNode));
+					if(errno != 0) {
+						perror("failed to allocate new tape data struct\n");
+						return (-1);
+					}
+					cursor->next = node;
+					node->prev = cursor;
+					cursor = node;
+				} else {
+					cursor = cursor->next;
+				}
+				instr_ptr++;
+				instr_offset++;
+				break;
+			case '<': /*decrement the memory cell under the pointer*/
+				if(cursor->prev == NULL) {
+					errno = 0;
+					struct TapeNode* node = (struct TapeNode*)calloc(1, sizeof(TapeNode));
+					if(errno != 0) {
+						perror("failed to allocate new tape data struct\n");
+						return (-1);
+					}
+					cursor->prev = node;
+					node->next = cursor;
+					cursor = node;
+				} else {
+					cursor = cursor->prev;
+				}
+				instr_ptr++;
+				instr_offset++;
+				break;
+			case '[': /*JZ to just past matching ]*/
+				old_nesting_level = loop_nesting_level;
+				loop_nesting_level++;
+				size_t old_instr_offset;
+				old_instr_offset = instr_offset;
+				if(cursor->cell == 0) {
+					while(*instr_ptr++ != ']' || old_nesting_level != loop_nesting_level) {
+						instr_offset++;
+						if(instr_ptr == instr_end) {
+							return -8;
+						}
+						if(*instr_ptr == '[') {
+							loop_nesting_level++;
+						} else if(*instr_ptr == ']') {
+							loop_nesting_level--;
+						}
+					}
+				} else {
+					instr_ptr++;
+					instr_offset++;
+				}
+				break;
+			case ']': /*JNZ to matching [*/
+				old_nesting_level = loop_nesting_level;
+				loop_nesting_level--;
+				if(cursor->cell != 0) {
+					while(*instr_ptr != '[' || old_nesting_level != loop_nesting_level) {
+						instr_ptr--;
+						if(instr_offset == 0) {
+							return -9;
+						}
+						if(*instr_ptr == '[') {
+							loop_nesting_level++;
+						} else if(*instr_ptr == ']') {
+							loop_nesting_level--;
+						}
+						instr_offset--;
+					}
+					loop_nesting_level--;
+				} else {
+					instr_ptr++;
+				}
+				break;
+			case ',': /*Input a character and store it in the cell at the pointer*/
+				errno = 0;
+				rc = fscanf(in_stream, "%c", &in_char);
+				if(rc == 1) {
+					cursor->cell = in_char;
+				} else if(rc == EOF) {
+					if(errno == 0) {
+							cursor->cell = -1;
+							in_char = EOF;
+					} else {
+					perror("input read of single char failed\n");
+					return (-1);
+					}
+				} else {
+					perror("input read of single char failed\n");
+					return (-1);
+				}
+				instr_ptr++;
+				instr_offset++;
+				break;
+			case '.':
+				fprintf(out_stream, "%c", (char)cursor->cell);
+				instr_ptr++;
+				instr_offset++;
+				break;
+			case ';':
+				errno = 0;
+				rc = fscanf(in_stream, " %ld", &in_signed);
+				if(rc != 1) {
+					if(errno == 0) {
+						errno = EINVAL;
+					}
+					perror("input read of single long int failed\n");
+					return (-1);
+				}
+				cursor->cell = in_signed;
+				instr_ptr++;
+				instr_offset++;
+				break;
+			case ':':
+				fprintf(out_stream, "%ld ", cursor->cell);
+				instr_ptr++;
+				instr_offset++;
+				break;
+			case '#': /*pushes the current value in cell under pointer to stack*/
+				vector_push_back(long, stack, cursor->cell);
+				instr_ptr++;
+				instr_offset++;
+				break;
+			case '$': /*pops the value from stack and overwrites the cell under the pointer*/
+				if(stack->elms == 0) {
+					return -6;
+				}
+				cursor->cell = vector_pop(long, stack);
+				instr_ptr++;
+				break;
+		}
+		instr_count++;
+	}
+	return 0;
 	return 0;
 }
 /*only adds to atape, will not remove any nodes*/
@@ -146,6 +341,8 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 				size_t old_instr_offset;
 				old_instr_offset = instr_offset;
 				if(cursor->cell == 0) {
+					fprintf(out_stream, "%ld (%lu): %c | a[%ld] = %ld, loop nesting level %ld\n",instr_count, instr_offset, *instr_ptr, cursor->index, cursor->cell, loop_nesting_level);
+
 					/*search for the matching tag in the buffer*/
 					/*this is a strict interpreter, we don't store tags for jumps*/
 					while(*instr_ptr++ != ']' || old_nesting_level != loop_nesting_level) {
@@ -154,7 +351,6 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 						of buffer so we can use it to check */
 						instr_offset++;
 						if(instr_ptr == instr_end) {
-							fprintf(out_stream, "reached end of program without matching ]\n");
 							return -8;
 						}
 						/*because the pointer looks ahead one, we can update the nesting levels for the
