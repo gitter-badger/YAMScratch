@@ -61,7 +61,6 @@ signed _eval_buffer(char* src, size_t nbytes, struct TapeNode* cursor,
 	instr_offset = 0;
 	/*declare some variables to take input from fscanf*/
 	char in_char;
-	unsigned long in_unsigned;
 	signed long in_signed;
 
 	/*declare the internal variables*/
@@ -70,7 +69,6 @@ signed _eval_buffer(char* src, size_t nbytes, struct TapeNode* cursor,
 	int rc;
 	unsigned long instr_count;
 	instr_count = 0;
-	signed long prev_index;
 	signed long loop_nesting_level;
 	loop_nesting_level = 0;
 	signed long old_nesting_level;
@@ -245,7 +243,6 @@ signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor
 	data_offset = cursor->index;
 	/*declare some variables to take input from fscanf*/
 	char in_char;
-	unsigned long in_unsigned;
 	signed long in_signed;
 
 	/*declare the internal variables*/
