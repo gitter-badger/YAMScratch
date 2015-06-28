@@ -4,10 +4,10 @@ OBJ = obj
 INC = inc
 LDIR = lib
 
-CC = clang
+CC = gcc
 CXX = clang++
 #-Werror
-CFLAGS = -Wall -Wextra --pedantic-errors -g
+CFLAGS = -Wall -Wextra --pedantic-errors -g -std=c99
 
 LIBS = -L $(LDIR)
 
@@ -146,7 +146,7 @@ $(BIN)/7.out : $(SRC)/7.c
 8 : $(BIN)/8.out
 
 $(BIN)/8.out : $(SRC)/8.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -I $(INC) -lm $< -o $@
 
 9 : $(BIN)/9.out
 
@@ -271,6 +271,11 @@ $(BIN)/43.out : $(SRC)/43.c
 48 : $(BIN)/48.out
 
 $(BIN)/48.out : $(SRC)/48.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
+50 : $(BIN)/50.out
+
+$(BIN)/50.out : $(SRC)/50.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
 52 : $(BIN)/52.out
