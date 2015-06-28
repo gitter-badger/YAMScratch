@@ -8,7 +8,7 @@
 #include "brainfuck_interpreter.h"
 #include "gtest/gtest.h"
 
-/*use overloading to allow inferring of type*/
+/*use overloading in C++ to allow inferring of type and call appropriate C function*/
 signed buffer_eval(char* src, size_t nbytes, struct TapeNode* cursor, 
 				   Vector_t(long)* stack, FILE* in_st, FILE* out_st) {
 	return _eval_buffer(src, nbytes, cursor, stack, in_st, out_st);

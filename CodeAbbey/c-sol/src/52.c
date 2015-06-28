@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <perror.h>
 #include <stdio.h>
 
 int main(int argc, char const *argv[])
@@ -12,7 +11,8 @@ int main(int argc, char const *argv[])
 		exit(-1);
 	}
 	/*allocate buffer for result*/
-	char* result = (char*)calloc(N, sizeof(char));
+	char* result;
+	result = (char*)calloc(N, sizeof(char));
 	if(result == NULL) {
 		perror("failed to allocate output buffer");
 		exit(-1);
