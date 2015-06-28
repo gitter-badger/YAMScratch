@@ -258,6 +258,11 @@ $(BIN)/33.out : $(SRC)/33.c
 $(BIN)/34.out : $(SRC)/34.c
 	$(CC) $(CFLAGS) -I $(INC) -lm $< -o $@	
 
+40 : $(BIN)/40.out
+
+$(BIN)/40.out : $(SRC)/40.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
 41 : $(BIN)/41.out
 
 $(BIN)/41.out : $(SRC)/41.c
@@ -281,6 +286,11 @@ $(BIN)/50.out : $(SRC)/50.c
 52 : $(BIN)/52.out
 
 $(BIN)/52.out : $(SRC)/52.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
+53 : $(BIN)/53.out
+
+$(BIN)/53.out : $(SRC)/53.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
 67 : $(BIN)/67.out
