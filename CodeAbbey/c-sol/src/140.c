@@ -7,6 +7,10 @@
 
 int main(int argc, char const *argv[])
 {
+	/*compute the number of Dyck words of length 2N, which
+	* happens to be Catalan Numbers. Rest assured, we did not do
+	* it the easy way here, instead only deriving the arithmatic recursion
+	* and manually computing all iterations until we get to the desired*/
 	unsigned N;
 	int rc;
 	unsigned ii, jj, kk;
