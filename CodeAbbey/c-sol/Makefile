@@ -321,6 +321,16 @@ $(BIN)/112.out : $(SRC)/112.c
 $(BIN)/140.out : $(SRC)/140.c
 	$(CC) $(CFLAGS) -I $(INC) -lgmp $< -o $@
 
+175 : $(BIN)/175.out
+
+$(BIN)/175.out : $(SRC)/175.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
+184 : $(BIN)/184.out
+
+$(BIN)/184.out : $(SRC)/184.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
 
 clean :
 	rm -vf $(TESTS) $(LDIR)/gtest.a $(LDIR)/gtest_main.a $(OBJ)/*.o $(BIN)/*
