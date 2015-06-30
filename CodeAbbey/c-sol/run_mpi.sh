@@ -1,3 +1,3 @@
 #! /bin/bash
 
-mpirun -np 4 $1
+mpirun -np 3 $1
