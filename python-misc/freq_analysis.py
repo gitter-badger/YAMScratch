@@ -123,7 +123,7 @@ class MonoSubstitution(object):
 			for element in self._cipher_digraphs_order:
 				tmp_digr = ''
 				for character in element:
-					if character in self._CtP_mapping:
+					if self._CtP_mapping[character] is not None:
 						tmp_digr += bcolors.format_string(self._CtP_mapping[character],
 										background = True, bright = True, color = 2)
 					else:
@@ -148,7 +148,7 @@ class MonoSubstitution(object):
 	def show_ciphertext_substitutions(self):
 		subbed = []
 		unsubbed = []
-		#iterate over every character in the cipher text and find strings
+		
 
 
 
@@ -175,7 +175,9 @@ class FreqAnalysis(object):
 def main():
 
 	subs = MonoSubstitution()
-	subs.add_rule(('jds', 'the'))
+	subs.add_rule(('js', 'te'))
+	print subs
+	print subs._CtP_mapping
 	subs.show_digraphs()
 	print
 	subs.show_digraphs(subs = True)
@@ -186,7 +188,11 @@ def main():
 
 	parser = argparse.ArgumentParser(prog = "Mono Subsitution Helper", 
 	description = "assists in decodeing a mono substitution	cipher")
-	parser.add_argument('cmd', choices = ['create','delete','help','quit'])
+	#parser.add_argument('cmd', choices = ['create','delete','help','quit'])
+	parser.add_argument('-decode', nargs=2, 
+			help = "<A> <B> where A in ciphertext maps to B in plaintext",
+			metavar = '<char>')
+	parser.add_argument('-quit', action = 'store_true', default = False)
 	while True:
 		astr = raw_input('$ ')
 		# print astr
@@ -194,15 +200,13 @@ def main():
 			args = parser.parse_args(astr.split())
 		except SystemExit:
 			# trap argparse error message
-			print 'error'
+			#print 'error'
 			continue
-		if args.cmd in ['create', 'delete']:
-			print 'doing', args.cmd
-		elif args.cmd == 'help':
-			parser.print_help()
-		else:
-			print 'done'
+
+		if args.quit:
 			break
+		if args.decode:
+			print args.decode[0], args.decode[1]
 
 
 if __name__ == '__main__':
