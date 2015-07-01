@@ -18,18 +18,16 @@ def roundrobin(*iterables):
 			nexts = cycle(islice(nexts, pending))
 
 class bcolors(object):
-	def __init__(self):
-		#format background, color, bright
+	CIS = '\033['
+	FAIL = '\033[91m'
+	ENDC = '\033[0m'
 
-		self.CIS = '\033['
-		self.FAIL = '\033[91m'
-		self.ENDC = '\033[0m'
-
-	def format_string(self, target, bright = False, background = False, color = 0, bold = False):
+	@classmethod
+	def format_string(cls, target, bright = False, background = False, color = 0, bold = False):
 		#sanity check color to be in range [0, 7]
 		if not (0 <= color <= 7):
 			return None
-		tmp = self.CIS
+		tmp = cls.CIS
 		#dark colors are 30+i, light colors are 90+i
 		#dark backgroands are 40+i, light backgrounds are 100+i
 		base = 30
@@ -44,12 +42,13 @@ class bcolors(object):
 			tmp += ';1'
 		#close the qualifiers
 		tmp += 'm'
-		return tmp + target + self.ENDC
+		return tmp + target + cls.ENDC
 
 class MonoSubstitution(object):
 	def __init__(self):
 		self.Ctext = [x for x in string.ascii_uppercase]
 		self.Ptext = ['_' for x in range(0, len(string.ascii_uppercase))]
+		self._CtP_mapping = {key: None for key in self.Ctext}
 		#internal list of statistics used to generate frequency charts
 		self._monograms = {'E': 529117365, 'T': 390965105, 'A': 374061888, 'O': 326627740, 
 						   'I': 320410057, 'N': 313720540, 'S': 294300210, 'R': 277000841,
@@ -77,6 +76,11 @@ class MonoSubstitution(object):
 						  'WAS', 'ECT', 'REA', 'COM', 'EVE', 'PER', 'INT', 'EST',
 						  'STA', 'CTI', 'ICA', 'IST', 'EAR', 'AIN', 'ONE', 'OUR',
 						  'ITI', 'RAT']
+  		self._cipher_monographs = {}
+		self._cipher_digraphs = {'JD': 37, 'DS':12}
+		self._cipher_trigraphs = {}
+
+		self._cipher_digraphs_order = ['JD', 'DS']
 
 	def add_rule(self, rule):
 		#takes a tuple mapping of chars to chars
@@ -88,7 +92,9 @@ class MonoSubstitution(object):
 		for key,character in enumerate(cipher):
 			#make sure character is a letter
 			assert(character in string.ascii_letters)
+			character = character.upper()
 			self.Ptext[self.Ctext.index(character)] = plain[key].upper()
+			self._CtP_mapping[character] = plain[key].upper()
 
 	def ciphertext():
 		doc = "The ciphertext property."
@@ -104,8 +110,47 @@ class MonoSubstitution(object):
 	def __repr__(self):
 		return "Mappings:\nC: "+" ".join(self.Ctext)+'\nP: '+" ".join(self.Ptext)
 
-	def show_digraphs_substitutions(self):
-		pass
+	def show_digraphs(self, subs = False):
+		tmp_digraphs = self._cipher_digraphs_order
+		tmp_digraph_count = [self._cipher_digraphs[x] for x in self._cipher_digraphs_order]
+		#if subs then we substitute the characters we know about
+		#and form a new list for latter formatting and printing
+		if(subs):
+			tmp_digraphs = []
+			#becuase we will be rewriting the keys
+			tmp_digraph_count = []
+			#colorize each digraph and translate it at same time
+			for element in self._cipher_digraphs_order:
+				tmp_digr = ''
+				for character in element:
+					if character in self._CtP_mapping:
+						tmp_digr += bcolors.format_string(self._CtP_mapping[character],
+										background = True, bright = True, color = 2)
+					else:
+						tmp_digr += character
+				tmp_digraphs.append(tmp_digr)
+
+		#now print out the digraphs
+		for index,element in enumerate(tmp_digraphs):
+			sys.stdout.write(element + ' ')
+			sys.stdout.write(str(self._cipher_digraphs[self._cipher_digraphs_order[index]]))
+
+			if(index < len(self._digraphs_order)):
+				sys.stdout.write(' ' + self._digraphs_order[index])
+			else:
+				sys.stdout.write('  ')
+			#now write the cipher text digraph count
+			sys.stdout.write('\n')
+
+
+
+
+	def show_ciphertext_substitutions(self):
+		subbed = []
+		unsubbed = []
+		#iterate over every character in the cipher text and find strings
+
+
 
 class FreqAnalysis(object):
 	def __init__(self, ciphertext = ""):
@@ -130,8 +175,12 @@ class FreqAnalysis(object):
 def main():
 
 	subs = MonoSubstitution()
-	bc = bcolors()
-	test = bc.format_string("foo", color = 2 , bright = False)
+	subs.add_rule(('jds', 'the'))
+	subs.show_digraphs()
+	print
+	subs.show_digraphs(subs = True)
+
+	test = bcolors.format_string("foo", color = 2 , bright = False)
 	print subs
 
 
@@ -139,7 +188,7 @@ def main():
 	description = "assists in decodeing a mono substitution	cipher")
 	parser.add_argument('cmd', choices = ['create','delete','help','quit'])
 	while True:
-		astr = raw_input('$: ')
+		astr = raw_input('$ ')
 		# print astr
 		try:
 			args = parser.parse_args(astr.split())
