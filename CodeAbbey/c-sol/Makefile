@@ -339,11 +339,16 @@ $(BIN)/112.out : $(SRC)/112.c
 $(BIN)/140.out : $(SRC)/140.c
 	$(CC) $(CFLAGS) -I $(INC) -lgmp $< -o $@
 
-175_mpi : $(BIN)/175_mpi.out
-#surpress the unused function warning since it comes from the macro-based
-#implementation of the vector we use
-$(BIN)/175_mpi.out : $(SRC)/175_mpi.c
-	mpicc $(MPICC_CFLAGS) -Wno-unused-function $(MPICC_LDFLAGS) -I $(INC) $< -o $@
+175 : $(BIN)/175.out
+
+$(BIN)/175.out : $(SRC)/175.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
+# 175_mpi : $(BIN)/175_mpi.out
+# #surpress the unused function warning since it comes from the macro-based
+# #implementation of the vector we use
+# $(BIN)/175_mpi.out : $(SRC)/175_mpi.c
+# 	mpicc $(MPICC_CFLAGS) -Wno-unused-function $(MPICC_LDFLAGS) -I $(INC) $< -o $@
 
 184 : $(BIN)/184.out
 
