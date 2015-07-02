@@ -15,19 +15,6 @@ except ImportError:
 else:
 	colorama.init()
 
-def roundrobin(*iterables):
-	"roundrobin('ABC', 'D', 'EF') --> A D E B F C"
-	# Recipe credited to George Sakkis
-	pending = len(iterables)
-	nexts = cycle(iter(it).next for it in iterables)
-	while pending:
-		try:
-			for next in nexts:
-				yield next()
-		except StopIteration:
-			pending -= 1
-			nexts = cycle(islice(nexts, pending))
-
 class bcolors(object):
 	CIS = '\033['
 	FAIL = '\033[91m'
@@ -124,7 +111,7 @@ class MonoSubstitution(object):
 			#make a copy of the cipher text string
 			str_cpy = self.ciphertext
 			regex_is_mapped = re.compile('['+''.join(is_mapped)+']*')
-			#regex_un_mapped = re.compile('['+''.join(not_mapped)+']*')
+			#unmapped will be everything that is not mapped
 			regex_un_mapped = re.compile('[^'+''.join(is_mapped)+']*')
 
 			tmp_array = regex_un_mapped.split(str_cpy)
@@ -145,14 +132,11 @@ class MonoSubstitution(object):
 			print s_un[0:30]
 			print len(s_m), len(s_un)
 			output_line = ''
-			
-			for segement in roundrobin(s_m, s_un):
-				output_line += segement
-			"""
+
 			for x in izip_longest(s_un, s_m, fillvalue = '--'):
 				output_line += x[0]
 				output_line += x[1]
-			"""
+			
 			print output_line
 
 	def clear_ciphertext(self):
