@@ -9,12 +9,10 @@ try:
 	import colorama
 except ImportError:
 	if sys.platform.startswith("win"):
-		print "Warning, you need colorama module to display pretty"
+		print "Warning, you need colorama python module to display pretty"
 		print "terminal output. Procede at your own risk"
 else:
 	colorama.init()
-
-
 
 def roundrobin(*iterables):
 	"roundrobin('ABC', 'D', 'EF') --> A D E B F C"
@@ -124,12 +122,18 @@ class MonoSubstitution(object):
 		#make sure subsitutions can be one to one
 		if(len(cipher) != len(plain)):
 			return None
-		for key,character in enumerate(cipher):
+		for index,character in enumerate(cipher):
 			#make sure character is a letter
-			assert(character in string.ascii_letters)
-			character = character.upper()
-			self.Ptext[self.Ctext.index(character)] = plain[key].upper()
-			self._CtP_mapping[character] = plain[key].upper()
+			if character in string.ascii_letters:
+				character = character.upper()
+				self.Ptext[self.Ctext.index(character)] = plain[index].upper()
+				if plain[index] == '_':
+					self._CtP_mapping[character] = None
+				else:
+					self._CtP_mapping[character] = plain[index].upper()
+			else:
+				#we must have a valid cipher text character to map to plaintext
+				return None
 
 	def __repr__(self):
 		return "Mappings:\nC: "+" ".join(self.Ctext)+'\nP: '+" ".join(self.Ptext)
@@ -253,7 +257,7 @@ def main():
 		if args.quit:
 			break
 		if args.decode:
-			subs.add_rule(())
+			subs.add_rule(args.decode[0], args.decode[1])
 			continue
 		if args.load_file:
 			filename = os.path.join(os.getcwd(),args.load[0])
