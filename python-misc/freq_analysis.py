@@ -1,6 +1,6 @@
 #! /usr/bin/python
 import argparse
-from itertools import cycle, islice
+from itertools import cycle, islice, izip_longest
 import os
 import re
 import string
@@ -124,7 +124,9 @@ class MonoSubstitution(object):
 			#make a copy of the cipher text string
 			str_cpy = self.ciphertext
 			regex_is_mapped = re.compile('['+''.join(is_mapped)+']*')
-			regex_un_mapped = re.compile('['+''.join(not_mapped)+']*')
+			#regex_un_mapped = re.compile('['+''.join(not_mapped)+']*')
+			regex_un_mapped = re.compile('[^'+''.join(is_mapped)+']*')
+
 			tmp_array = regex_un_mapped.split(str_cpy)
 			#translate the tmporary array
 			tmp_array2 = []
@@ -136,14 +138,21 @@ class MonoSubstitution(object):
 					else:
 						accum += character
 				tmp_array2.append(accum)
+			print tmp_array2[0:30]
 			#colorize all of the mapped values
 			s_m += [bcolors.format_string(x, bright = True, background = True, color = 2) for x in tmp_array2]
 			s_un = regex_is_mapped.split(str_cpy)
-			print len(s_m), len(s_m)
+			print s_un[0:30]
+			print len(s_m), len(s_un)
 			output_line = ''
+			
 			for segement in roundrobin(s_m, s_un):
 				output_line += segement
-
+			"""
+			for x in izip_longest(s_un, s_m, fillvalue = '--'):
+				output_line += x[0]
+				output_line += x[1]
+			"""
 			print output_line
 
 	def clear_ciphertext(self):
