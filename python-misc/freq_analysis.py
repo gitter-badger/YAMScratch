@@ -80,6 +80,7 @@ class MonoSubstitution(object):
 						  'WAS', 'ECT', 'REA', 'COM', 'EVE', 'PER', 'INT', 'EST',
 						  'STA', 'CTI', 'ICA', 'IST', 'EAR', 'AIN', 'ONE', 'OUR',
 						  'ITI', 'RAT']
+		self.ComputedFlag = False
 		self._cipher_monographs = {}
 		self._cipher_digraphs = {}
 		self._cipher_trigraphs = {}
@@ -90,6 +91,7 @@ class MonoSubstitution(object):
 
 	def clear_ciphertext(self):
 		self.ciphertext = ''
+		self.ComputedFlag = False
 		self._cipher_monographs = {}
 		self._cipher_digraphs = {}
 		self._cipher_trigraphs = {}
@@ -98,10 +100,15 @@ class MonoSubstitution(object):
 		self._cipher_digraphs_order = []
 		self._cipher_trigraphs_order = []
 
-	def add_rule(self, rule):
-		#takes a tuple mapping of chars to chars
-		cipher = rule[0]
-		plain = rule[1]
+	def compute_frequency(self, force = False):
+		#no need to do extra work if we already computed the graphs
+		if self.ComputedFlag and not force:
+			return None
+
+		self.ComputedFlag = True
+		return None
+
+	def add_rule(self, cipher, plain):
 		#make sure subsitutions can be one to one
 		if(len(cipher) != len(plain)):
 			return None
@@ -115,47 +122,72 @@ class MonoSubstitution(object):
 	def __repr__(self):
 		return "Mappings:\nC: "+" ".join(self.Ctext)+'\nP: '+" ".join(self.Ptext)
 
-	def show_digraphs(self, subs = False):
-		tmp_digraphs = self._cipher_digraphs_order
-		tmp_digraph_count = [self._cipher_digraphs[x] for x in self._cipher_digraphs_order]
-		#if subs then we substitute the characters we know about
-		#and form a new list for latter formatting and printing
-		if(subs):
-			tmp_digraphs = []
-			#becuase we will be rewriting the keys
-			tmp_digraph_count = []
-			#colorize each digraph and translate it at same time
-			for element in self._cipher_digraphs_order:
-				tmp_digr = ''
-				for character in element:
-					if self._CtP_mapping[character] is not None:
-						tmp_digr += bcolors.format_string(self._CtP_mapping[character],
-										background = True, bright = True, color = 2)
-					else:
-						tmp_digr += character
-				tmp_digraphs.append(tmp_digr)
+	def show_ngrams(self, ngram = -1, subs = False):
+		#if it is zero then we will do all of them
+		if ngram == -1:
+			headers = ["Monographs", "Digraphs", "Trigraphs"]
+			ngram_ordered = [self._cipher_monographs_order, self._cipher_digraphs_order, self._cipher_trigraphs_order]
+			ngram_counter = [self._cipher_monographs, self._cipher_digraphs, self._cipher_trigraphs]
+			english_ngrams = [self._monographs_order, self._digraphs_order, self._trigraphs_order]
+		elif ngram == 1:
+			headers = ["Monographs"]
+			ngram_ordered = [self._cipher_monographs_order]
+			ngram_counter = [self._cipher_monographs]
+			english_ngrams = [self._monographs_order]
+		elif ngram == 2:
+			headers = ["Digraphs"]
+			ngram_ordered = [self._cipher_digraphs_order]
+			ngram_counter = [self._cipher_digraphs]
+			english_ngrams = [self._digraphs_order]
+		elif ngram == 3:
+			headers = ["Trigraphs"]
+			ngram_ordered = [self._cipher_trigraphs_order]
+			ngram_counter = [self._cipher_trigraphs]
+			english_ngrams = [self._trigraphs_order]
+		else:
+			#that option was not valid
+			return False
+		#use array to vist each of them
+		for overt_index, ordering in enumerate(ngram_ordered):
+			tmp_ngram = ordering
+			tmp_counter = ngram_counter[overt_index]
+			print headers[overt_index]
+			#copy the counts because after we colorize the output we can
+			#no longer use them as keys to look up the counts
+			tmp_ngram_count = [tmp_counter[x] for x in tmp_ngram]
+			#if subs then we substitute the characters we know about
+			#and form a new list for latter formatting and printing
+			if(subs):
+				tmp_ngram = []
+				#colorize each digraph and translate it at same time
+				for element in ordering:
+					tmp_elm = ''
+					#check each character
+					for character in element:
+						#ignore characters not in mapping
+						if (character in self._CtP_mapping) and (self._CtP_mapping[character] is not None):
+							tmp_elm += bcolors.format_string(self._CtP_mapping[character],
+											background = True, bright = True, color = 2)
+						else:
+							tmp_elm += character
+					tmp_ngram.append(tmp_elm)
 
-		#now print out the digraphs
-		for index,element in enumerate(tmp_digraphs):
-			sys.stdout.write(element + ' ')
-			sys.stdout.write(str(self._cipher_digraphs[self._cipher_digraphs_order[index]]))
+			#now print out the digraphs
+			for index,element in enumerate(tmp_ngram):
+				sys.stdout.write(element + ' ')
+				sys.stdout.write(str(tmp_counter[ordering[index]]))
 
-			if(index < len(self._digraphs_order)):
-				sys.stdout.write(' ' + self._digraphs_order[index])
-			else:
-				sys.stdout.write('  ')
-			#now write the cipher text digraph count
-			sys.stdout.write('\n')
-
-
-
+				if(index < len(ordering)):
+					sys.stdout.write(' ' + english_ngrams[overt_index][index])
+				else:
+					sys.stdout.write('  ')
+				#now write the cipher text digraph count
+				sys.stdout.write('\n')
 
 	def show_ciphertext_substitutions(self):
 		subbed = []
 		unsubbed = []
 		
-
-
 
 class FreqAnalysis(object):
 	def __init__(self, ciphertext = ""):
@@ -176,23 +208,7 @@ class FreqAnalysis(object):
 			#only display the digraphs
 			pass
 
-
 def main():
-
-	subs = MonoSubstitution()
-	subs.add_rule(('js', 'te'))
-	print subs
-	print subs._CtP_mapping
-	subs._cipher_digraphs = {'JD': 37, 'DS':12}
-	subs._cipher_digraphs_order = ['JD', 'DS']
-	subs.show_digraphs()
-	print
-	subs.show_digraphs(subs = True)
-
-	test = bcolors.format_string("foo", color = 2 , bright = False)
-	print subs
-
-
 	parser = argparse.ArgumentParser(prog = "Mono Subsitution Helper", 
 	description = "assists in decoding a mono substitution cipher")
 	#parser.add_argument('cmd', choices = ['create','delete','help','quit'])
@@ -206,6 +222,15 @@ def main():
 			help = "Loads a string of cipher text from command line")
 	parser.add_argument('--sub', action = 'store_true', default = False)
 	parser.add_argument('--to-upper', action = 'store_true', default = False)
+	parser.add_argument('--show-mapping', action = 'store_true', default = False,
+			help = "show the individual character level mapping of the cipher")
+	parser.add_argument('-c', '--ciphertext', default = False)
+	parser.add_argument('-f', '--frequency', nargs = '?', default = False, const = [0])
+
+	subs = MonoSubstitution();
+	subs.add_rule('JDS','THE')
+	subs._cipher_digraphs_order = ['JD', 'DS']
+	subs._cipher_digraphs = {'JD':32, 'DS':10}
 
 	while True:
 		astr = raw_input('$ ')
@@ -220,7 +245,7 @@ def main():
 		if args.quit:
 			break
 		if args.decode:
-			print args.decode[0], args.decode[1]
+			subs.add_rule(())
 			continue
 		if args.load_file:
 			filename = os.path.join(os.getcwd(),args.load[0])
@@ -247,6 +272,31 @@ def main():
 			else:
 				subs.ciphertext += args.load_string[0]
 			print subs.ciphertext
+
+		if args.show_mapping:
+			print subs
+
+		elif args.ciphertext:
+			if args.sub:
+				subs.display_ciphertext(True)
+			else:
+				subs.display_ciphertext(False)
+
+		elif args.frequency:
+			if args.sub:
+				sub_flag = True
+			else:
+				sub_flag = False
+			#show the frequency counts with 
+			if args.frequency[0] == '1':
+				subs.show_ngrams(ngram = 1, subs = sub_flag)
+			elif args.frequency[0] == '2':
+				subs.show_ngrams(ngram = 2, subs = sub_flag)
+			elif args.frequency[0] == '3':
+				subs.show_ngrams(ngram = 3, subs = sub_flag)
+			else:
+				#show mono, di, and trigraphs
+				subs.show_ngrams(ngram = -1, subs = sub_flag)
 
 if __name__ == '__main__':
 	main()
