@@ -322,10 +322,6 @@ def main():
 	parser.add_argument('-f', '--frequency', nargs = '?', default = False, const = [0])
 
 	subs = MonoSubstitution();
-	subs.add_rule('JDS','THE')
-	subs._cipher_digraphs_order = ['JD', 'DS']
-	subs._cipher_digraphs = {'JD':32, 'DS':10}
-
 	while True:
 		astr = raw_input('$ ')
 		# print astr
@@ -345,7 +341,11 @@ def main():
 			filename = os.path.join(os.getcwd(),args.load_file[0])
 			#check the filesize since the designed behaviour is to
 			#load the entire ciphertext into memory and make several copies
-			statinfo = os.stat(filename)
+			try:
+				statinfo = os.stat(filename)
+			except OSError:
+				print "{} does not exist".format(filename)
+				continue
 			#100 megabytes is maximum file size
 			if(statinfo.st_size < 1024*1024*1024*100):
 				#flush the old cipher text and remove all token counts from old data
