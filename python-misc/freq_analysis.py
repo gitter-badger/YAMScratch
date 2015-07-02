@@ -5,6 +5,15 @@ import os
 import string
 import sys
 
+try:
+	import colorama
+except ImportError:
+	if sys.platform.startswith("win"):
+		print "Warning, you need colorama module to display pretty"
+		print "terminal output. Procede at your own risk"
+else:
+	colorama.init()
+
 
 
 def roundrobin(*iterables):
@@ -88,6 +97,9 @@ class MonoSubstitution(object):
 		self._cipher_monographs_order = []
 		self._cipher_digraphs_order = []
 		self._cipher_trigraphs_order = []
+
+	def display_ciphertext(self, sub = False):
+		pass
 
 	def clear_ciphertext(self):
 		self.ciphertext = ''
@@ -183,10 +195,6 @@ class MonoSubstitution(object):
 					sys.stdout.write('  ')
 				#now write the cipher text digraph count
 				sys.stdout.write('\n')
-
-	def show_ciphertext_substitutions(self):
-		subbed = []
-		unsubbed = []
 		
 
 class FreqAnalysis(object):
@@ -224,7 +232,7 @@ def main():
 	parser.add_argument('--to-upper', action = 'store_true', default = False)
 	parser.add_argument('--show-mapping', action = 'store_true', default = False,
 			help = "show the individual character level mapping of the cipher")
-	parser.add_argument('-c', '--ciphertext', default = False)
+	parser.add_argument('-c', '--ciphertext', action = 'store_true' ,default = False)
 	parser.add_argument('-f', '--frequency', nargs = '?', default = False, const = [0])
 
 	subs = MonoSubstitution();
