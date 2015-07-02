@@ -114,23 +114,20 @@ class MonoSubstitution(object):
 			#unmapped will be everything that is not mapped
 			regex_un_mapped = re.compile('[^'+''.join(is_mapped)+']*')
 
-			tmp_array = regex_un_mapped.split(str_cpy)
+			unmapped_split = regex_un_mapped.split(str_cpy)
 			#translate the tmporary array
-			tmp_array2 = []
-			for segment in tmp_array:
+			tmp_array = []
+			for segment in unmapped_split:
 				accum = ''
 				for character in segment:
 					if character in self._CtP_mapping:
 						accum += self._CtP_mapping[character]
 					else:
 						accum += character
-				tmp_array2.append(accum)
-			print tmp_array2[0:30]
+				tmp_array.append(accum)
 			#colorize all of the mapped values
-			s_m += [bcolors.format_string(x, bright = True, background = True, color = 2) for x in tmp_array2]
+			s_m += [bcolors.format_string(x, bright = True, background = True, color = 2) for x in tmp_array]
 			s_un = regex_is_mapped.split(str_cpy)
-			print s_un[0:30]
-			print len(s_m), len(s_un)
 			output_line = ''
 
 			for x in izip_longest(s_un, s_m, fillvalue = '--'):
@@ -154,6 +151,51 @@ class MonoSubstitution(object):
 		#no need to do extra work if we already computed the graphs
 		if self.ComputedFlag and not force:
 			return None
+		#compute the graphs
+		regex_valid_chars = re.compile('[^'+''.join(self.Ctext)+']*')
+		#only bother with the valid chars
+		valid_chars = regex_valid_chars.sub('', self.ciphertext)
+		total_length = len(valid_chars)
+		for index, character in enumerate(valid_chars):
+			if character in self._CtP_mapping:
+				#monograph
+				if character in self._cipher_monographs:
+					self._cipher_monographs[character] += 1
+				else:
+					self._cipher_monographs[character] = 1
+
+				#digraph
+				if index < total_length-1:
+					token = ''
+					token = character + valid_chars[index+1]
+					if token in self._cipher_digraphs:
+						self._cipher_digraphs[token] += 1
+					else:
+						self._cipher_digraphs[token] = 1
+				#trigraph
+				if index < total_length-2:
+					token = ''
+					token = character + valid_chars[index+1] + valid_chars[index+2]
+					if token in self._cipher_trigraphs:
+						self._cipher_trigraphs[token] += 1
+					else:
+						self._cipher_trigraphs[token] = 1
+
+
+		#now create the ordered list by frequency
+		tmp_array = [x for x in self._cipher_monographs.items()]
+		self._cipher_monographs_order = [x[0] for x in sorted(tmp_array, key=lambda item: item[1], reverse = True)]
+		del tmp_array
+
+		tmp_array = [x for x in self._cipher_digraphs.items()]
+		long_array = sorted(tmp_array, key=lambda item: item[1], reverse = True)
+		#shorten the digraphs and trigraphs to length 50
+		self._cipher_digraphs_order = [x[0] for x in long_array[0:min(len(long_array), 50)]]
+		del tmp_array
+		del long_array
+		tmp_array = [x for x in self._cipher_trigraphs.items()]
+		long_array = sorted(tmp_array, key = lambda item: item[1], reverse = True)
+		self._cipher_trigraphs_order = [x[0] for x in long_array[0:min(len(long_array), 50)]]
 
 		self.ComputedFlag = True
 		return None
@@ -335,6 +377,7 @@ def main():
 				subs.display_ciphertext(False)
 
 		elif args.frequency:
+			subs.compute_frequency()
 			if args.sub:
 				sub_flag = True
 			else:
