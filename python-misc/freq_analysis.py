@@ -1,8 +1,11 @@
 #! /usr/bin/python
 import argparse
-import sys
-import string
 import itertools
+import os
+import string
+import sys
+
+
 
 def roundrobin(*iterables):
 	"roundrobin('ABC', 'D', 'EF') --> A D E B F C"
@@ -46,6 +49,7 @@ class bcolors(object):
 
 class MonoSubstitution(object):
 	def __init__(self):
+		self.ciphertext = ''
 		self.Ctext = [x for x in string.ascii_uppercase]
 		self.Ptext = ['_' for x in range(0, len(string.ascii_uppercase))]
 		self._CtP_mapping = {key: None for key in self.Ctext}
@@ -76,11 +80,23 @@ class MonoSubstitution(object):
 						  'WAS', 'ECT', 'REA', 'COM', 'EVE', 'PER', 'INT', 'EST',
 						  'STA', 'CTI', 'ICA', 'IST', 'EAR', 'AIN', 'ONE', 'OUR',
 						  'ITI', 'RAT']
-  		self._cipher_monographs = {}
-		self._cipher_digraphs = {'JD': 37, 'DS':12}
+		self._cipher_monographs = {}
+		self._cipher_digraphs = {}
 		self._cipher_trigraphs = {}
 
-		self._cipher_digraphs_order = ['JD', 'DS']
+		self._cipher_monographs_order = []
+		self._cipher_digraphs_order = []
+		self._cipher_trigraphs_order = []
+
+	def clear_ciphertext(self):
+		self.ciphertext = ''
+		self._cipher_monographs = {}
+		self._cipher_digraphs = {}
+		self._cipher_trigraphs = {}
+
+		self._cipher_monographs_order = []
+		self._cipher_digraphs_order = []
+		self._cipher_trigraphs_order = []
 
 	def add_rule(self, rule):
 		#takes a tuple mapping of chars to chars
@@ -95,17 +111,6 @@ class MonoSubstitution(object):
 			character = character.upper()
 			self.Ptext[self.Ctext.index(character)] = plain[key].upper()
 			self._CtP_mapping[character] = plain[key].upper()
-
-	def ciphertext():
-		doc = "The ciphertext property."
-		def fget(self):
-			return self._ciphertext
-		def fset(self, value):
-			self._ciphertext = value
-		def fdel(self):
-			del self._ciphertext
-		return locals()
-	ciphertext = property(**ciphertext())
 
 	def __repr__(self):
 		return "Mappings:\nC: "+" ".join(self.Ctext)+'\nP: '+" ".join(self.Ptext)
@@ -178,6 +183,8 @@ def main():
 	subs.add_rule(('js', 'te'))
 	print subs
 	print subs._CtP_mapping
+	subs._cipher_digraphs = {'JD': 37, 'DS':12}
+	subs._cipher_digraphs_order = ['JD', 'DS']
 	subs.show_digraphs()
 	print
 	subs.show_digraphs(subs = True)
@@ -187,12 +194,19 @@ def main():
 
 
 	parser = argparse.ArgumentParser(prog = "Mono Subsitution Helper", 
-	description = "assists in decodeing a mono substitution	cipher")
+	description = "assists in decoding a mono substitution cipher")
 	#parser.add_argument('cmd', choices = ['create','delete','help','quit'])
-	parser.add_argument('-decode', nargs=2, 
+	parser.add_argument('-decode', nargs = 2, 
 			help = "<A> <B> where A in ciphertext maps to B in plaintext",
 			metavar = '<char>')
-	parser.add_argument('-quit', action = 'store_true', default = False)
+	parser.add_argument('-q', '--quit', action = 'store_true', default = False)
+	parser.add_argument('--load-file', nargs = 1, metavar = "<filename>", default = False,
+			help = "Loads a file and treats it as cipher text")
+	parser.add_argument('--load-string', nargs = 1, metavar = "<string>", default = False,
+			help = "Loads a string of cipher text from command line")
+	parser.add_argument('--sub', action = 'store_true', default = False)
+	parser.add_argument('--to-upper', action = 'store_true', default = False)
+
 	while True:
 		astr = raw_input('$ ')
 		# print astr
@@ -207,7 +221,32 @@ def main():
 			break
 		if args.decode:
 			print args.decode[0], args.decode[1]
-
+			continue
+		if args.load_file:
+			filename = os.path.join(os.getcwd(),args.load[0])
+			#check the filesize since the designed behaviour is to
+			#load the entire ciphertext into memory and make several copies
+			statinfo = os.stat(filename)
+			#100 megabytes is maximum file size
+			if(statinfo.st_size < 1024*1024*1024*100):
+				#flush the old cipher text and remove all token counts from old data
+				subs.clear_ciphertext()
+				with open(filename, "r") as f:
+					for line in f:
+						#we have the option to force everything to upper case
+						if args.to_upper:
+							line = line.upper()
+						subs.ciphertext += line
+				
+			else:
+				print "File is too large"
+		elif args.load_string:
+			subs.clear_ciphertext()
+			if args.to_upper:
+				subs.ciphertext += args.load_string[0].upper()
+			else:
+				subs.ciphertext += args.load_string[0]
+			print subs.ciphertext
 
 if __name__ == '__main__':
 	main()
