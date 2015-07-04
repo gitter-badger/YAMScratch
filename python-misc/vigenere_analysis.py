@@ -6,7 +6,7 @@ matplotlib.use("Qt5Agg")
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, \
 		QSizePolicy, QMessageBox, QWidget, QLabel, QLineEdit, QVBoxLayout, \
-		QPushButton, QGridLayout
+		QPushButton, QGridLayout, QSyntaxHighlighter
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvass
 from matplotlib.figure import Figure
@@ -45,6 +45,14 @@ class Form(QWidget):
         else:
             QMessageBox.information(self, "Success!",
                                     "Hello %s!" % name)
+
+class MyHighlighter(QSyntaxHighlighter):
+    """docstring for MyHighlighter"""
+    def __init__(self, parent):
+        QSyntaxHighlighter.__init__(self, parent)
+        self.parent = parent
+        self.highlightrules
+        
  
 if __name__ == '__main__':
     import sys
