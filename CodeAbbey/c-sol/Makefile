@@ -112,6 +112,8 @@ $(OBJ)/yam_fibonacci.o : $(SRC)/yam_fibonacci.c $(INC)/yam_fibonacci.h $(GTEST_H
 $(OBJ)/brainfuck_interpreter.o : $(SRC)/brainfuck_interpreter.c $(INC)/brainfuck_interpreter.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++ -I $(INC) -c $< -o $@
 
+$(OBJ)/code_abbey_utility.o : $(SRC)/code_abbey_utility.c $(INC)/code_abbey_utility.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++ -I $(INC) -c $< -o $@
 #========================================
 # 		CODE ABBEY PROBLEMS SETS
 #========================================
@@ -198,8 +200,8 @@ $(BIN)/16.out : $(SRC)/16.c
 
 17 : $(BIN)/17.out
 
-$(BIN)/17.out : $(SRC)/17.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+$(BIN)/17.out : $(SRC)/17.c $(OBJ)/code_abbey_utility.o
+	$(CC) $(CFLAGS) -I $(INC) $^ -o $@
 
 18 : $(BIN)/18.out
 
