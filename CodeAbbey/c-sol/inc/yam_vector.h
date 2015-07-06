@@ -94,6 +94,7 @@ extern "C" {
 		}																		\
 	}
 
+#endif
 /*operations*/
 #define Vector_t(TYPE) vec_##TYPE##_t
 #define newVector(TYPE) init_vec_##TYPE()
@@ -104,4 +105,7 @@ extern "C" {
 #define vector_pop(TYPE, ptr) pop_##TYPE(ptr)
 
 #endif
+
+#ifdef __cplusplus
+}
 #endif

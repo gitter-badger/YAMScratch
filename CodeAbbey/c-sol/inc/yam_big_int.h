@@ -5,7 +5,7 @@ extern "C" {
 #ifndef _YAM_BIG_INT_
 #define _YAM_BIG_INT_ 
 
-#include "parseCodeAbbeyInput.h"
+#include "yam_vector.h"
 
 /*we will use a vector as our big integer*/
 VECTOR_INIT(char)

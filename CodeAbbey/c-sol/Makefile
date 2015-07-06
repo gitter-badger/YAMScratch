@@ -223,6 +223,11 @@ $(BIN)/20.out : $(SRC)/20.c
 $(BIN)/21.out : $(SRC)/21.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
+23 : $(BIN)/23.out
+
+$(BIN)/23.out : $(SRC)/23.c
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
+
 24 : $(BIN)/24.out
 
 $(BIN)/24.out : $(SRC)/24.c
