@@ -225,8 +225,8 @@ $(BIN)/21.out : $(SRC)/21.c
 
 23 : $(BIN)/23.out
 
-$(BIN)/23.out : $(SRC)/23.c
-	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
+$(BIN)/23.out : $(SRC)/23.c $(OBJ)/code_abbey_utility.o
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $^ -o $@
 
 24 : $(BIN)/24.out
 
