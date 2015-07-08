@@ -30,7 +30,6 @@ signed array_checksum(long const * array, size_t size, long* checksum);
 					max = jj;	\
 				}	\
 			}	\
-			printf("%ld ", max );	\
 			/*swap maximum element with end element*/	\
 			tmp = array[size-ii];	\
 			array[size-ii] = array[max];	\
