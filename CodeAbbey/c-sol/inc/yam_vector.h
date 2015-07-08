@@ -82,6 +82,9 @@ extern "C" {
 	}																			\
 	static TYPE pop_##TYPE(vec_##TYPE##_t *p) {									\
 		if(p != NULL) {															\
+			if(p->elms == 0) {													\
+				return 0;														\
+			}																	\
 			TYPE tmp;															\
 			tmp = p->items[p->elms -1];											\
 			p->items[p->elms - 1] = 0;											\

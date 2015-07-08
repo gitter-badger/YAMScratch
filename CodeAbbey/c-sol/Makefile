@@ -211,7 +211,7 @@ $(BIN)/18.out : $(SRC)/18.c
 19 : $(BIN)/19.out
 
 $(BIN)/19.out : $(SRC)/19.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
 
 20 : $(BIN)/20.out
 
