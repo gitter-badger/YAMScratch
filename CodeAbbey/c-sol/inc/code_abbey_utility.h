@@ -5,10 +5,10 @@ extern "C" {
 #ifndef CODE_ABBEY_UTILITY
 #define CODE_ABBEY_UTILITY
 #include <stdio.h>
+#include <stdint.h>
 
 signed array_checksum(long const * array, size_t size, long* checksum);
 /*sort in place*/
-
 #define selection_sort_init(TYPE) \
 	extern signed selection_sort_##TYPE(TYPE * array, size_t size, int (*cmp)(TYPE *,  TYPE *)) { \
 		/*sanity checks*/	\
@@ -39,6 +39,10 @@ signed array_checksum(long const * array, size_t size, long* checksum);
 	}
 
 #define selection_sort(TYPE, array, size, cmp) selection_sort_##TYPE(array, size, cmp)
+
+/*modular exponentiation (A^B)%M 
+modulo is limited to 32 bit integer to prevent overflows*/
+uint64_t modular_exponentiation(uint64_t A, uint64_t B, uint32_t M);
 
 #endif
 
