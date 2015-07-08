@@ -350,6 +350,11 @@ $(BIN)/68.out : $(SRC)/68.c
 
 $(BIN)/81.out : $(SRC)/81.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
+101 : $(BIN)/101.out
+
+$(BIN)/101.out : $(SRC)/101.c
+	$(CC) $(CFLAGS) -I $(INC) -lm $< -o $@
 	
 108 : $(BIN)/108.out
 
