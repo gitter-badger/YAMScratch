@@ -27,11 +27,10 @@ signed array_checksum(long const * array, size_t size, long* checksum);
 				/*if element less than max*/	\
 				if((*cmp)(array+jj, array+max)) {	\
 				} else {	\
-					printf("%ld %ld\n", array[jj], array[max]);	\
 					max = jj;	\
 				}	\
 			}	\
-			printf("[0 - %ld] \n", jj);	\
+			printf("%ld ", max );	\
 			/*swap maximum element with end element*/	\
 			tmp = array[size-ii];	\
 			array[size-ii] = array[max];	\
