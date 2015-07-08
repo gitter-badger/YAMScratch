@@ -303,6 +303,11 @@ $(BIN)/43.out : $(SRC)/43.c
 $(BIN)/48.out : $(SRC)/48.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
+49 : $(BIN)/49.out
+
+$(BIN)/49.out : $(SRC)/49.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
 50 : $(BIN)/50.out
 
 $(BIN)/50.out : $(SRC)/50.c
