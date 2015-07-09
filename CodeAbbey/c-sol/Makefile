@@ -346,6 +346,16 @@ $(BIN)/67.out : $(OBJ)/yam_big_int.o $(OBJ)/yam_fibonacci.o $(OBJ)/67.o
 $(BIN)/68.out : $(SRC)/68.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
+69 : $(BIN)/69.out
+
+$(BIN)/69.out : $(SRC)/69.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
+71 : $(BIN)/71.out
+
+$(BIN)/71.out : $(SRC)/71.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
 81 : $(BIN)/81.out
 
 $(BIN)/81.out : $(SRC)/81.c
