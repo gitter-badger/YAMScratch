@@ -1,5 +1,7 @@
-#include <stdlib.h>
+/*make sure that we have the getline() extension provided by GNU C library*/
+#define _GNU_SOURCE
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 
 int main(int argc, char const *argv[])
@@ -22,28 +24,44 @@ int main(int argc, char const *argv[])
 	/*find the first fibonacci number divisible by A*/
 	unsigned ii;
 	unsigned long A;
-	char terminator;
+	char * lineptr;
+	lineptr = NULL;
+	size_t nbytes;
+	nbytes = 0;
 	for(ii = 0; ii < N; ++ii) {
 		result[ii] = 0;
 		errno = 0;
-		for(;;) {
-			/*keep scanning until we reach end of line*/
-			rc = scanf("%lu[^\n]%c", &A, &terminator);
-			printf("%lu %x %d\n", A, terminator, rc);
-			if(rc != 2) {
-				perror("matching on input failed");
+		ssize_t bytes_read;
+		bytes_read = getline(&lineptr, &nbytes, stdin);
+		if(bytes_read < 0) {
+			/*this checks for when there is only EOF */
+			errno = EINVAL;
+			perror("Must input a number");
+			exit(-1);
+		} else if(bytes_read == 1) {
+			/*check for empty line which should not happen*/
+			if(*lineptr == '\n') {
+				errno = EINVAL;
+				perror("Lines must have numbers on them");
 				exit(-1);
 			}
-			result[ii] += (A * A);
-			if(terminator == '\n') {
-				/*here we will move on to next line*/
+		}
+		FILE * stream;
+		stream = fmemopen(lineptr, bytes_read, "r");
+		for(;;) {
+			rc = fscanf(stream," %lu ", &A);
+			if(rc == EOF) {
 				break;
 			}
+			result[ii] += A * A;
 		}
+		fclose(stream);
 	}
+	free(lineptr);
 	for(ii = 0; ii < N; ++ii) {
 		printf("%d ",result[ii]);
 	}
+
 	printf("\n");
 	free(result);
 	return 0;
