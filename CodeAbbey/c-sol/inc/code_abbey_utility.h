@@ -44,6 +44,9 @@ signed array_checksum(long const * array, size_t size, long* checksum);
 modulo is limited to 32 bit integer to prevent overflows*/
 uint64_t modular_exponentiation(uint64_t A, uint64_t B, uint32_t M);
 
+unsigned long linear_congruent_gen(unsigned long A, unsigned long C,
+								unsigned long M, unsigned long Xcurr);
+
 #endif
 
 #ifdef __cplusplus

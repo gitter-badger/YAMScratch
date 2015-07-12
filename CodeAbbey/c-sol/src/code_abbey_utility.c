@@ -41,4 +41,11 @@ uint64_t modular_exponentiation(uint64_t A, uint64_t B, uint32_t M){
 	return result;
 }
 
-
+unsigned long linear_congruent_gen(unsigned long A, unsigned long C,
+								unsigned long M, unsigned long Xcurr) {
+	/*make the chance of overflow smaller*/
+	A %= M;
+	Xcurr %= M;
+	C %= M;
+	return ((A * Xcurr) % M + C ) % M;
+}

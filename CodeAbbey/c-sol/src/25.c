@@ -2,10 +2,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-unsigned long linear_congruent_gen(unsigned long A, unsigned long C,
-								unsigned long M, unsigned long Xcurr) {
-	return (A * Xcurr + C ) % M;
-}
+#include "code_abbey_utility.h"
 
 int main(int argc, char const *argv[])
 {
