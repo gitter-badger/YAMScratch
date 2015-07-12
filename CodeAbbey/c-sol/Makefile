@@ -333,6 +333,11 @@ $(BIN)/57.out : $(SRC)/57.c
 $(BIN)/57_mpi.out : $(SRC)/57_mpi.c
 	mpicc $(MPICC_CFLAGS) $(MPICC_LDFLAGS) -I $(INC) $< -o $@
 
+59 : $(BIN)/59.out
+
+$(BIN)/59.out : $(SRC)/59.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
 67 : $(BIN)/67.out
 
 $(OBJ)/67.o : $(SRC)/67.c
