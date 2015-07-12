@@ -361,6 +361,11 @@ $(BIN)/69.out : $(SRC)/69.c
 $(BIN)/71.out : $(SRC)/71.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
+72 : $(BIN)/72.out
+
+$(BIN)/72.out : $(SRC)/72.c $(OBJ)/code_abbey_utility.o
+	$(CC) $(CFLAGS) -I $(INC) $^ -o $@
+
 81 : $(BIN)/81.out
 
 $(BIN)/81.out : $(SRC)/81.c
