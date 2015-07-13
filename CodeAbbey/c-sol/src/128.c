@@ -5,8 +5,8 @@
 
 signed binomial_coeff(mpz_t* N, mpz_t* K, mpz_t* result) {
 	/*some sanity checks*/
+	mpz_set_ui(*result, 1);
 	if(mpz_cmp_ui(*K, 0) == 0) {
-		mpz_set_ui(*result, 1);
 		return 0;
 	}
 	/*make sure N and K are both positive*/
@@ -16,41 +16,25 @@ signed binomial_coeff(mpz_t* N, mpz_t* K, mpz_t* result) {
 	if( mpz_cmp_ui(*K, 0) < 0) {
 		return -1;
 	}
-	mpz_t* A, * T, * L, * S;
+	mpz_t* A, * cN, * cK, * I;
 	A = malloc(3 * sizeof(mpz_t));
-	T = &A[0];
-	L = &A[1];
-	S = &A[2];
-	mpz_init(*T); /*numerator (top)*/
-	mpz_init(*L); /*larger of denominator*/
-	mpz_init(*S); /*smaller of denominator*/
-	/*use T as a temporary value to determine if (N-K) or K is L*/
-	mpz_set(*L, *K);
-	mpz_set(*T, *N);
-	/*set S to N-K*/
-	mpz_sub(*S, *T, *L);
-	/*if S is acutally > Ls, swap the two*/
-	if(mpz_cmp(*S, *L) > 0) {
-		mpz_t* tmp;
-		tmp = L;
-		L = S;
-		S = tmp;
-	}
-	/* compute the factorial of the numerator which is (N!/L!)*/
+	cN = &A[0];
+	cK = &A[1];
+	I = &A[2];
+	mpz_init(*cN);
+	mpz_init(*cK);
+	mpz_init(*I);
+	mpz_set(*cN, *N);
+	mpz_set(*cK, *K);
 	mpz_set_ui(*result, 1);
-	for(;mpz_cmp(*T, *L) > 0; mpz_sub_ui(*T, *T, 1)) {
-		mpz_mul(*result, *result, *T);
+	for(mpz_set_ui(*I, 1); mpz_cmp(*K, *I) >= 0; mpz_add_ui(*I, *I, 1)) {
+		mpz_mul(*result, *result, *cN);
+		mpz_cdiv_q(*result, *result, *I);
+		mpz_sub_ui(*cN, *cN, 1);
 	}
-	/*compute S!, storing it in T*/
-	mpz_set_ui(*T, 1);
-	for(;mpz_cmp_ui(*S, 1) > 0; mpz_sub_ui(*S, *S, 1)) {
-		mpz_mul(*T, *T, *S);
-	}
-	/*divide the numerator by S!*/
-	mpz_cdiv_q(*result, *result, *T);
-	mpz_clear(*T);
-	mpz_clear(*L);
-	mpz_clear(*S);
+	mpz_clear(*cN);
+	mpz_clear(*cK);
+	mpz_clear(*I);
 	free(A);
 	return 0;
 }
