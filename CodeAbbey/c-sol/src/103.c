@@ -3,11 +3,12 @@
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>
+#include <string.h>
 
 int main(int argc, char const *argv[])
 {
 	int rc;
-	unsigned A, I;
+	unsigned ii, jj, A, I, E, T;
 	unsigned long N;
 	char * lineptr;
 	size_t nbytes;
@@ -58,9 +59,20 @@ int main(int argc, char const *argv[])
 	* is not defined.
 	*/
 	unsigned long* masks;
+	errno = 0;
 	masks = (unsigned long*)calloc(N, sizeof(unsigned long));
+	if(masks == NULL) {
+		perror("failed to allocate masks buffer");
+		exit(-1);
+	}
+	char* metadata;
+	errno = 0;
+	metadata = (char*)calloc(2*N, sizeof(char));
+	if(metadata == NULL) {
+		perror("failed to allocate metadata buffer");
+		exit(-1);
+	}
 	/*read in the N mappings*/
-	unsigned ii, jj;
 	for(ii = 0; ii < N; ++ii) {
 		errno = 0;
 		bytes_read = getline(&lineptr, &nbytes, stdin);
@@ -81,17 +93,28 @@ int main(int argc, char const *argv[])
 		* silently
 		*/
 		char colon;
-		rc = fscanf(stream, "%u %c", &A, &colon);
-		printf("rc = %d, %c\n", rc, colon);
+		/*make sure that each line begins with an index and then
+		* the colon character delimeter follows*/
+		rc = fscanf(stream, "%u %c", &E, &colon);
+		assert(colon == ':');
 		for(jj = 0;;) {
 			rc = fscanf(stream," %u ", &A);
 			if(rc == EOF) {
 				break;
 			}
-			printf("A = %u\n", A );
+			/*make sure shift will fit in mask, and prevents walking off
+			* edge of array*/
+			assert(A < 64);
+			masks[E] |= 1<<A;
+			if(metadata[2*A+1]++ == 0) {
+				metadata[2*A] = E;
+			}
 			++jj;
 		}
 		fclose(stream);
+	}
+	for(ii = 0; ii < N; ++ii) {
+		printf("Bit %u is flipped %u times\n", ii, metadata[ii*2+1]);
 	}
 	free(lineptr);
 	printf("\n");
