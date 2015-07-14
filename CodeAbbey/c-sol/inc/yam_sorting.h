@@ -2,8 +2,8 @@
 extern "C" {
 #endif
 
-#ifndef _YAM_QUICKSORT
-#define _YAM_QUICKSORT 
+#ifndef YAM_QUICKSORT
+#define YAM_QUICKSORT 
 
 #define QUICKSORT_INIT(TYPE) \
 	void yam_quicksort_##TYPE(TYPE * list, unsigned left, unsigned right, unsigned (*less_than)(TYPE*, TYPE*)) {\
@@ -72,11 +72,18 @@ extern "C" {
 	list[a] = list[b];					\
 	list[b] = tmp;
 
-
 #define yam_quicksort(TYPE, list, left, right, fnptr) \
 	yam_quicksort_##TYPE(list, left, right, fnptr)
 
-#endif
+#endif /*YAM_QUICKSORT*/
+
+#ifndef YAM_TOPOLOGICAL_SORT
+#define YAM_TOPOLOGICAL_SORT
+
+#define TOPOLOGICAL_SORT_INIT(TYPE) \
+	void yam_topological_sort_##TYPE(TYPE)
+
+#endif /*YAM_TOPOLOGICAL_SORT*/
 
 #ifdef __cplusplus
 }
