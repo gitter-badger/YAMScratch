@@ -394,7 +394,7 @@ $(BIN)/101.out : $(SRC)/101.c
 103 : $(BIN)/103.out
 
 $(BIN)/103.out : $(SRC)/103.c
-	$(CC) $(CFLAGS) -I $(INC) -lm $< -o $@
+	$(CC) $(CFLAGS) -I $(INC) -Wno-unused-function $< -o $@
 
 104 : $(BIN)/104.out
 

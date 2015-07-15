@@ -4,6 +4,19 @@
 #include <errno.h>
 #include <assert.h>
 
+#include "yam_vector.h"
+
+struct MaskData {
+	unsigned long key;	/*unique value*/
+	unsigned long value; /*value we use can use to compare objects*/
+	size_t len; /*number of bits set in mask*/
+	unsigned char* bits; /*array indicating which indices are set, is malloced and freed*/
+};
+
+typedef struct MaskData s_MaskData;
+
+VECTOR_INIT(s_MaskData)
+
 /*becuse we are using a long as a bitmask*/
 #define MAX_BITS 64
 
@@ -13,14 +26,9 @@
 		exit(-1);				\
 	}
 
-struct MaskData {
-	unsigned long value; /*value we use can use to compare objects*/
-	size_t len; /*number of bits set in mask*/
-	unsigned char* bits; /*array indicating which indices are set, is malloced and freed*/
-};
 
 void print_MaskData(struct MaskData* m) {
-	printf("value: %lu\n", m->value);
+	printf("Key: %lu value: %lu\n", m->key, m->value);
 	/*printf("Len: %lu\n", m->len);*/
 	printf("Bits: ");
 	size_t ii;
@@ -83,7 +91,7 @@ int main(int argc, char const *argv[])
 	NULL_CHECK(index_buffer, "failed to allocate a buffer")
 	/*
 	* Store each masks, we will only read up to N masks from the file,
-	* this is defined input format 
+	* this is the defined input format 
 	*/
 	struct MaskData* _masks;
 	errno = 0;
@@ -97,7 +105,6 @@ int main(int argc, char const *argv[])
 	unsigned* cursor;
 	/*read in the N masks*/
 	for(ii = 0; ii < N; ++ii) {
-		printf("iteration %u", ii);
 		errno = 0;
 		bytes_read = getline(&lineptr, &nbytes, stdin);
 		if(bytes_read < 0) {
@@ -106,8 +113,7 @@ int main(int argc, char const *argv[])
 		} else if(bytes_read == 1) {
 			/*check for empty line which should not happen*/
 			if(*lineptr == '\n') {
-				perror("Lines must have numbers on them");
-				exit(-1);
+				continue;
 			}
 		}
 		stream = fmemopen(lineptr, bytes_read, "r");
@@ -120,6 +126,7 @@ int main(int argc, char const *argv[])
 		* the colon character delimeter follows*/
 		rc = fscanf(stream, "%u %c", &E, &colon);
 		assert(colon == ':');
+		_masks[E].key = E;
 		/*walk over buffer starting from begining*/
 		cursor = index_buffer;
 		/*the below code depends on these two fields beign zeroed*/
