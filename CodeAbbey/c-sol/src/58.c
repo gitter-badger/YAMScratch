@@ -19,6 +19,12 @@ int main(int argc, char const *argv[])
 	for(ii = 0; ii < N; ++ii) {
 		errno = 0;
 		rc = scanf(" %u ", &C);
+		if(rc != 1) {
+			fprintf(stderr, "input read error on line %u\n", ii+2);
+			fflush(stderr);
+			perror("");
+			exit(-1);
+		}
 		printf("%s-of-%s ",ranks[C%13], suites[C/13]);
 	}
 	printf("\n");
