@@ -32,7 +32,7 @@ int main(int argc, char const *argv[])
 	NULL_CHECK(result, "failed to allocate result bit array");
 	/*set all indices to true*/
 	memset(result, 255, size_needed* sizeof(STORAGE_TYPE));
-
+	printf("Originally %lu\n",result[0] );
 	keep = (STORAGE_TYPE*)malloc(size_needed * sizeof(STORAGE_TYPE));
 	NULL_CHECK(keep, "failed to allocate bit array");
 	unsigned ii, jj, kk, ll, C, R, d0, d1, d2, d3, secret, bin_index;
@@ -65,12 +65,9 @@ int main(int argc, char const *argv[])
 		if(R == 0) {
 			/*operate directly on result*/
 			/*clear all with same thoudsands place*/
-			printf("thoudsands place ==================\n");
 			for(jj = d0*1000; jj < (d0+1)*1000; ++jj) {
-				printf("eliminating %d\n", jj);
 				result[jj/BITS_PER_INDEX] &= ~(1<<(jj%BITS_PER_INDEX));
 			}
-			printf("hundreds place ====================\n");
 			/*clear all with same hundreds place*/
 			for(jj = 0; jj < 10; ++jj) {
 				/*skip zone we have already cleared*/
@@ -78,12 +75,10 @@ int main(int argc, char const *argv[])
 					bin_index = jj*1000;
 					/*cross out everything with same hundreds place*/
 					for(kk = bin_index+(d1*100); kk < bin_index+((d1+1)*100); ++kk) {
-						printf("eliminating %d\n", kk);
 						result[kk/BITS_PER_INDEX] &= ~(1<<(kk%BITS_PER_INDEX));
 					}
 				}
 			}
-			printf("tens place =======================\n");
 			/*clear all with same tens place*/
 			for(jj = 0; jj < 10; ++jj) {
 				/*skip zone we have already cleared*/
@@ -92,13 +87,11 @@ int main(int argc, char const *argv[])
 						if(kk != d1) {
 							bin_index = 1000*jj + 100*kk;
 							for(ll = bin_index+(d2*10); ll < bin_index+((d2+1)*10); ++ll)
-							printf("eliminating %d\n", ll);
 							result[ll/BITS_PER_INDEX] &= ~(1<<(ll%BITS_PER_INDEX));
 						}
 					}
 				}
 			}
-			printf("ones place ======================\n");
 			/*clear all with same ones place*/
 			for(jj = 0; jj < 10; ++jj) {
 				if(jj != d0) {
@@ -107,7 +100,6 @@ int main(int argc, char const *argv[])
 							for(ll = 0; ll < 10; ++ll) {
 								if(ll != d2) {
 									bin_index = 1000*jj + 100*kk + 10*ll + d3;
-									printf("eliminating %d\n", bin_index);
 									result[bin_index/BITS_PER_INDEX] &= ~(1<<(bin_index%BITS_PER_INDEX));
 								}
 							}
@@ -129,14 +121,16 @@ int main(int argc, char const *argv[])
 	cursor = result;
 	secret = 0;
 	ii = 0;
-	while(*cursor++ != 0) {++ii;}
-	--cursor;
+	while(*cursor++ == 0) {++ii;}
 	/*now result points to non zero block*/
 	kk = 0;
+	printf("value %lu\n", result[ii]);
 	for(jj = 0; jj < BITS_PER_INDEX; ++jj) {
-		if(*cursor & 1<<jj) {
+		if(result[ii] & 1<<jj) {
 			++kk;
 			secret = jj;
+			printf("ii %u, jj %u\n", ii, jj );
+			printf("valid %lu\n", jj+(ii*BITS_PER_INDEX));
 		}
 	}
 	/*only one bit should be set*/
