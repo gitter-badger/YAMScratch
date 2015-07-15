@@ -13,9 +13,21 @@ struct MaskData {
 	unsigned char* bits; /*array indicating which indices are set, is malloced and freed*/
 };
 
-typedef struct MaskData s_MaskData;
+#define MaskData_init(mask) \
+	mask.key = 0;			\
+	mask.value = 0;			\
+	mask.len = 0;			\
+	mask.bits = NULL;
 
-VECTOR_INIT(s_MaskData)
+#define MaskData_clear(mask) 	\
+	if(mask.bits != NULL) {		\
+		free(mask.bits);		\
+	}
+
+/*make single token name for use in TYPE macros*/
+typedef struct MaskData struct_MaskData;
+
+VECTOR_INIT(struct_MaskData)
 
 /*becuse we are using a long as a bitmask*/
 #define MAX_BITS 64
@@ -41,7 +53,7 @@ void print_MaskData(struct MaskData* m) {
 int main(int argc, char const *argv[])
 {
 	int rc;
-	unsigned ii, jj, kk, A, I, E, T;
+	unsigned ii, jj, kk, A, K, E, T;
 	unsigned long N;
 	/*read first line with unknown length of data*/
 	char * lineptr;
@@ -65,7 +77,7 @@ int main(int argc, char const *argv[])
 	}
 	stream = fmemopen(lineptr, bytes_read, "r");
 	N = 0;
-	I = 0;
+	K = 0;
 	for(;;) {
 		rc = fscanf(stream," %u ", &A);
 		if(rc == EOF) {
@@ -73,8 +85,8 @@ int main(int argc, char const *argv[])
 		}
 		/*A should be 1 or zero*/
 		assert(A < 2);
-		/*this stores I as big endian, position 0 is represented by the high bit*/
-		I |= A<<N;
+		/*this stores K as little endian, position 0 is represented by the low bit*/
+		K |= A<<N;
 		++N;
 	}
 	if(N > MAX_BITS) {
@@ -86,25 +98,24 @@ int main(int argc, char const *argv[])
 	}
 	fclose(stream);
 	/* Allocate a buffer to record which indices are set */
-	unsigned* index_buffer;
+	unsigned* index_buffer, *cursor;
 	index_buffer = (unsigned*)malloc(N* sizeof(unsigned));
 	NULL_CHECK(index_buffer, "failed to allocate a buffer")
-	/*
-	* Store each masks, we will only read up to N masks from the file,
-	* this is the defined input format 
-	*/
-	struct MaskData* _masks;
-	errno = 0;
-	_masks = (struct MaskData*)malloc(N * sizeof(struct MaskData));
-	NULL_CHECK(_masks, "failed to allocate masks buffer")
 	char* metadata;
 	errno = 0;
 	metadata = (char*)calloc(2*N, sizeof(char));
 	NULL_CHECK(metadata, "failed to allocate metadata buffer")
-	/*ptr inside temporary buffer that creates */
-	unsigned* cursor;
+	/*
+	* Store each masks, we will only read up to N masks from the file,
+	* this is the defined input format 
+	*/
+	Vector_t(struct_MaskData)* _masks;
+	_masks = newVector(struct_MaskData);
 	/*read in the N masks*/
+	struct MaskData tmp_mask;
+	MaskData_init(tmp_mask);
 	for(ii = 0; ii < N; ++ii) {
+		/*clears*/
 		errno = 0;
 		bytes_read = getline(&lineptr, &nbytes, stdin);
 		if(bytes_read < 0) {
@@ -125,37 +136,39 @@ int main(int argc, char const *argv[])
 		/*make sure that each line begins with an index and then
 		* the colon character delimeter follows*/
 		rc = fscanf(stream, "%u %c", &E, &colon);
-		assert(colon == ':');
-		_masks[E].key = E;
-		/*walk over buffer starting from begining*/
-		cursor = index_buffer;
-		/*the below code depends on these two fields beign zeroed*/
-		_masks[E].len = 0;
-		_masks[E].value = 0;
-		for(jj = 0; jj < MAX_BITS; ++jj) {
-			rc = fscanf(stream," %u ", &A);
-			if(rc == EOF) {
-				break;
-			}
-			/*make sure shift will fit in mask, and prevents walking off
-			* edge of array*/
-			assert(A < MAX_BITS);
-			_masks[E].value |= 1<<A;
-			_masks[E].len++;
-			/*store and advance buffer*/
-			*cursor++ = A;
-			if(metadata[2*A+1]++ == 0) {
-				metadata[2*A] = E;
+		if(colon == ':') {
+			tmp_mask.key = E;
+			/*walk over buffer starting from begining*/
+			cursor = index_buffer;
+			/*the below code depends on these two fields beign zeroed*/
+			tmp_mask.len = 0;
+			tmp_mask.value = 0;
+			for(jj = 0; jj < MAX_BITS; ++jj) {
+				rc = fscanf(stream," %u ", &A);
+				if(rc == EOF) {
+					break;
+				}
+				/*make sure shift will fit in mask, and prevents walking off
+				* edge of array*/
+				assert(A < MAX_BITS);
+				tmp_mask.value |= 1<<A;
+				tmp_mask.len++;
+				/*store and advance buffer*/
+				*cursor++ = A;
+				if(metadata[2*A+1]++ == 0) {
+					metadata[2*A] = E;
+				}
 			}
 		}
 		fclose(stream);
 		/*check to see if pattern already exists*/
 		/*allocate an appropriate size buffer for the MaskData
 		* instance and copy valid contents of buff into*/
-		_masks[E].bits = (unsigned char*)malloc(_masks[E].len* sizeof(unsigned char));
-		for(kk = 0; kk < _masks[E].len; ++kk) {
-			_masks[E].bits[kk] = index_buffer[kk];
+		tmp_mask.bits = (unsigned char*)malloc(tmp_mask.len * sizeof(unsigned char));
+		for(kk = 0; kk < tmp_mask.len; ++kk) {
+			tmp_mask.bits[kk] = index_buffer[kk];
 		}
+		vector_push_back(struct_MaskData, _masks, tmp_mask);
 	}
 	free(lineptr);
 	/*we wont use index_buffer again*/
@@ -169,12 +182,12 @@ int main(int argc, char const *argv[])
 	printf("\n");
 
 	/*free each of the MaskData bits arrays*/
-	for(ii = 0; ii < N; ++ii) {
-		print_MaskData(_masks+ii);
+	for(ii = 0; ii < _masks->elms; ++ii) {
+		print_MaskData(&_masks->items[ii]);
 		printf("\n");
-		free(_masks[ii].bits);
+		MaskData_clear(_masks->items[ii]);
 	}
-	free(_masks);
+	vector_destroy(struct_MaskData, _masks);
 	free(metadata);
 	return 0;
 }
