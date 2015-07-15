@@ -83,17 +83,18 @@ extern "C" {
 	static TYPE pop_##TYPE(vec_##TYPE##_t *p) {									\
 		if(p != NULL) {															\
 			if(p->elms == 0) {													\
-				return 0;														\
+				perror("cannot pop from empty vector");							\
+				exit(-1);														\
 			}																	\
 			TYPE tmp;															\
 			tmp = p->items[p->elms -1];											\
-			p->items[p->elms - 1] = 0;											\
 			p->elms--;															\
 			return tmp;															\
 		} else {																\
 			/*indicate failure*/												\
 			errno = EDESTADDRREQ;												\
-			return 0;															\
+			perror("Null pointer exception");									\
+			exit(-1);															\
 		}																		\
 	}
 
