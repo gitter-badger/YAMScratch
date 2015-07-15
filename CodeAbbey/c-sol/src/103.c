@@ -7,6 +7,12 @@
 /*becuse we are using a long as a bitmask*/
 #define MAX_BITS 64
 
+#define NULL_CHECK(ptr, msg) 	\
+	if(ptr == NULL) {			\
+		perror(msg);			\
+		exit(-1);				\
+	}
+
 struct MaskData {
 	unsigned long value; /*value we use can use to compare objects*/
 	size_t len; /*number of bits set in mask*/
@@ -74,10 +80,7 @@ int main(int argc, char const *argv[])
 	/* Allocate a buffer to record which indices are set */
 	unsigned* index_buffer;
 	index_buffer = (unsigned*)malloc(N* sizeof(unsigned));
-	if(index_buffer == NULL) {
-		perror("failed to allocate a buffer");
-		exit(-1);
-	}
+	NULL_CHECK(index_buffer, "failed to allocate a buffer")
 	/*
 	* Store each masks, we will only read up to N masks from the file,
 	* this is defined input format 
@@ -85,17 +88,11 @@ int main(int argc, char const *argv[])
 	struct MaskData* _masks;
 	errno = 0;
 	_masks = (struct MaskData*)malloc(N * sizeof(struct MaskData));
-	if(_masks == NULL) {
-		perror("failed to allocate masks buffer");
-		exit(-1);
-	}
+	NULL_CHECK(_masks, "failed to allocate masks buffer")
 	char* metadata;
 	errno = 0;
 	metadata = (char*)calloc(2*N, sizeof(char));
-	if(metadata == NULL) {
-		perror("failed to allocate metadata buffer");
-		exit(-1);
-	}
+	NULL_CHECK(metadata, "failed to allocate metadata buffer")
 	/*ptr inside temporary buffer that creates */
 	unsigned* cursor;
 	/*read in the N masks*/
