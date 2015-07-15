@@ -136,6 +136,7 @@ int main(int argc, char const *argv[])
 		/*make sure that each line begins with an index and then
 		* the colon character delimeter follows*/
 		rc = fscanf(stream, "%u %c", &E, &colon);
+		/*check if input line has correct format*/
 		if(colon == ':') {
 			tmp_mask.key = E;
 			/*walk over buffer starting from begining*/
@@ -170,6 +171,9 @@ int main(int argc, char const *argv[])
 		}
 		vector_push_back(struct_MaskData, _masks, tmp_mask);
 	}
+	/*clean up the tmp_mask so we do not accidently free data belonging to
+	* object inside the vector*/
+	tmp_mask.bits = NULL;
 	free(lineptr);
 	/*we wont use index_buffer again*/
 	free(index_buffer); index_buffer = NULL;
