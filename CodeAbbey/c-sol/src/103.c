@@ -145,6 +145,7 @@ int main(int argc, char const *argv[])
 			}
 		}
 		fclose(stream);
+		/*check to see if pattern already exists*/
 		/*allocate an appropriate size buffer for the MaskData
 		* instance and copy valid contents of buff into*/
 		_masks[E].bits = (unsigned char*)malloc(_masks[E].len* sizeof(unsigned char));
@@ -152,10 +153,12 @@ int main(int argc, char const *argv[])
 			_masks[E].bits[kk] = index_buffer[kk];
 		}
 	}
+	free(lineptr);
+	/*we wont use index_buffer again*/
+	free(index_buffer); index_buffer = NULL;
 	for(ii = 0; ii < N; ++ii) {
 		printf("Bit %u is flipped %u times\n", ii, metadata[ii*2+1]);
 	}
-	free(lineptr);
 	printf("\n");
 
 	/*free each of the MaskData bits arrays*/
@@ -165,5 +168,6 @@ int main(int argc, char const *argv[])
 		free(_masks[ii].bits);
 	}
 	free(_masks);
+	free(metadata);
 	return 0;
 }
