@@ -8,13 +8,13 @@
 #define MAX_BITS 64
 
 struct MaskData {
-	unsigned long key; /*key we use can use to compare objects*/
+	unsigned long value; /*value we use can use to compare objects*/
 	size_t len; /*number of bits set in mask*/
 	unsigned char* bits; /*array indicating which indices are set, is malloced and freed*/
 };
 
 void print_MaskData(struct MaskData* m) {
-	printf("Key: %lu\n", m->key);
+	printf("value: %lu\n", m->value);
 	/*printf("Len: %lu\n", m->len);*/
 	printf("Bits: ");
 	size_t ii;
@@ -127,7 +127,7 @@ int main(int argc, char const *argv[])
 		cursor = index_buffer;
 		/*the below code depends on these two fields beign zeroed*/
 		_masks[E].len = 0;
-		_masks[E].key = 0;
+		_masks[E].value = 0;
 		for(jj = 0; jj < MAX_BITS; ++jj) {
 			rc = fscanf(stream," %u ", &A);
 			if(rc == EOF) {
@@ -136,7 +136,7 @@ int main(int argc, char const *argv[])
 			/*make sure shift will fit in mask, and prevents walking off
 			* edge of array*/
 			assert(A < MAX_BITS);
-			_masks[E].key |= 1<<A;
+			_masks[E].value |= 1<<A;
 			_masks[E].len++;
 			/*store and advance buffer*/
 			*cursor++ = A;
@@ -156,6 +156,9 @@ int main(int argc, char const *argv[])
 	free(lineptr);
 	/*we wont use index_buffer again*/
 	free(index_buffer); index_buffer = NULL;
+	/*======END OF READING INPUT==========*/
+	/*======BEGIN SOLVING SYSTEM==========*/
+
 	for(ii = 0; ii < N; ++ii) {
 		printf("Bit %u is flipped %u times\n", ii, metadata[ii*2+1]);
 	}
