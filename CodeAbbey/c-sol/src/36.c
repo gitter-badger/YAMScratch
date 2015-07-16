@@ -124,7 +124,6 @@ int main(int argc, char const *argv[])
 						if(kk != d2) {
 							for(ll = 0; ll < 10; ++ll){
 								if(ll != d3) {
-									printf("keeping %u\n", (d0*1000 + jj*100 + kk*10 + ll));
 									SET_BIT(keep, (d0*1000 + jj*100 + kk*10 + ll));
 								}
 							}
@@ -139,7 +138,6 @@ int main(int argc, char const *argv[])
 						if(kk != d2) {
 							for(ll = 0; ll < 10; ++ll){
 								if(ll != d3) {
-									printf("keeping %u\n", (jj*1000 + d1*100 + kk*10 + ll));
 									SET_BIT(keep, (jj*1000 + d1*100 + kk*10 + ll));
 								}
 							}
@@ -154,7 +152,6 @@ int main(int argc, char const *argv[])
 						if(kk != d1) {
 							for(ll = 0; ll < 10; ++ll){
 								if(ll != d3) {
-									printf("keeping %u\n", (jj*1000 + kk*100 + d2*10 + ll));
 									SET_BIT(keep, (jj*1000 + kk*100 + d2*10 + ll));
 								}
 							}
@@ -169,7 +166,6 @@ int main(int argc, char const *argv[])
 						if(kk != d1) {
 							for(ll = 0; ll < 10; ++ll){
 								if(ll != d2) {
-									printf("keeping %u\n", (jj*1000 + kk*100 + ll*10 + d3));
 									SET_BIT(keep, (jj*1000 + kk*100 + ll*10 + d3));
 								}
 							}
@@ -185,10 +181,9 @@ int main(int argc, char const *argv[])
 		} else if (R == 2) {
 			/*keep form of d0 d1 ? ?*/
 			for(jj = 0; jj < 10; ++jj) {
-				if(jj != d3) {
+				if(jj != d2) {
 					for(kk = 0; kk < 10; ++kk) {
-						if(kk != d2) {
-							printf("keeping %u\n", (d0*1000 + d1*100 + jj*10 + kk));
+						if(kk != d3) {
 							SET_BIT(keep, (d0*1000 + d1*100 + jj*10 + kk));
 						}
 					}
@@ -196,42 +191,81 @@ int main(int argc, char const *argv[])
 			}
 			/*keep form of d0 ? d2 ?*/
 			for(jj = 0; jj < 10; ++jj) {
-				if(jj != d3) {
+				if(jj != d1) {
 					for(kk = 0; kk < 10; ++kk) {
-						if(kk != d1) {
-							printf("keeping %u\n", (d0*1000 + kk*100 + d2*10 + jj));
-							SET_BIT(keep, (d0*1000 + d1*100 + jj*10 + kk));
+						if(kk != d3) {
+							SET_BIT(keep, (d0*1000 + jj*100 + d2*10 + kk));
 						}
 					}
 				}
+			}
+			/*keep form of d0 ? ? d3*/
+			for(jj = 0; jj < 10; ++jj) {
+				if(jj != d1) {
+					for(kk = 0; kk < 10; ++kk) {
+						if(kk != d2) {
+							SET_BIT(keep, (d0*1000 + jj*100 + kk*10 + d3));
+						}
+					}
+				}
+			}
+			/*keep form of ? d1 d2 ?*/
+			for(jj = 0; jj < 10; ++jj) {
+				if(jj != d0) {
+					for(kk = 0; kk < 10; ++kk) {
+						if(kk != d3) {
+							SET_BIT(keep, (jj*1000 + d1*100 + d2*10 + kk));
+						}
+					}
+				}
+			}
+			/*keep form of ? d1 ? d3*/
+			for(jj = 0; jj < 10; ++jj) {
+				if(jj != d0) {
+					for(kk = 0; kk < 10; ++kk) {
+						if(kk != d2) {
+							SET_BIT(keep, (jj*1000 + d1*100 + kk*10 + d3));
+						}
+					}
+				}
+			}
+			/*keep form of ? ? d2 d3*/
+			for(jj = 0; jj < 10; ++jj) {
+				if(jj != d0) {
+					for(kk = 0; kk < 10; ++kk) {
+						if(kk != d1) {
+							SET_BIT(keep, (jj*1000 + kk*100 + d2*10 + d3));
+						}
+					}
+				}
+			}
+			/*now zero everybit we dont want to keep*/
+			for(jj = 0; jj < size_needed; ++jj) {
+				result[jj] &= keep[jj];
 			}
 
 		} else if (R == 3) {
 			/*keep form of ? d1 d2 d3*/
 			for(jj= 0; jj < 10; ++jj) {
 				if(jj != d0) {
-					printf("keeping %u\n", (jj*1000 + d1*100 + d2*10 + d3));
 					SET_BIT(keep, (jj*1000 + d1*100 + d2*10 + d3));
 				}
 			}
 			/*keep form of d0 ? d2 d3*/
 			for(jj= 0; jj < 10; ++jj) {
 				if(jj != d1) {
-					printf("keeping %u\n", (d0*1000 + jj*100 + d2*10 + d3));
 					SET_BIT(keep, (d0*1000 + jj*100 + d2*10 + d3));
 				}
 			}
 			/*keep form of d0 d1 ? d3*/
 			for(jj= 0; jj < 10; ++jj) {
 				if(jj != d2) {
-					printf("keeping %u\n", (d0*1000 + d1*100 + jj*10 + d3));
 					SET_BIT(keep, (d0*1000 + d1*100 + jj*10 + d3));
 				}
 			}
 			/*keep form of d0 d1 d2 ?*/
 			for(jj= 0; jj < 10; ++jj) {
 				if(jj != d3) {
-					printf("keeping %u\n", (d0*1000 + d1*100 + d2*10 + jj));
 					SET_BIT(keep, (d0*1000 + d1*100 + d2*10 + jj));
 				}
 			}
@@ -246,25 +280,17 @@ int main(int argc, char const *argv[])
 	cursor = result;
 	secret = 0;
 	ii = 0;
-	
-	for(jj = 0; jj < 10000; ++jj) {
-		printf("%lu :%lu\n", jj, GET_BIT(result, jj));
+	while(*cursor++ == 0) {++ii;}
+	/*now result points to non zero block*/
+	kk = 0;
+	for(jj = 0; jj < BPI; ++jj) {
+		unsigned tmp = (ii*BPI +jj);
+		if(GET_BIT(result, tmp)) {
+			++kk;
+			printf("%lu\n", tmp);
+		}
 	}
-	
-	// while(*cursor++ == 0) {++ii;}
-	// /*now result points to non zero block*/
-	// kk = 0;
-	// printf("value %lu\n", result[ii]);
-	// for(jj = 0; jj < BPI; ++jj) {
-	// 	if(result[ii] & 1<<jj) {
-	// 		++kk;
-	// 		secret = jj;
-	// 		printf("ii %u, jj %u\n", ii, jj );
-	// 		printf("valid %lu\n", jj+(ii*BPI));
-	// 	}
-	// }
-	/*only one bit should be set*/
-
+	/*only one bit should be set, so we should have only printed tmp onces*/
 	free(result);
 	free(keep);
 	return 0;
