@@ -9,7 +9,6 @@ extern "C" {
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifndef VECTOR_INIT
 #define VECTOR_INIT(TYPE) 														\
 	typedef struct { 															\
 		TYPE* items; 															\
@@ -97,8 +96,6 @@ extern "C" {
 			exit(-1);															\
 		}																		\
 	}
-
-#endif
 /*operations*/
 #define Vector_t(TYPE) vec_##TYPE##_t
 #define newVector(TYPE) init_vec_##TYPE()
