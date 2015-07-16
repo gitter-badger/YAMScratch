@@ -33,17 +33,17 @@ Grid is flat array with grid index =
       +---+
 
           +-----+
-         /0 1 2/
-        /7 8 3/
-       /6 5 4/
+         /7 8 9/
+        /4 5 6/
+       /1 2 3/
 +-----+-----+-----+-----+
-|2 3 4|2 3 4|2 3 4|2 3 4|
-|1 8 5|1 8 5|1 8 5|1 8 5|
-|0 7 6|0 7 6|0 7 6|0 7 6|
+|7 8 9|7 8 9|7 8 9|7 8 9|
+|4 5 6|4 5 6|4 5 6|4 5 6|
+|1 2 3|1 2 3|1 2 3|1 2 3|
 +-----+-----+-----+-----+
-	   \4 5 6\
-	    \3 8 7\
-	     \2 1 0\
+	   \7 8 9\
+	    \4 5 6\
+	     \1 2 3\
 	      +-----+
 */
 
@@ -135,10 +135,22 @@ int main(int argc, char const *argv[])
 					switch(face) {
 						case UP:
 							new_face = face;
-							if(cell == 8) {
-								new_cell = cell;
-							} else {
-								new_cell = (cell+2) % 8;
+							if(cell%2 == 1) {
+								new_cell = (cell%8) +2;
+							}
+							switch(cell) {
+								case 1:
+									new_cell = 7;
+									break;
+								case 3:
+									new_cell = 1;
+									break;
+								case 7:
+									new_cell = 9;
+									break;
+								case 9:
+									new_cell = 3;
+									break;
 							}
 							break;
 						case DOWN:
@@ -147,8 +159,7 @@ int main(int argc, char const *argv[])
 							new_cell = cell;
 							break;
 						default: /*this will catch LEFT, RIGHT, FRONT, BACK*/
-							if(cell > 1 && cell < 5) {
-								/*rotate faces of cells 2 3 4*/
+							if(cell > 5) {
 								new_face = (face + 3)%4;
 							} else {
 								new_face = face;
@@ -169,10 +180,22 @@ int main(int argc, char const *argv[])
 					switch(face) {
 						case DOWN:
 							new_face = face;
-							if(cell == 8) {
-								new_cell = cell;
-							} else {
-								new_cell = (cell+2) % 8;
+							if(cell%2 == 1) {
+								new_cell = (cell%8) +2;
+							}
+							switch(cell) {
+								case 1:
+									new_cell = 7;
+									break;
+								case 3:
+									new_cell = 1;
+									break;
+								case 7:
+									new_cell = 9;
+									break;
+								case 9:
+									new_cell = 3;
+									break;
 							}
 							break;
 						case UP:
@@ -181,8 +204,7 @@ int main(int argc, char const *argv[])
 							new_cell = cell;
 							break;
 						default: /*this will catch LEFT, RIGHT, FRONT, BACK*/
-							if(cell == 0 || cell == 7 || cell || 6) {
-								/*rotate faces of cells 0 7 6*/
+							if(cell < 3) {
 								new_face = (face + 1)%4;
 							} else {
 								new_face = face;
