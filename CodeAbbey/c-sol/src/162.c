@@ -135,11 +135,11 @@ int main(int argc, char const *argv[])
 					/*set the default*/
 					new_face = face;
 					new_cell = cell;
+					printf("face %u cell %u maps to ", face, cell);
 					switch(face) {
 						case UP:
-							new_face = face;
-							if(cell == 8) {
-								cell = (cell+2) % 8;
+							if(cell != 8) {
+								new_cell = (cell+2) % 8;
 							}
 							break;
 						case DOWN:
@@ -154,6 +154,7 @@ int main(int argc, char const *argv[])
 					}
 					grid_buffer[new_face*CUBE_ORDER + new_cell] = cube->grid[face*CUBE_ORDER + cell];
 					cube->tracked[jj] = new_face*CUBE_ORDER+new_cell;
+					printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9  );					
 				}
 				break;
 			case DOWN:
@@ -164,10 +165,9 @@ int main(int argc, char const *argv[])
 					/*set the default*/
 					new_face = face;
 					new_cell = cell;
-					//printf("face %u cell %u maps to ", face, cell);
+					printf("face %u cell %u maps to ", face, cell);
 					switch(face) {
 						case DOWN:
-							new_face = face;
 							if(cell != 8) {
 								new_cell = (cell+2) % 8;
 							}
@@ -184,7 +184,7 @@ int main(int argc, char const *argv[])
 					}
 					grid_buffer[new_face*CUBE_ORDER + new_cell] = cube->grid[face*CUBE_ORDER + cell];
 					cube->tracked[jj] = new_face*CUBE_ORDER+new_cell;
-					//printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9  );
+					printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9  );
 				}
 				break;
 			case LEFT:
@@ -198,7 +198,6 @@ int main(int argc, char const *argv[])
 					printf("face %u cell %u maps to ", face, cell);
 					switch(face) {
 						case LEFT:
-							new_face = face;
 							if(cell != 8) {
 								new_cell = (cell+2) % 8;
 							}
