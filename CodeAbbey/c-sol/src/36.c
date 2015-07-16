@@ -41,27 +41,7 @@ int main(int argc, char const *argv[])
 	result = (STORAGE_TYPE*)malloc(size_needed * sizeof(STORAGE_TYPE)); 
 	NULL_CHECK(result, "failed to allocate result bit array");
 	/*set all indices to true*/
-	memset(result, 1, size_needed* sizeof(STORAGE_TYPE));
-	printf("before %x\n", result[0] );
-	STORAGE_TYPE foobar;
-	for(ii = 0; ii < BPI; ++ii) {
-		foobar = 1<<(ii%BPI);
-		//printf("mask = %lx, %lx\n", foobar);
-		printf("bit %u = %lu\n", ii, GET_BIT(result, ii));
-	}
-
-	for(ii = 64; ii < 64+BPI; ++ii) {
-		printf("===================\n");
-		printf("index %u bit %u\n", (ii)/ BPI , (ii) % BPI );
-
-		printf("bit %u = %lu\n", ii, GET_BIT(result, ii));
-		SET_BIT(result, ii);
-		printf("bit %u = %lu\n", ii, GET_BIT(result, ii));
-		CLEAR_BIT(result, ii);
-		printf("bit %u = %lu\n", ii, GET_BIT(result, ii));
-	}
-
-
+	memset(result, 255, size_needed* sizeof(STORAGE_TYPE));
 	keep = (STORAGE_TYPE*)malloc(size_needed * sizeof(STORAGE_TYPE));
 	NULL_CHECK(keep, "failed to allocate bit array");
 	for(ii = 0; ii < N; ++ii) {
@@ -90,12 +70,12 @@ int main(int argc, char const *argv[])
 		d3 = C % 10;
 		/*clear the keep vector*/
 		memset(keep, 0, size_needed* sizeof(STORAGE_TYPE));
-		if(R == 6) {
+		if(R == 0) {
 			/*operate directly on result*/
 			/*clear all with same thoudsands place*/
 			for(jj = d0*1000; jj < (d0+1)*1000; ++jj) {
 				//printf("eliminating %u\n", jj);
-				result[jj/BPI] &= ~(1<<(jj%BPI));
+				CLEAR_BIT(result, jj);
 			}
 			/*clear all with same hundreds place*/
 			for(jj = 0; jj < 10; ++jj) {
@@ -105,7 +85,7 @@ int main(int argc, char const *argv[])
 					/*cross out everything with same hundreds place*/
 					for(kk = bin_index+(d1*100); kk < bin_index+((d1+1)*100); ++kk) {
 						//printf("eliminating %u\n", kk);
-						result[kk/BPI] &= ~(1<<(kk%BPI));
+						CLEAR_BIT(result, kk);
 					}
 				}
 			}
@@ -118,7 +98,7 @@ int main(int argc, char const *argv[])
 							bin_index = 1000*jj + 100*kk;
 							for(ll = bin_index+(d2*10); ll < bin_index+((d2+1)*10); ++ll)
 							//printf("eliminating %u\n", ll);
-							result[ll/BPI] &= ~(1<<(ll%BPI));
+							CLEAR_BIT(result, ll);
 						}
 					}
 				}
@@ -131,10 +111,8 @@ int main(int argc, char const *argv[])
 							for(ll = 0; ll < 10; ++ll) {
 								if(ll != d2) {
 									bin_index = 1000*jj + 100*kk + 10*ll + d3;
-									printf("eliminating %u\n", bin_index);
-									printf("before %lx, bit = %lu\n", result[bin_index/BPI], (result[bin_index/BPI]>>(bin_index%BPI) & 1) );
-									result[bin_index/BPI] &= ~(1<<(bin_index%BPI));
-									printf("after %lx, bit = %lu\n", result[bin_index/BPI], (result[bin_index/BPI]>>(bin_index%BPI) & 1));
+									//printf("eliminating %u\n", bin_index);
+									CLEAR_BIT(result, bin_index);
 								}
 							}
 						}
@@ -155,6 +133,10 @@ int main(int argc, char const *argv[])
 	cursor = result;
 	secret = 0;
 	ii = 0;
+	
+	for(jj = 0; jj < 10000; ++jj) {
+		printf("%lu :%lu\n", jj, GET_BIT(result, jj));
+	}
 	
 	// while(*cursor++ == 0) {++ii;}
 	// /*now result points to non zero block*/
