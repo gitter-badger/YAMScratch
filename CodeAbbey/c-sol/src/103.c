@@ -10,7 +10,7 @@ struct MaskData {
 	unsigned long key;	/*unique value*/
 	unsigned long value; /*value we use can use to compare objects*/
 	size_t len; /*number of bits set in mask*/
-	unsigned char* bits; /*array indicating which indices are set, is malloced and freed*/
+	unsigned* bits; /*array indicating which indices are set, is malloced and freed*/
 };
 
 #define MaskData_init(mask) \
@@ -38,7 +38,6 @@ VECTOR_INIT(struct_MaskData)
 		exit(-1);				\
 	}
 
-
 void print_MaskData(struct MaskData* m) {
 	printf("Key: %lu value: %lu\n", m->key, m->value);
 	/*printf("Len: %lu\n", m->len);*/
@@ -48,6 +47,32 @@ void print_MaskData(struct MaskData* m) {
 		printf("%u ", m->bits[ii]);
 	}
 	printf("\n");
+}
+
+#define BIT_ARRAY_REPR_TYPE char
+#define MASK_ACTIVE 1
+#define MASK_INACTIVE 0
+#define MASK_KEEP 10
+
+int remove_one(unsigned N, unsigned* bit_counts, unsigned* target_bit_counts,
+				unsigned lower_bound, unsigned* possible, struct MaskData* masks) {
+	unsigned ii, jj, kk;
+	/*check if this is a solution*/
+	unsigned n_possible;
+	n_possible = 0;
+	unsigned possible_take_away[N];
+	for(ii = lower_bound; ii < N; ++ii) {
+		if(possible[ii] == MASK_ACTIVE) {
+			for(jj = 0; jj < masks[ii].len; ++jj)
+				kk = masks[ii].bits[jj];
+				if(bit_counts[kk] == 1 && target_bit_counts[kk] == 1) {
+					/*we cannot take away any more*/
+					possible_take_away[n_possible] = ii;
+					++n_possible;
+			}
+		}
+	}
+	return 0;
 }
 
 int main(int argc, char const *argv[])
@@ -96,6 +121,7 @@ int main(int argc, char const *argv[])
 		fflush(stderr);
 		exit(-1);
 	}
+
 	fclose(stream);
 	/* Allocate a buffer to record which indices are set */
 	unsigned* index_buffer, *cursor;
@@ -138,6 +164,14 @@ int main(int argc, char const *argv[])
 		rc = fscanf(stream, "%u %c", &E, &colon);
 		/*check if input line has correct format*/
 		if(colon == ':') {
+			/*for the masks to make sense in the context of our problem
+			* where touching an egg at index I flips the bits given by XOR
+			* the mask with the current state vector, we cannot touch an egg
+			* outside of the the range*/
+			assert(E < N);
+			/*TODO: make strong check that the new mask does not overwrite 
+			* any of the previous masks, aka there should no be two rules 
+			* for touching the same egg */
 			tmp_mask.key = E;
 			/*walk over buffer starting from begining*/
 			cursor = index_buffer;
@@ -165,7 +199,7 @@ int main(int argc, char const *argv[])
 		/*check to see if pattern already exists*/
 		/*allocate an appropriate size buffer for the MaskData
 		* instance and copy valid contents of buff into*/
-		tmp_mask.bits = (unsigned char*)malloc(tmp_mask.len * sizeof(unsigned char));
+		tmp_mask.bits = (unsigned*)malloc(tmp_mask.len * sizeof(unsigned));
 		for(kk = 0; kk < tmp_mask.len; ++kk) {
 			tmp_mask.bits[kk] = index_buffer[kk];
 		}
@@ -178,10 +212,31 @@ int main(int argc, char const *argv[])
 	/*we wont use index_buffer again*/
 	free(index_buffer); index_buffer = NULL;
 	/*======END OF READING INPUT==========*/
-	/*======BEGIN SOLVING SYSTEM==========*/
+	struct MaskData* mask_buffer;
+	mask_buffer = (struct MaskData*)malloc(N * sizeof(struct MaskData));
+	NULL_CHECK(mask_buffer, "failed to allocate buffer for all masks");
+	/*allocate a buffer that marks masks as available*/
+	char* possible;
+	possible = (char*)malloc(N * sizeof(char));
+	NULL_CHECK(possible, "failed to allocate buffer for flags");
+	memset(possible, MASK_INACTIVE, N*sizeof(char));
+	/*copy all masks into an array that will act as set with contant tim
+	* lookup by mask.key == index*/
+	for(ii = 0; ii < _masks->elms ; ++ii) {
+		mask_buffer[_masks->items[ii].key] = _masks->items[ii];
+		possible[_masks->items[ii].key] = MASK_ACTIVE;
+	}
 
 	for(ii = 0; ii < N; ++ii) {
 		printf("Bit %u is flipped %u times\n", ii, metadata[ii*2+1]);
+		if(metadata[ii*2+1] == 1) {
+			if( ){
+				printf("must keep %u\n", metadata[ii*2]);
+				possible[ii] = MASK_KEEP;
+			} else
+				printf("must remove %u\n", metadata[ii*2]);
+
+		}
 	}
 	printf("\n");
 
