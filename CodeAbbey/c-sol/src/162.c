@@ -176,9 +176,9 @@ int main(int argc, char const *argv[])
 							/*not affected*/
 							break;
 						default: /*this will catch LEFT, RIGHT, FRONT, BACK*/
-							if(cell == 0 || cell == 7 || cell || 6) {
+							if(cell == 0 || cell == 7 || cell == 6) {
 								/*rotate faces of cells 0 7 6*/
-								new_face = (face + 1)%4;
+								new_face = (face+1) % 4;
 							}
 							break;
 					}
