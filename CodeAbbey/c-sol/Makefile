@@ -441,6 +441,11 @@ $(BIN)/128.out : $(SRC)/128.c
 $(BIN)/140.out : $(SRC)/140.c
 	$(CC) $(CFLAGS) -I $(INC) -lgmp $< -o $@
 
+162 : $(BIN)/162.out
+
+$(BIN)/162.out : $(SRC)/162.c
+	$(CC) $(CFLAGS) -I $(INC)  $< -o $@
+
 145 : $(BIN)/145.out
 
 $(BIN)/145.out : $(SRC)/145.c $(OBJ)/code_abbey_utility.o
