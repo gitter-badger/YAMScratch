@@ -46,9 +46,6 @@ Grid is flat array with grid index =
 	     \2 1 0\
 	      +-----+
 */
-
-
-
 int main(int argc, char const *argv[])
 {
 	/*simulate a rubiks cube*/
@@ -70,21 +67,29 @@ int main(int argc, char const *argv[])
 	grid_buffer = (unsigned*)malloc(CUBE_ORDER*6 *sizeof(unsigned));
 	NULL_CHECK(grid_buffer, "failed to allocate grid_buffer");
 	
-	//cube->num_tracked = CUBE_ORDER;
-	cube->num_tracked = CUBE_ORDER*6;
+	cube->num_tracked = CUBE_ORDER;
+	//cube->num_tracked = CUBE_ORDER*6;
 
 	cube->tracked = (unsigned*)malloc(cube->num_tracked * sizeof(unsigned));
 	
 
 	unsigned ii, jj;
 	for(ii = 0; ii < cube->num_tracked; ++ii) {
-		//cube->tracked[ii] = FRONT* CUBE_ORDER + ii;
+		cube->tracked[ii] = FRONT* CUBE_ORDER + ii;
 		/*initialize it to a value that is reconizable*/
-		//cube->grid[FRONT* CUBE_ORDER +ii] = 100 + ii;
+		cube->grid[FRONT* CUBE_ORDER +ii] = 100 + ii;
 
-		cube->tracked[ii] = ii;
-		cube->grid[ii] = ii*2;
+		//cube->tracked[ii] = ii;
+		//cube->grid[ii] = ii*2;
 	}
+	/*initialize the write buffer*/
+	errno = 0;
+	memcpy(grid_buffer, cube->grid, CUBE_ORDER*6*sizeof(unsigned));
+	if(errno != 0) {
+		perror("failed to copy grid buffer");
+		exit(-1);
+	}
+
 	char C;
 	unsigned face, cell, new_face, new_cell, rotation;
 	for(ii = 0; ii < N; ++ii) {
@@ -117,15 +122,6 @@ int main(int argc, char const *argv[])
 				fprintf(stderr, "recieved %c expected [U/D/L/R/F/B]\n", C);
 				exit(-1);
 		}
-		printf("rotation = %c %u\n", C, rotation);
-
-		/*initialize the write buffer*/
-		errno = 0;
-		memcpy(grid_buffer, cube->grid, CUBE_ORDER*6*sizeof(unsigned));
-		if(errno != 0) {
-			perror("failed to copy grid buffer");
-			exit(-1);
-		}
 		switch(rotation) {
 			case UP:
 				for(jj = 0; jj < cube->num_tracked; ++jj) {
@@ -135,7 +131,6 @@ int main(int argc, char const *argv[])
 					/*set the default*/
 					new_face = face;
 					new_cell = cell;
-					//printf("face %u cell %u maps to ", face, cell);
 					switch(face) {
 						case UP:
 							if(cell != 8) {
@@ -154,7 +149,6 @@ int main(int argc, char const *argv[])
 					}
 					grid_buffer[new_face*CUBE_ORDER + new_cell] = cube->grid[face*CUBE_ORDER + cell];
 					cube->tracked[jj] = new_face*CUBE_ORDER+new_cell;
-					//printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9  );					
 				}
 				break;
 			case DOWN:
@@ -165,7 +159,6 @@ int main(int argc, char const *argv[])
 					/*set the default*/
 					new_face = face;
 					new_cell = cell;
-					//printf("face %u cell %u maps to ", face, cell);
 					switch(face) {
 						case DOWN:
 							if(cell != 8) {
@@ -184,7 +177,6 @@ int main(int argc, char const *argv[])
 					}
 					grid_buffer[new_face*CUBE_ORDER + new_cell] = cube->grid[face*CUBE_ORDER + cell];
 					cube->tracked[jj] = new_face*CUBE_ORDER+new_cell;
-					//printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9  );
 				}
 				break;
 			case LEFT:
@@ -195,8 +187,7 @@ int main(int argc, char const *argv[])
 					/*set the default*/
 					new_face = face;
 					new_cell = cell;
-					//printf("face %u cell %u maps to ", face, cell);
-					switch(face) {
+								switch(face) {
 						case LEFT:
 							if(cell != 8) {
 								new_cell = (cell+2) % 8;
@@ -232,7 +223,6 @@ int main(int argc, char const *argv[])
 					}
 					grid_buffer[new_face*CUBE_ORDER + new_cell] = cube->grid[face*CUBE_ORDER + cell];
 					cube->tracked[jj] = new_face*CUBE_ORDER+new_cell;
-					//printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9 );
 				}
 				break;
 			case RIGHT:
@@ -243,7 +233,6 @@ int main(int argc, char const *argv[])
 					/*set the default*/
 					new_face = face;
 					new_cell = cell;
-					//printf("face %u cell %u maps to ", face, cell);
 					switch(face) {
 						case RIGHT:
 							if(cell != 8) {
@@ -280,7 +269,6 @@ int main(int argc, char const *argv[])
 					}
 					grid_buffer[(new_face*CUBE_ORDER) + new_cell] = cube->grid[(face*CUBE_ORDER) + cell];
 					cube->tracked[jj] = (new_face*CUBE_ORDER)+new_cell;
-					//printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9 );
 				}
 				break;
 				break;
@@ -292,7 +280,6 @@ int main(int argc, char const *argv[])
 					/*set the default*/
 					new_face = face;
 					new_cell = cell;
-					//printf("face %u cell %u maps to ", face, cell);
 					switch(face) {
 						case FRONT:
 							if(cell != 8) {
@@ -329,7 +316,6 @@ int main(int argc, char const *argv[])
 					}
 					grid_buffer[(new_face*CUBE_ORDER) + new_cell] = cube->grid[(face*CUBE_ORDER) + cell];
 					cube->tracked[jj] = (new_face*CUBE_ORDER)+new_cell;
-					//printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9 );
 				}
 				break;
 			case BACK:
@@ -340,7 +326,6 @@ int main(int argc, char const *argv[])
 					/*set the default*/
 					new_face = face;
 					new_cell = cell;
-					printf("face %u cell %u maps to ", face, cell);
 					switch(face) {
 						case BACK:
 							if(cell != 8) {
@@ -377,16 +362,45 @@ int main(int argc, char const *argv[])
 					}
 					grid_buffer[(new_face*CUBE_ORDER) + new_cell] = cube->grid[(face*CUBE_ORDER) + cell];
 					cube->tracked[jj] = (new_face*CUBE_ORDER)+new_cell;
-					printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9 );
 				}
 				break;
 		}
 		/*update the cube according to the write buffer*/
-		
+		memcpy(cube->grid, grid_buffer, CUBE_ORDER*6*sizeof(unsigned));
+	}
+	/*convert the numbering back from inner representation to given repr
+		+-----+    +-----+
+		|2 3 4|    |7 8 9|
+		|1 8 5| => |4 5 6|
+		|0 7 6|    |1 2 3|
+		+-----+    +-----+
+	*/
+	unsigned mapping[9] = {0 ,7 ,6, 1, 8, 5, 2 ,3, 4};
+	for(ii = 0; ii < cube->num_tracked; ++ii) {
+		face = cube->tracked[mapping[ii]];
+		face /= CUBE_ORDER;
+		switch(face) {
+			case 0:
+				C = 'L';
+				break;
+			case 1:
+				C = 'F';
+				break;
+			case 2:
+				C = 'R';
+				break;
+			case 3:
+				C = 'B';
+				break;
+			case 4:
+				C = 'U';
+				break;
+			case 5:
+				C = 'D';
+				break;
+		}
+		printf("%c ", C);
 	}
 	printf("\n");
 	return 0;
 }
-
-
-
