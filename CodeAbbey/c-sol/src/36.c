@@ -5,7 +5,8 @@
 #include <string.h>
 
 #define STORAGE_TYPE long
-#define BITS_PER_INDEX (8*sizeof(STORAGE_TYPE))
+/*#define BPI (8 * sizeof(STORAGE_TYPE)) */
+#define BPI 64
 #define NULL_CHECK(ptr, msg) 	\
 	if(ptr == NULL) {			\
 		perror(msg);			\
@@ -66,7 +67,8 @@ int main(int argc, char const *argv[])
 			/*operate directly on result*/
 			/*clear all with same thoudsands place*/
 			for(jj = d0*1000; jj < (d0+1)*1000; ++jj) {
-				result[jj/BITS_PER_INDEX] &= ~(1<<(jj%BITS_PER_INDEX));
+				//printf("eliminating %u\n", jj);
+				result[jj/BPI] &= ~(1<<(jj%BPI));
 			}
 			/*clear all with same hundreds place*/
 			for(jj = 0; jj < 10; ++jj) {
@@ -75,7 +77,8 @@ int main(int argc, char const *argv[])
 					bin_index = jj*1000;
 					/*cross out everything with same hundreds place*/
 					for(kk = bin_index+(d1*100); kk < bin_index+((d1+1)*100); ++kk) {
-						result[kk/BITS_PER_INDEX] &= ~(1<<(kk%BITS_PER_INDEX));
+						//printf("eliminating %u\n", kk);
+						result[kk/BPI] &= ~(1<<(kk%BPI));
 					}
 				}
 			}
@@ -87,7 +90,8 @@ int main(int argc, char const *argv[])
 						if(kk != d1) {
 							bin_index = 1000*jj + 100*kk;
 							for(ll = bin_index+(d2*10); ll < bin_index+((d2+1)*10); ++ll)
-							result[ll/BITS_PER_INDEX] &= ~(1<<(ll%BITS_PER_INDEX));
+							//printf("eliminating %u\n", ll);
+							result[ll/BPI] &= ~(1<<(ll%BPI));
 						}
 					}
 				}
@@ -100,7 +104,10 @@ int main(int argc, char const *argv[])
 							for(ll = 0; ll < 10; ++ll) {
 								if(ll != d2) {
 									bin_index = 1000*jj + 100*kk + 10*ll + d3;
-									result[bin_index/BITS_PER_INDEX] &= ~(1<<(bin_index%BITS_PER_INDEX));
+									printf("eliminating %u\n", bin_index);
+									printf("before %lu\n", (result[bin_index/BPI]>>(bin_index%BPI) & 1) );
+									result[bin_index/BPI] &= ~(1<<(bin_index%BPI));
+									printf("after %lu\n", (result[bin_index/BPI]>>(bin_index%BPI) & 1));
 								}
 							}
 						}
@@ -121,21 +128,27 @@ int main(int argc, char const *argv[])
 	cursor = result;
 	secret = 0;
 	ii = 0;
-	while(*cursor++ == 0) {++ii;}
-	/*now result points to non zero block*/
-	kk = 0;
-	printf("value %lu\n", result[ii]);
-	for(jj = 0; jj < BITS_PER_INDEX; ++jj) {
-		if(result[ii] & 1<<jj) {
-			++kk;
-			secret = jj;
-			printf("ii %u, jj %u\n", ii, jj );
-			printf("valid %lu\n", jj+(ii*BITS_PER_INDEX));
-		}
+	STORAGE_TYPE tmp;
+	for(jj = 0; jj < 10000; ++jj) {
+		tmp = 0;
+		tmp = result[jj/BPI];
+
+		tmp &= (1<<(jj%BPI));
+		printf("%lu %lu :%lu\n", jj/BPI, jj%BPI, tmp);
 	}
+	// while(*cursor++ == 0) {++ii;}
+	// /*now result points to non zero block*/
+	// kk = 0;
+	// printf("value %lu\n", result[ii]);
+	// for(jj = 0; jj < BPI; ++jj) {
+	// 	if(result[ii] & 1<<jj) {
+	// 		++kk;
+	// 		secret = jj;
+	// 		printf("ii %u, jj %u\n", ii, jj );
+	// 		printf("valid %lu\n", jj+(ii*BPI));
+	// 	}
+	// }
 	/*only one bit should be set*/
-	secret += ii * BITS_PER_INDEX;
-	printf("%u\n", secret);
 
 	free(result);
 	free(keep);
