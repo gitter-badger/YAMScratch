@@ -117,32 +117,118 @@ int main(int argc, char const *argv[])
 			}
 
 		} else if(R == 1) {
+			/*keep form of d0 ? ? ?*/
+			for(jj = 0; jj < 10; ++jj) {
+				if(jj != d1) {
+					for(kk = 0; kk < 10; ++kk) {
+						if(kk != d2) {
+							for(ll = 0; ll < 10; ++ll){
+								if(ll != d3) {
+									printf("keeping %u\n", (d0*1000 + jj*100 + kk*10 + ll));
+									SET_BIT(keep, (d0*1000 + jj*100 + kk*10 + ll));
+								}
+							}
+						}
+					}
+				}
+			}
+			/*keep form of ? d1 ? ?*/
+			for(jj = 0; jj < 10; ++jj) {
+				if(jj != d0) {
+					for(kk = 0; kk < 10; ++kk) {
+						if(kk != d2) {
+							for(ll = 0; ll < 10; ++ll){
+								if(ll != d3) {
+									printf("keeping %u\n", (jj*1000 + d1*100 + kk*10 + ll));
+									SET_BIT(keep, (jj*1000 + d1*100 + kk*10 + ll));
+								}
+							}
+						}
+					}
+				}
+			}
+			/*keep form of ? ? d2 ?*/
+			for(jj = 0; jj < 10; ++jj) {
+				if(jj != d0) {
+					for(kk = 0; kk < 10; ++kk) {
+						if(kk != d1) {
+							for(ll = 0; ll < 10; ++ll){
+								if(ll != d3) {
+									printf("keeping %u\n", (jj*1000 + kk*100 + d2*10 + ll));
+									SET_BIT(keep, (jj*1000 + kk*100 + d2*10 + ll));
+								}
+							}
+						}
+					}
+				}
+			}
+			/*keep form of ? ? ? d3*/
+			for(jj = 0; jj < 10; ++jj) {
+				if(jj != d0) {
+					for(kk = 0; kk < 10; ++kk) {
+						if(kk != d1) {
+							for(ll = 0; ll < 10; ++ll){
+								if(ll != d2) {
+									printf("keeping %u\n", (jj*1000 + kk*100 + ll*10 + d3));
+									SET_BIT(keep, (jj*1000 + kk*100 + ll*10 + d3));
+								}
+							}
+						}
+					}
+				}
+			}
+			/*now zero everybit we dont want to keep*/
+			for(jj = 0; jj < size_needed; ++jj) {
+				result[jj] &= keep[jj];
+			}
 
 		} else if (R == 2) {
+			/*keep form of d0 d1 ? ?*/
+			for(jj = 0; jj < 10; ++jj) {
+				if(jj != d3) {
+					for(kk = 0; kk < 10; ++kk) {
+						if(kk != d2) {
+							printf("keeping %u\n", (d0*1000 + d1*100 + jj*10 + kk));
+							SET_BIT(keep, (d0*1000 + d1*100 + jj*10 + kk));
+						}
+					}
+				}
+			}
+			/*keep form of d0 ? d2 ?*/
+			for(jj = 0; jj < 10; ++jj) {
+				if(jj != d3) {
+					for(kk = 0; kk < 10; ++kk) {
+						if(kk != d1) {
+							printf("keeping %u\n", (d0*1000 + kk*100 + d2*10 + jj));
+							SET_BIT(keep, (d0*1000 + d1*100 + jj*10 + kk));
+						}
+					}
+				}
+			}
 
 		} else if (R == 3) {
-
+			/*keep form of ? d1 d2 d3*/
 			for(jj= 0; jj < 10; ++jj) {
 				if(jj != d0) {
 					printf("keeping %u\n", (jj*1000 + d1*100 + d2*10 + d3));
 					SET_BIT(keep, (jj*1000 + d1*100 + d2*10 + d3));
 				}
 			}
-
+			/*keep form of d0 ? d2 d3*/
 			for(jj= 0; jj < 10; ++jj) {
 				if(jj != d1) {
 					printf("keeping %u\n", (d0*1000 + jj*100 + d2*10 + d3));
 					SET_BIT(keep, (d0*1000 + jj*100 + d2*10 + d3));
 				}
 			}
-
+			/*keep form of d0 d1 ? d3*/
 			for(jj= 0; jj < 10; ++jj) {
 				if(jj != d2) {
 					printf("keeping %u\n", (d0*1000 + d1*100 + jj*10 + d3));
 					SET_BIT(keep, (d0*1000 + d1*100 + jj*10 + d3));
 				}
 			}
-
+			/*keep form of d0 d1 d2 ?*/
 			for(jj= 0; jj < 10; ++jj) {
 				if(jj != d3) {
 					printf("keeping %u\n", (d0*1000 + d1*100 + d2*10 + jj));
