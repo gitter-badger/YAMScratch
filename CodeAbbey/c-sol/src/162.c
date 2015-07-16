@@ -33,17 +33,17 @@ Grid is flat array with grid index =
       +---+
 
           +-----+
-         /7 8 9/
-        /4 5 6/
-       /1 2 3/
+         /0 1 2/
+        /7 8 3/
+       /6 5 4/
 +-----+-----+-----+-----+
-|7 8 9|7 8 9|7 8 9|7 8 9|
-|4 5 6|4 5 6|4 5 6|4 5 6|
-|1 2 3|1 2 3|1 2 3|1 2 3|
+|2 3 4|2 3 4|2 3 4|2 3 4|
+|1 8 5|1 8 5|1 8 5|1 8 5|
+|0 7 6|0 7 6|0 7 6|0 7 6|
 +-----+-----+-----+-----+
-	   \7 8 9\
-	    \4 5 6\
-	     \1 2 3\
+	   \4 5 6\
+	    \3 8 7\
+	     \2 1 0\
 	      +-----+
 */
 
@@ -132,39 +132,24 @@ int main(int argc, char const *argv[])
 					face = cube->tracked[jj];
 					cell = face % CUBE_ORDER;
 					face /= CUBE_ORDER;
+					/*set the default*/
+					new_face = face;
+					new_cell = cell;
 					switch(face) {
 						case UP:
 							new_face = face;
-							if(cell%2 == 1) {
-								new_cell = (cell%8) +2;
-							}
-							switch(cell) {
-								case 1:
-									new_cell = 7;
-									break;
-								case 3:
-									new_cell = 1;
-									break;
-								case 7:
-									new_cell = 9;
-									break;
-								case 9:
-									new_cell = 3;
-									break;
+							if(cell == 8) {
+								cell = (cell+2) % 8;
 							}
 							break;
 						case DOWN:
 							/*not affected*/
-							new_face = face;
-							new_cell = cell;
 							break;
 						default: /*this will catch LEFT, RIGHT, FRONT, BACK*/
-							if(cell > 5) {
+							if(cell > 1 && cell < 5) {
+								/*rotate faces of cells 2 3 4*/
 								new_face = (face + 3)%4;
-							} else {
-								new_face = face;
 							}
-							new_cell = cell;
 							break;
 					}
 					grid_buffer[new_face*CUBE_ORDER + new_cell] = cube->grid[face*CUBE_ORDER + cell];
@@ -176,45 +161,30 @@ int main(int argc, char const *argv[])
 					face = cube->tracked[jj];
 					cell = face % CUBE_ORDER;
 					face /= CUBE_ORDER;
-					//printf("face %u cell %u maps to ", face, cell+1);
+					/*set the default*/
+					new_face = face;
+					new_cell = cell;
+					//printf("face %u cell %u maps to ", face, cell);
 					switch(face) {
 						case DOWN:
 							new_face = face;
-							if(cell%2 == 1) {
-								new_cell = (cell%8) +2;
-							}
-							switch(cell) {
-								case 1:
-									new_cell = 7;
-									break;
-								case 3:
-									new_cell = 1;
-									break;
-								case 7:
-									new_cell = 9;
-									break;
-								case 9:
-									new_cell = 3;
-									break;
+							if(cell != 8) {
+								new_cell = (cell+2) % 8;
 							}
 							break;
 						case UP:
 							/*not affected*/
-							new_face = face;
-							new_cell = cell;
 							break;
 						default: /*this will catch LEFT, RIGHT, FRONT, BACK*/
-							if(cell < 3) {
+							if(cell == 0 || cell == 7 || cell || 6) {
+								/*rotate faces of cells 0 7 6*/
 								new_face = (face + 1)%4;
-							} else {
-								new_face = face;
 							}
-							new_cell = cell;
 							break;
 					}
 					grid_buffer[new_face*CUBE_ORDER + new_cell] = cube->grid[face*CUBE_ORDER + cell];
 					cube->tracked[jj] = new_face*CUBE_ORDER+new_cell;
-					//printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9 +1 );
+					//printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9  );
 				}
 				break;
 			case LEFT:
@@ -222,85 +192,48 @@ int main(int argc, char const *argv[])
 					face = cube->tracked[jj];
 					cell = face % CUBE_ORDER;
 					face /= CUBE_ORDER;
-					//printf("face %u cell %u maps to ", face, cell+1);
+					/*set the default*/
+					new_face = face;
+					new_cell = cell;
+					//printf("face %u cell %u maps to ", face, cell);
 					switch(face) {
 						case LEFT:
 							new_face = face;
-							if(cell%2 == 1) {
-								new_cell = (cell%8) +2;
-							}
-							switch(cell) {
-								case 1:
-									new_cell = 7;
-									break;
-								case 3:
-									new_cell = 1;
-									break;
-								case 7:
-									new_cell = 9;
-									break;
-								case 9:
-									new_cell = 3;
-									break;
+							if(cell != 8) {
+								new_cell = (cell+2) % 8;
 							}
 							break;
 						case RIGHT:
 							/*not affected*/
-							new_face = face;
-							new_cell = cell;
 							break;
-						case BACK:
-							if(cell == 8) {
-								new_face = UP;
-								new_cell = 0;
-							} else if(cell == 5) {
-								new_face = UP;
-								new_cell = 3;
-							} else if(cell == 2) {
-								new_face = UP;
-								new_cell = 6;
-							} else {
-								new_face = face;
-								new_cell = cell;
+						case FRONT:
+							if(cell < 3) {
+								new_face = DOWN;
+								new_cell = (cell+2) % 8;
 							}
 							break;
 						case DOWN:
-							if(cell == 6) {
+							if(cell > 1 && cell < 5) {
 								new_face = BACK;
-								new_cell = 2;
-							} else if(cell == 3) {
-								new_face = BACK;
-								new_cell = 5;
-							} else if(cell == 0) {
-								new_face = BACK;
-								new_cell = 8;
-							} else {
-								new_face = face;
-								new_cell = cell;
+								new_cell = (cell+2) % 8;
 							}
-
 							break;
-						case FRONT:
-							if(cell == 6 || cell == 3 || cell == 0) {
-								new_face = DOWN;
-							} else {
-								new_face = face;
+						case BACK:
+							if(cell > 3 && cell < 7) {
+								new_face = UP;
+								new_cell = (cell+2) % 8;
 							}
-							new_cell = cell;
 							break;
 						case UP:
-							if(cell == 6 || cell == 3 || cell == 0) {
-								new_face = RIGHT;
-							} else {
-								new_face = face;
+							if(cell == 0 || cell == 6 || cell == 7) {
+								new_face = FRONT;
+								new_cell = (cell+2) % 8;
 							}
-							new_cell = cell;
 							break;
-
 					}
 					grid_buffer[new_face*CUBE_ORDER + new_cell] = cube->grid[face*CUBE_ORDER + cell];
 					cube->tracked[jj] = new_face*CUBE_ORDER+new_cell;
-					//printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9 +1 );
+					//printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9 );
 				}
 				break;
 			case RIGHT:
@@ -308,97 +241,47 @@ int main(int argc, char const *argv[])
 					face = cube->tracked[jj];
 					cell = face % CUBE_ORDER;
 					face /= CUBE_ORDER;
-					printf("face %u cell %u maps to ", face, cell+1);
+					/*set the default*/
+					new_face = face;
+					new_cell = cell;
+					printf("face %u cell %u maps to ", face, cell);
 					switch(face) {
 						case RIGHT:
-							new_face = face;
-							switch(cell) {
-								case 0:
-									new_cell = 6;
-									break;
-								case 1:
-									new_cell = 3;
-									break;
-								case 2:
-									new_cell = 0;
-									break;
-								case 3:
-									new_cell = 7;
-									break;
-								case 4:
-									new_cell = cell;
-									break;
-								case 5:
-									new_cell = 1;
-									break;
-								case 6:
-									new_cell = 8;
-									break;
-								case 7:
-									new_cell = 5;
-									break;
-								case 8:
-									new_cell = 2;
-									break;
+							if(cell != 8) {
+								new_cell = (cell+2) % 8;
 							}
 							break;
 						case LEFT:
 							/*not affected*/
-							new_face = face;
-							new_cell = cell;
-							break;
-						case UP:
-							if(cell == 8) {
-								new_face = BACK;
-								new_cell = 0;
-							} else if(cell == 5) {
-								new_face = BACK;
-								new_cell = 3;
-							} else if(cell == 2) {
-								new_face = BACK;
-								new_cell = 6;
-							} else {
-								new_face = face;
-								new_cell = cell;
-							}
 							break;
 						case BACK:
-							if(cell == 6) {
+							if(cell < 3) {
 								new_face = DOWN;
-								new_cell = 2;
-							} else if(cell == 3) {
-								new_face = DOWN;
-								new_cell = 5;
-							} else if(cell == 0) {
-								new_face = DOWN;
-								new_cell = 8;
-							} else {
-								new_face = face;
-								new_cell = cell;
+								new_cell = (cell+6) % 8;
 							}
-
 							break;
 						case DOWN:
-							if(cell == 8 || cell == 5 || cell == 2) {
+							if(cell == 0 || cell == 7 || cell == 6) {
 								new_face = FRONT;
-							} else {
-								new_face = face;
+								new_cell = (cell+6) % 8;
 							}
-							new_cell = cell;
 							break;
 						case FRONT:
-							if(cell == 8 || cell == 5 || cell == 2) {
+							if(cell > 3 && cell < 7) {
 								new_face = UP;
-							} else {
-								new_face = face;
+								new_cell = (cell+6) % 8;
 							}
-							new_cell = cell;
 							break;
-
+						case UP:
+							if(cell > 1 && cell < 5) {
+								new_face = BACK;
+								new_cell = (cell+6) % 8;
+							}
+							break;
 					}
 					grid_buffer[(new_face*CUBE_ORDER) + new_cell] = cube->grid[(face*CUBE_ORDER) + cell];
 					cube->tracked[jj] = (new_face*CUBE_ORDER)+new_cell;
-					printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9 +1 );
+					printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9 );
 				}
 				break;
 				break;
