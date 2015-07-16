@@ -381,6 +381,11 @@ $(BIN)/71.out : $(SRC)/71.c
 $(BIN)/72.out : $(SRC)/72.c $(OBJ)/code_abbey_utility.o
 	$(CC) $(CFLAGS) -I $(INC) $^ -o $@
 
+75 : $(BIN)/75.out
+
+$(BIN)/75.out : $(SRC)/75.c
+	$(CC) $(CFLAGS) -I $(INC) -Wno-unused-function $< -o $@
+
 81 : $(BIN)/81.out
 
 $(BIN)/81.out : $(SRC)/81.c

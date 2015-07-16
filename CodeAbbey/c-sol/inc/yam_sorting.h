@@ -6,7 +6,7 @@ extern "C" {
 #define YAM_QUICKSORT 
 
 #define QUICKSORT_INIT(TYPE) \
-	void yam_quicksort_##TYPE(TYPE * list, unsigned left, unsigned right, unsigned (*less_than)(TYPE*, TYPE*)) {\
+	static void yam_quicksort_##TYPE(TYPE * list, unsigned left, unsigned right, unsigned (*less_than)(TYPE*, TYPE*)) {\
 		/*find recursive case when len(list) > 3*/							\
 		unsigned ii, jj;													\
 		TYPE* pivot;														\
