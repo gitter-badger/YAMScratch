@@ -195,7 +195,7 @@ int main(int argc, char const *argv[])
 					/*set the default*/
 					new_face = face;
 					new_cell = cell;
-					//printf("face %u cell %u maps to ", face, cell);
+					printf("face %u cell %u maps to ", face, cell);
 					switch(face) {
 						case LEFT:
 							new_face = face;
@@ -233,7 +233,7 @@ int main(int argc, char const *argv[])
 					}
 					grid_buffer[new_face*CUBE_ORDER + new_cell] = cube->grid[face*CUBE_ORDER + cell];
 					cube->tracked[jj] = new_face*CUBE_ORDER+new_cell;
-					//printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9 );
+					printf(" face %u cell %u\n", cube->tracked[jj]/9, cube->tracked[jj]%9 );
 				}
 				break;
 			case RIGHT:
