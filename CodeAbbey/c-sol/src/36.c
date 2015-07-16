@@ -74,7 +74,6 @@ int main(int argc, char const *argv[])
 			/*operate directly on result*/
 			/*clear all with same thoudsands place*/
 			for(jj = d0*1000; jj < (d0+1)*1000; ++jj) {
-				//printf("eliminating %u\n", jj);
 				CLEAR_BIT(result, jj);
 			}
 			/*clear all with same hundreds place*/
@@ -84,7 +83,6 @@ int main(int argc, char const *argv[])
 					bin_index = jj*1000;
 					/*cross out everything with same hundreds place*/
 					for(kk = bin_index+(d1*100); kk < bin_index+((d1+1)*100); ++kk) {
-						//printf("eliminating %u\n", kk);
 						CLEAR_BIT(result, kk);
 					}
 				}
@@ -97,7 +95,6 @@ int main(int argc, char const *argv[])
 						if(kk != d1) {
 							bin_index = 1000*jj + 100*kk;
 							for(ll = bin_index+(d2*10); ll < bin_index+((d2+1)*10); ++ll)
-							//printf("eliminating %u\n", ll);
 							CLEAR_BIT(result, ll);
 						}
 					}
@@ -111,7 +108,6 @@ int main(int argc, char const *argv[])
 							for(ll = 0; ll < 10; ++ll) {
 								if(ll != d2) {
 									bin_index = 1000*jj + 100*kk + 10*ll + d3;
-									//printf("eliminating %u\n", bin_index);
 									CLEAR_BIT(result, bin_index);
 								}
 							}
@@ -126,6 +122,37 @@ int main(int argc, char const *argv[])
 
 		} else if (R == 3) {
 
+			for(jj= 0; jj < 10; ++jj) {
+				if(jj != d0) {
+					printf("keeping %u\n", (jj*1000 + d1*100 + d2*10 + d3));
+					SET_BIT(keep, (jj*1000 + d1*100 + d2*10 + d3));
+				}
+			}
+
+			for(jj= 0; jj < 10; ++jj) {
+				if(jj != d1) {
+					printf("keeping %u\n", (d0*1000 + jj*100 + d2*10 + d3));
+					SET_BIT(keep, (d0*1000 + jj*100 + d2*10 + d3));
+				}
+			}
+
+			for(jj= 0; jj < 10; ++jj) {
+				if(jj != d2) {
+					printf("keeping %u\n", (d0*1000 + d1*100 + jj*10 + d3));
+					SET_BIT(keep, (d0*1000 + d1*100 + jj*10 + d3));
+				}
+			}
+
+			for(jj= 0; jj < 10; ++jj) {
+				if(jj != d3) {
+					printf("keeping %u\n", (d0*1000 + d1*100 + d2*10 + jj));
+					SET_BIT(keep, (d0*1000 + d1*100 + d2*10 + jj));
+				}
+			}
+			/*now zero everybit we dont want to keep*/
+			for(jj = 0; jj < size_needed; ++jj) {
+				result[jj] &= keep[jj];
+			}
 		}
 	}
 	/*find the first non zero block, then find which bit is set*/
