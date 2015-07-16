@@ -102,8 +102,16 @@ def main():
 	gen = input_closure(K_bits)
 	bit_counts = count_set_bits(unique, N)
 	#recursive call
+	a = [1, 2, 5, 7, 8, 9, 13, 15]
+	b = [m for m in unique if m.key in a]
+	tmp = 0;
+	for elm in b:
+		tmp ^= elm.value
 
-	remove_one(K, gen, bit_counts, unique)
+	print tmp
+	print K
+
+	#remove_one(K, gen, bit_counts, unique)
 
 
 if __name__ == '__main__':
