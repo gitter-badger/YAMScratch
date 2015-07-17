@@ -14,17 +14,6 @@ struct MaskData {
 	unsigned* bits; /*array indicating which indices are set, is malloced and freed*/
 };
 
-#define MaskData_init(mask) \
-	mask.key = 0;			\
-	mask.value = 0;			\
-	mask.len = 0;			\
-	mask.bits = NULL;
-
-#define MaskData_clear(mask) 	\
-	if(mask.bits != NULL) {		\
-		free(mask.bits);		\
-	}
-
 /*make single token name for use in TYPE macros*/
 typedef struct MaskData struct_MaskData;
 
@@ -48,7 +37,6 @@ void print_MaskData(struct MaskData* m) {
 	printf("\n");
 }
 
-#define BIT_ARRAY_REPR_TYPE char
 #define MASK_ACTIVE 'A'
 #define MASK_INACTIVE 'X'
 #define MASK_KEEP 'K'
@@ -357,10 +345,9 @@ int main(int argc, char const *argv[])
 				}
 			}
 		}
-		printf("%s\n", possible);
-		printf("removed %u\n", removed);
 	} while(removed != 0);
-	
+	printf("After first pass filtering:\n\t%s", possible);
+
 	printf("\n");
 	return 0;
 }
