@@ -49,9 +49,9 @@ void print_MaskData(struct MaskData* m) {
 }
 
 #define BIT_ARRAY_REPR_TYPE char
-#define MASK_ACTIVE 1
-#define MASK_INACTIVE 0
-#define MASK_KEEP 10
+#define MASK_ACTIVE 'A'
+#define MASK_INACTIVE 'X'
+#define MASK_KEEP 'K'
 
 /*========================================================*/
 struct MetaData {
@@ -245,7 +245,6 @@ int main(int argc, char const *argv[])
 	/*keep track total bits set for building the metadata offset table*/
 
 	for(ii = 0; ii < N; ++ii) {
-		printf("iteration %u\n", ii);
 		lineptr = NULL;
 		nbytes = 0;
 		errno = 0;
@@ -310,37 +309,55 @@ int main(int argc, char const *argv[])
 	}
 	/*we wont use index_buffer again*/
 	free(index_buffer); index_buffer = NULL;
+	/*======END OF READING INPUT==========*/
 	struct MetaData meta;
 	MetaData_init(&meta, N, bit_counts, mask_buffer, N);
 	print_MetaData(&meta);
-	/*======END OF READING INPUT==========*/
 	
 	/*allocate a buffer that marks masks as available*/
 	char* possible;
-	possible = (char*)malloc(N * sizeof(char));
+	possible = (char*)malloc((N+1) * sizeof(char));
 	NULL_CHECK(possible, "failed to allocate buffer for flags");
-	memset(possible, MASK_INACTIVE, N*sizeof(char));
+	memset(possible, MASK_ACTIVE, N*sizeof(char));
+	/*null terminate so we can print it directly for debugging*/
+	possible[N] = '\0';
 	
 	/*remove any masks that are the only one to set the bit
 	* only masks that are possible to be removed */
 	unsigned removed;
+	MetaData_iterator md_iter, end;
 	do {
 		removed = 0;
 		for(ii = 0; ii < N; ++ii) {
 			if(bit_counts[ii] == 1) {
-				/*find mask which sets this bit*/
-
+				/*find mask which sets this bit:
+				* so first get the bin of all masks that set this
+				* and find the one that is marked active*/
+				md_iter = MetaData_row_start(&meta, ii);
+				end = MetaData_row_end(&meta, ii);
+				for(; md_iter != end; ++md_iter) {
+					if(possible[*md_iter] != MASK_INACTIVE) {
+						break;
+					}
+				}
+				if(possible[*md_iter] == MASK_KEEP) {
+					continue;
+				}
 				
-				if(target_bits[ii] == 1 && possible[ii] == MASK_ACTIVE){
+				if(target_bits[ii] == 1){
 					possible[ii] = MASK_KEEP;
 					++removed;
 				} else {
 					possible[ii] = MASK_INACTIVE;
 					/*change the bit counts in metadata to reflect change*/
-					//mask_total_bit_counts
+					for(jj = 0; jj < mask_buffer[*md_iter].len; ++jj) {
+						--bit_counts[mask_buffer[*md_iter].bits[jj]];
+					}
+					++removed;
 				}
 			}
 		}
+		printf("%s\n", possible);
 		printf("removed %u\n", removed);
 	} while(removed != 0);
 	
