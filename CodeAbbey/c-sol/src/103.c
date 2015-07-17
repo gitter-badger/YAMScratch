@@ -6,6 +6,8 @@
 #include <string.h>
 
 #include "yam_vector.h"
+#include "code_abbey_utility.h"
+#include "yam_sorting.h"
 
 struct MaskData {
 	unsigned long key;	/*unique value*/
@@ -14,11 +16,45 @@ struct MaskData {
 	unsigned* bits; /*array indicating which indices are set, is malloced and freed*/
 };
 
+unsigned less_than(struct MaskData** A, struct MaskData** B) {
+	unsigned result = 0;
+	/*use the key as the */
+	if(*A->value < *B->value) {
+		return 1;
+	} else if(*A->value > *B->value) {
+		return 0;
+	} else {
+		/*if the keys are the same, check the length*/
+		if(*A->len < *B->len) {
+			return 1;
+		} else if(*A->len > *B->len) {
+			return 0;
+		} else {
+			/*check the values for the array*/
+			long checksumA, checksumB;
+			int rc;
+			unsigned ii;
+			for(ii = 0; ii < *A->len; ++ ii) {
+				checksumA += *A->bits[ii];
+				checksumA *= 113;
+				checksumA %= 10000007;
+				checksumB += *B->bits[ii];
+				checksumB *= 113;
+				checksumB %= 10000007;
+			}
+			/*make sure A<B and B< A both are true*/
+			return (checksumA <= checksumB) ? 1 : 0;
+		}
+	}
+}
+
 /*make single token name for use in TYPE macros*/
 typedef struct MaskData struct_MaskData;
+typedef struct MaskData* MaskData_ptr;
 
 VECTOR_INIT(struct_MaskData)
 VECTOR_INIT(unsigned)
+QUICKSORT_INIT(MaskData_ptr)
 
 #define NULL_CHECK(ptr, msg) 	\
 	if(ptr == NULL) {			\
@@ -96,15 +132,17 @@ void MetaData_init(struct MetaData* md, unsigned bins, unsigned* bin_counts,
 	NULL_CHECK(temp_offsets, "failed to allocate temp buffer");
 	for(ii = 0; ii < len_mask_buff; ++ii) {
 		for(jj = 0; jj < mask_buff[ii].len; ++jj) {
-
-			tmp_key = mask_buff[ii].bits[jj];
-			/*make sure bit number is within range of bits metadata
-			* is keeping track of*/
-			assert(tmp_key < md->bins);
-			kk = temp_offsets[tmp_key] + md->offsets[tmp_key];
-			assert(kk < md->offsets[tmp_key+1]);
-			md->grid[kk] = ii;
-			temp_offsets[tmp_key]++;
+			/*ignore empty masks*/
+			if(mask_buff[ii].len > 0) {
+				tmp_key = mask_buff[ii].bits[jj];
+				/*make sure bit number is within range of bits metadata
+				* is keeping track of*/
+				assert(tmp_key < md->bins);
+				kk = temp_offsets[tmp_key] + md->offsets[tmp_key];
+				assert(kk < md->offsets[tmp_key+1]);
+				md->grid[kk] = ii;
+				temp_offsets[tmp_key]++;
+			}
 		}
 	}
 	/*make sure metadata is internally consistant:
@@ -298,6 +336,7 @@ int main(int argc, char const *argv[])
 	/*we wont use index_buffer again*/
 	free(index_buffer); index_buffer = NULL;
 	/*======END OF READING INPUT==========*/
+	/*remove duplicates*/
 	struct MetaData meta;
 	MetaData_init(&meta, N, bit_counts, mask_buffer, N);
 	print_MetaData(&meta);
@@ -345,6 +384,7 @@ int main(int argc, char const *argv[])
 				}
 			}
 		}
+		printf("removed %u\n",  removed);
 	} while(removed != 0);
 	printf("After first pass filtering:\n\t%s", possible);
 
