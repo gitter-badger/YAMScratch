@@ -290,20 +290,14 @@ int main(int argc, char const *argv[])
 	possible = (char*)malloc(N * sizeof(char));
 	NULL_CHECK(possible, "failed to allocate buffer for flags");
 	memset(possible, MASK_INACTIVE, N*sizeof(char));
-	/*copy all masks into an array that will act as set with contant tim
-	* lookup by mask.key == index*/
-	for(ii = 0; ii < _masks->elms ; ++ii) {
-		/*we have already asserted that each key is less than N*/
-		mask_buffer[_masks->items[ii].key] = _masks->items[ii];
-		possible[_masks->items[ii].key] = MASK_ACTIVE;
-	}
+	
 	/*remove any masks that are the only one to set the bit
 	* only masks that are possible to be removed */
 	unsigned removed;
 	do {
 		removed = 0;
 		for(ii = 0; ii < N; ++ii) {
-			if(mask_total_bit_counts[ii] == 1) {
+			if(bit_counts[ii] == 1) {
 				/*find mask which sets this bit*/
 
 				
@@ -313,7 +307,7 @@ int main(int argc, char const *argv[])
 				} else {
 					possible[ii] = MASK_INACTIVE;
 					/*change the bit counts in metadata to reflect change*/
-					mask_total_bit_counts
+					//mask_total_bit_counts
 				}
 			}
 		}
@@ -321,14 +315,5 @@ int main(int argc, char const *argv[])
 	} while(removed != 0);
 	
 	printf("\n");
-
-	/*free each of the MaskData bits arrays*/
-	for(ii = 0; ii < _masks->elms; ++ii) {
-		print_MaskData(&_masks->items[ii]);
-		printf("\n");
-		MaskData_clear(_masks->items[ii]);
-	}
-	vector_destroy(struct_MaskData, _masks);
-	free
 	return 0;
 }
