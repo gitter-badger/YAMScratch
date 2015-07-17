@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>
+#include <string.h>
 
 #include "yam_vector.h"
 
@@ -28,9 +29,7 @@ struct MaskData {
 typedef struct MaskData struct_MaskData;
 
 VECTOR_INIT(struct_MaskData)
-
-/*becuse we are using a long as a bitmask*/
-#define MAX_BITS 64
+VECTOR_INIT(unsigned)
 
 #define NULL_CHECK(ptr, msg) 	\
 	if(ptr == NULL) {			\
@@ -54,6 +53,88 @@ void print_MaskData(struct MaskData* m) {
 #define MASK_INACTIVE 0
 #define MASK_KEEP 10
 
+/*========================================================*/
+struct MetaData {
+	unsigned bins;
+	unsigned* offsets; /*has bins + 1 total elements*/
+	unsigned* grid;
+};
+typedef unsigned* MetaData_iterator;
+
+MetaData_iterator MetaData_row_start(struct MetaData* md, unsigned row) {
+	/*sanity check*/
+	if(row > md->bins) {
+		return NULL;
+	}
+	return md->grid + md->offsets[row];
+}
+
+MetaData_iterator MetaData_row_end(struct MetaData* md, unsigned row) {
+	if(row > md->bins) {
+		return NULL;
+	}
+	return md->grid + md->offsets[row+1];
+}
+
+void MetaData_init(struct MetaData* md, unsigned bins, unsigned* bin_counts, 
+					struct MaskData* mask_buff, unsigned len_mask_buff) {
+	/*sanity checks*/
+	NULL_CHECK(md, "NULL ptr: cannot initialize a null pointer");
+	NULL_CHECK(bin_counts, "NULL ptr: must pass a valid bin array");
+	NULL_CHECK(mask_buff, "NULL ptr: must pass a valid MaskData array");
+	if(len_mask_buff == 0) return;
+	if(bins == 0) return;
+	unsigned ii, jj, kk, total, tmp_key;
+	md->bins = bins;
+	errno = 0;
+	md->offsets = (unsigned*)malloc((bins+1) * sizeof(unsigned));
+	NULL_CHECK(md->offsets, "failed to allocate metadata offset buffer");
+	/*compute the total number of grid elements to allocate*/
+	total = 0;
+	for(ii = 0; ii < bins; ++ii) {
+		md->offsets[ii] = total;
+		total += bin_counts[ii];
+	}
+	/*and get last one*/
+	md->offsets[ii] = total;
+
+	errno = 0;
+	md->grid = (unsigned*)malloc(total * sizeof(unsigned));
+	NULL_CHECK(md->grid, "failed to allocate metadata grid table");
+	/*create a temporary offset table to keep track of insertions*/
+	unsigned* temp_offsets;
+	errno = 0;
+	temp_offsets = (unsigned*)calloc(md->bins, sizeof(unsigned));
+	NULL_CHECK(temp_offsets, "failed to allocate temp buffer");
+	for(ii = 0; ii < len_mask_buff; ++ii) {
+		for(jj = 0; mask_buff[ii].len; ++jj) {
+			tmp_key = mask_buff[ii].bits[jj];
+			/*make sure bit number is within range of bits metadata
+			* is keeping track of*/
+			assert(tmp_key < md->bins);
+			kk = temp_offsets[tmp_key] + md->offsets[tmp_key];
+			assert(kk < md->offsets[tmp_key+1]);
+			md->grid[kk] = tmp_key;
+			temp_offsets[tmp_key]++;
+		}
+	}
+	/*make sure metadata is internally consistant:
+	* the number of elements set in the preceding step should match
+	* exactly with the size of each bin in the grid*/
+	for(ii = 0; ii < md->bins; ++ii) {
+		assert(temp_offsets[ii] == (md->offsets[ii+1] - md->offsets[ii]));
+	}
+}
+
+void print_MetaData(struct MetaData* md) {
+	unsigned ii;
+	if(md == NULL) {
+		return;
+	}
+
+}
+/*===============================================================*/
+
 int remove_one(unsigned N, unsigned* bit_counts, unsigned* target_bit_counts,
 				unsigned lower_bound, unsigned* possible, struct MaskData* masks) {
 	unsigned ii, jj, kk;
@@ -75,34 +156,40 @@ int remove_one(unsigned N, unsigned* bit_counts, unsigned* target_bit_counts,
 	return 0;
 }
 
-int main(int argc, char const *argv[])
-{
-	int rc;
-	unsigned ii, jj, kk, A, K, E, T;
-	unsigned long N;
-	/*read first line with unknown length of data*/
-	char * lineptr;
+int stream_from_single_line(FILE* in_stream, FILE ** out_stream) {
+	char* lineptr;
 	size_t nbytes;
 	ssize_t bytes_read;
-	FILE * stream;
 	lineptr = NULL;
 	nbytes = 0;
 	errno = 0;
-	bytes_read = getline(&lineptr, &nbytes, stdin);
+	bytes_read = getline(&lineptr, &nbytes, in_stream);
 	if(bytes_read < 0) {
 		/*this checks for when there is only EOF */
-		perror("EOF reached before proper input could be processed");
-		exit(-1);
-	} else if(bytes_read == 1) {
-		/*check for empty line which should not happen*/
-		if(*lineptr == '\n') {
-			perror("Lines should not be empty");
-			exit(-1);
-		}
+		return EOF;
 	}
-	stream = fmemopen(lineptr, bytes_read, "r");
+	*out_stream = fmemopen(lineptr, bytes_read, "r");
+	free(lineptr);
+}
+
+int main(int argc, char const *argv[])
+{
+	int rc;
+	unsigned ii, jj, kk, A, TV, E, T, total_bits_set;
+	unsigned long N;
+	/*read first line with unknown length of data*/
+	FILE * stream;
+	rc = stream_from_single_line(stdin, &stream);
+	if(rc == EOF) {
+		perror("end of input reached before expected");
+		exit(-1);
+	}
+	Vector_t(unsigned)* _target_set_bits;
+	_target_set_bits = newVector(unsigned);
+	NULL_CHECK(_target_set_bits, "failed to allocate new vector");
+
 	N = 0;
-	K = 0;
+	TV = 0;
 	for(;;) {
 		rc = fscanf(stream," %u ", &A);
 		if(rc == EOF) {
@@ -111,53 +198,45 @@ int main(int argc, char const *argv[])
 		/*A should be 1 or zero*/
 		assert(A < 2);
 		/*this stores K as little endian, position 0 is represented by the low bit*/
-		K |= A<<N;
+		vector_push_back(unsigned, _target_set_bits, A);
 		++N;
 	}
-	if(N > MAX_BITS) {
-		/*we cannot represent more than 64 bits using long
-		* so we must give an error in this implementation*/
-		fprintf(stderr, "More than 64 states given by input\n");
-		fflush(stderr);
-		exit(-1);
+	fclose(stream);
+	/*use an array for programming convience to represent which
+	* bits of the target value are set*/
+	unsigned* target_bits;
+	target_bits = (unsigned*)malloc(N*sizeof(unsigned));
+	NULL_CHECK(target_bits, "failed to allocate target bit buffer");
+	for(ii = 0; ii < N; ++ii) {
+		if( _target_set_bits->items[ii] == 1) {
+			target_bits[ii] = 1;
+		} else {
+			target_bits[ii] = 0;
+		}
 	}
 
-	fclose(stream);
-	/* Allocate a buffer to record which indices are set */
-	unsigned* index_buffer, *cursor;
+	/* Allocate a buffer to record which indices are set 
+	* for use in reading in each mask below*/
+	unsigned* index_buffer, *cursor, * bit_counts;
 	index_buffer = (unsigned*)malloc(N* sizeof(unsigned));
 	NULL_CHECK(index_buffer, "failed to allocate a buffer")
-	char* metadata;
 	errno = 0;
-	metadata = (char*)calloc(2*N, sizeof(char));
-	NULL_CHECK(metadata, "failed to allocate metadata buffer")
+	bit_counts = (unsigned*)calloc(N, sizeof(unsigned));
+	NULL_CHECK(bit_counts, "failed to allocate metadata buffer")
 	/*
 	* Store each masks, we will only read up to N masks from the file,
 	* this is the defined input format 
 	*/
-	Vector_t(struct_MaskData)* _masks;
-	_masks = newVector(struct_MaskData);
-	/*read in the N masks*/
-	struct MaskData tmp_mask;
-	MaskData_init(tmp_mask);
+	struct MaskData* mask_buffer;
+	mask_buffer = (struct MaskData*)malloc(N * sizeof(struct MaskData));
+	NULL_CHECK(mask_buffer, "failed to allocate buffer for all masks");
+	/*keep track total bits set for building the metadata offset table*/
 	for(ii = 0; ii < N; ++ii) {
-		/*clears*/
-		errno = 0;
-		bytes_read = getline(&lineptr, &nbytes, stdin);
-		if(bytes_read < 0) {
-			/*this checks for when there is only EOF */
+		rc = stream_from_single_line(stdin, &stream);
+		if(rc == EOF) {
+			/*no more data from stream coming*/
 			break;
-		} else if(bytes_read == 1) {
-			/*check for empty line which should not happen*/
-			if(*lineptr == '\n') {
-				continue;
-			}
 		}
-		stream = fmemopen(lineptr, bytes_read, "r");
-		/*find the index of the rule, these can be out of order
-		* and the last rule present will overwrite all previous ones
-		* silently
-		*/
 		char colon;
 		/*make sure that each line begins with an index and then
 		* the colon character delimeter follows*/
@@ -172,49 +251,40 @@ int main(int argc, char const *argv[])
 			/*TODO: make strong check that the new mask does not overwrite 
 			* any of the previous masks, aka there should no be two rules 
 			* for touching the same egg */
-			tmp_mask.key = E;
+			mask_buffer[ii].key = E;
 			/*walk over buffer starting from begining*/
 			cursor = index_buffer;
-			/*the below code depends on these two fields beign zeroed*/
-			tmp_mask.len = 0;
-			tmp_mask.value = 0;
-			for(jj = 0; jj < MAX_BITS; ++jj) {
+			/*the below code depends on these two fields being zeroed*/
+			mask_buffer[ii].len = 0;
+			mask_buffer[ii].value = 0;
+			for(;;) {
 				rc = fscanf(stream," %u ", &A);
 				if(rc == EOF) {
 					break;
 				}
-				/*make sure shift will fit in mask, and prevents walking off
-				* edge of array*/
-				assert(A < MAX_BITS);
-				tmp_mask.value |= 1<<A;
-				tmp_mask.len++;
+				/*value will be pretty useless if there are more than 64 masks*/
+				mask_buffer[ii].value |= 1<<A;
+				mask_buffer[ii].len++;
 				/*store and advance buffer*/
 				*cursor++ = A;
-				if(metadata[2*A+1]++ == 0) {
-					metadata[2*A] = E;
-				}
+				bit_counts[A]++;
 			}
 		}
 		fclose(stream);
 		/*check to see if pattern already exists*/
 		/*allocate an appropriate size buffer for the MaskData
 		* instance and copy valid contents of buff into*/
-		tmp_mask.bits = (unsigned*)malloc(tmp_mask.len * sizeof(unsigned));
-		for(kk = 0; kk < tmp_mask.len; ++kk) {
-			tmp_mask.bits[kk] = index_buffer[kk];
+		mask_buffer[ii].bits = (unsigned*)malloc(mask_buffer[ii].len * sizeof(unsigned));
+		NULL_CHECK(mask_buffer[ii].bits, "failed to allocate mask bit count");
+		for(kk = 0; kk < mask_buffer[ii].len; ++kk) {
+			mask_buffer[ii].bits[kk] = index_buffer[kk];
 		}
-		vector_push_back(struct_MaskData, _masks, tmp_mask);
+
 	}
-	/*clean up the tmp_mask so we do not accidently free data belonging to
-	* object inside the vector*/
-	tmp_mask.bits = NULL;
-	free(lineptr);
 	/*we wont use index_buffer again*/
 	free(index_buffer); index_buffer = NULL;
 	/*======END OF READING INPUT==========*/
-	struct MaskData* mask_buffer;
-	mask_buffer = (struct MaskData*)malloc(N * sizeof(struct MaskData));
-	NULL_CHECK(mask_buffer, "failed to allocate buffer for all masks");
+	
 	/*allocate a buffer that marks masks as available*/
 	char* possible;
 	possible = (char*)malloc(N * sizeof(char));
@@ -223,21 +293,33 @@ int main(int argc, char const *argv[])
 	/*copy all masks into an array that will act as set with contant tim
 	* lookup by mask.key == index*/
 	for(ii = 0; ii < _masks->elms ; ++ii) {
+		/*we have already asserted that each key is less than N*/
 		mask_buffer[_masks->items[ii].key] = _masks->items[ii];
 		possible[_masks->items[ii].key] = MASK_ACTIVE;
 	}
+	/*remove any masks that are the only one to set the bit
+	* only masks that are possible to be removed */
+	unsigned removed;
+	do {
+		removed = 0;
+		for(ii = 0; ii < N; ++ii) {
+			if(mask_total_bit_counts[ii] == 1) {
+				/*find mask which sets this bit*/
 
-	for(ii = 0; ii < N; ++ii) {
-		printf("Bit %u is flipped %u times\n", ii, metadata[ii*2+1]);
-		if(metadata[ii*2+1] == 1) {
-			if( ){
-				printf("must keep %u\n", metadata[ii*2]);
-				possible[ii] = MASK_KEEP;
-			} else
-				printf("must remove %u\n", metadata[ii*2]);
-
+				
+				if(target_bits[ii] == 1 && possible[ii] == MASK_ACTIVE){
+					possible[ii] = MASK_KEEP;
+					++removed;
+				} else {
+					possible[ii] = MASK_INACTIVE;
+					/*change the bit counts in metadata to reflect change*/
+					mask_total_bit_counts
+				}
+			}
 		}
-	}
+		printf("removed %u\n", removed);
+	} while(removed != 0);
+	
 	printf("\n");
 
 	/*free each of the MaskData bits arrays*/
@@ -247,6 +329,6 @@ int main(int argc, char const *argv[])
 		MaskData_clear(_masks->items[ii]);
 	}
 	vector_destroy(struct_MaskData, _masks);
-	free(metadata);
+	free
 	return 0;
 }
