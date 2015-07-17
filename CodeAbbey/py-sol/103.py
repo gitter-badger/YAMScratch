@@ -24,59 +24,6 @@ class MaskData(object):
 	def __repr__(self):
 		return "V:"+ str(self.value) + "\nB: " + str(self.bits)
 
-def count_set_bits(iterable, N):
-	count = [0 for x in range(0,N)]
-	#used for reduceing list of MaskData bit counts
-	for mask in iterable:
-		for index in mask.bits:
-			count[index] += 1
-	return count
-
-def input_closure(K_bits):
-	#takes a bit array of the value K we want to find
-	#subset that XORs to the same value
-	def inner_closure(bit_counts):
-		def take_away_possible(mask):
-			for bit_index in mask.bits:
-				if K_bits[bit_index] == 1 and bit_counts[bit_index] == 1:
-						#we cannot take away any more bits
-						return False
-			return True	
-		return take_away_possible
-	return inner_closure
-
-def remove_one(K, gen, bit_counts, S):
-	#test if we have found it
-	tmp = 0;
-	for mask in S:
-		tmp ^= mask.value
-	if tmp == K:
-		print "found solution"
-		for thing in S:
-			print thing.key
-		return None
-
-	#left masks is a set, bit counts
-	take_away = gen(bit_counts)
-	#get list of all candidates for removal
-	possible = filter(take_away, S)
-	#stop if no more can take away
-	if possible == []:
-		return None
-
-	for mask in possible:
-		#take out the bits from bit count
-		for index in mask.bits:
-			bit_counts[index] -= 1
-		t = set()
-		t.add(mask)
-		remove_one(K, gen, bit_counts, S.difference(t))
-		#add them back in
-		for index in mask.bits:
-			bit_counts[index] += 1
-
-
-
 def main():
 	#remove all white space from line
 	line = ''.join(raw_input().split())
@@ -97,21 +44,23 @@ def main():
 			_masks.append(MaskData(line))
 			unique.add(_masks[-1])
 	#don't compute repeated masks
-	print "Saved:", len(_masks) - len(unique)
+	masks = [m for m in unique]
+	M = len(unique)
+	solutions = []
+	#brute force
+	for ii in range(0, 2**M):
+		tmp = 0;
+		for jj in range(0, M):
+			if (1<<jj & ii) != 0:
+				tmp ^= masks[jj].value
+		if tmp == K:
+			one_sol = [masks[jj].key for jj in range(0, M) if (1<<jj & ii) != 0]
+			solutions.append(one_sol)
+			del one_sol
 
-	gen = input_closure(K_bits)
-	bit_counts = count_set_bits(unique, N)
-	#recursive call
-	a = [1, 2, 5, 7, 8, 9, 13, 15]
-	b = [m for m in unique if m.key in a]
-	tmp = 0;
-	for elm in b:
-		tmp ^= elm.value
-
-	print tmp
-	print K
-
-	#remove_one(K, gen, bit_counts, unique)
+	for sol in solutions:
+		print " ".join([str(x) for x in sorted(sol)])
+					
 
 
 if __name__ == '__main__':
