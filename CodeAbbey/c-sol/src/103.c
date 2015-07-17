@@ -266,7 +266,7 @@ int main(int argc, char const *argv[])
 	* this is the defined input format 
 	*/
 	struct MaskData* mask_buffer;
-	mask_buffer = (struct MaskData*)malloc(N * sizeof(struct MaskData));
+	mask_buffer = (struct MaskData*)calloc(N,  sizeof(struct MaskData));
 	NULL_CHECK(mask_buffer, "failed to allocate buffer for all masks");
 	/*keep track total bits set for building the metadata offset table*/
 
