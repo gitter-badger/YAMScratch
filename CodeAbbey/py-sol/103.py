@@ -12,8 +12,6 @@ class MaskData(object):
 		for digit in tmp:
 			self.value |= 1<<digit
 			self.bits.append(digit)
-
-
 	#here we promise to immutable
 	def __hash__(self):
 		return self.value
@@ -57,11 +55,8 @@ def main():
 			one_sol = [masks[jj].key for jj in range(0, M) if (1<<jj & ii) != 0]
 			solutions.append(one_sol)
 			del one_sol
-
 	for sol in solutions:
 		print " ".join([str(x) for x in sorted(sol)])
-					
-
 
 if __name__ == '__main__':
 	main()
