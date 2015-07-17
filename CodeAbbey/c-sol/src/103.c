@@ -107,14 +107,15 @@ void MetaData_init(struct MetaData* md, unsigned bins, unsigned* bin_counts,
 	temp_offsets = (unsigned*)calloc(md->bins, sizeof(unsigned));
 	NULL_CHECK(temp_offsets, "failed to allocate temp buffer");
 	for(ii = 0; ii < len_mask_buff; ++ii) {
-		for(jj = 0; mask_buff[ii].len; ++jj) {
+		for(jj = 0; jj < mask_buff[ii].len; ++jj) {
+
 			tmp_key = mask_buff[ii].bits[jj];
 			/*make sure bit number is within range of bits metadata
 			* is keeping track of*/
 			assert(tmp_key < md->bins);
 			kk = temp_offsets[tmp_key] + md->offsets[tmp_key];
 			assert(kk < md->offsets[tmp_key+1]);
-			md->grid[kk] = tmp_key;
+			md->grid[kk] = ii;
 			temp_offsets[tmp_key]++;
 		}
 	}
@@ -128,10 +129,21 @@ void MetaData_init(struct MetaData* md, unsigned bins, unsigned* bin_counts,
 
 void print_MetaData(struct MetaData* md) {
 	unsigned ii;
-	if(md == NULL) {
-		return;
+	MetaData_iterator iter, end;
+	if(md == NULL) return;
+	printf("MetaData %p\n", (void*)md);
+	for(ii = 0; ii < md->bins; ++ii) {
+		printf("%u: ", ii);
+		end = MetaData_row_end(md, ii);
+		iter = MetaData_row_start(md, ii);
+		if((end - iter) == 0) {
+			printf("None\n");
+		}
+		for(; iter != end; ++iter) {
+			printf("%u ", *iter);
+		}
+		printf("\n");
 	}
-
 }
 /*===============================================================*/
 
@@ -156,34 +168,28 @@ int remove_one(unsigned N, unsigned* bit_counts, unsigned* target_bit_counts,
 	return 0;
 }
 
-int stream_from_single_line(FILE* in_stream, FILE ** out_stream) {
-	char* lineptr;
-	size_t nbytes;
-	ssize_t bytes_read;
-	lineptr = NULL;
-	nbytes = 0;
-	errno = 0;
-	bytes_read = getline(&lineptr, &nbytes, in_stream);
-	if(bytes_read < 0) {
-		/*this checks for when there is only EOF */
-		return EOF;
-	}
-	*out_stream = fmemopen(lineptr, bytes_read, "r");
-	free(lineptr);
-}
-
 int main(int argc, char const *argv[])
 {
 	int rc;
 	unsigned ii, jj, kk, A, TV, E, T, total_bits_set;
 	unsigned long N;
-	/*read first line with unknown length of data*/
+	char *lineptr;
+	size_t nbytes;
+	ssize_t bytes_read;
+	lineptr = NULL;
+	nbytes = 0;
+	bytes_read = 0;
 	FILE * stream;
-	rc = stream_from_single_line(stdin, &stream);
-	if(rc == EOF) {
-		perror("end of input reached before expected");
+	/*read first line with unknown length of data*/
+	errno = 0;
+	bytes_read = getline(&lineptr, &nbytes, stdin);
+	if(bytes_read < 0) {
+		/*this checks for when there is only EOF */
+		perror("reached end of input stream before expected");
 		exit(-1);
 	}
+	stream = fmemopen(lineptr, bytes_read, "r");
+
 	Vector_t(unsigned)* _target_set_bits;
 	_target_set_bits = newVector(unsigned);
 	NULL_CHECK(_target_set_bits, "failed to allocate new vector");
@@ -192,7 +198,12 @@ int main(int argc, char const *argv[])
 	TV = 0;
 	for(;;) {
 		rc = fscanf(stream," %u ", &A);
-		if(rc == EOF) {
+		if(rc != 1) {
+			if(feof(stream)) break;
+			if(ferror(stream)) {
+				perror("error reading input stream");
+				exit(-1);
+			}
 			break;
 		}
 		/*A should be 1 or zero*/
@@ -202,6 +213,7 @@ int main(int argc, char const *argv[])
 		++N;
 	}
 	fclose(stream);
+	free(lineptr); lineptr = NULL;
 	/*use an array for programming convience to represent which
 	* bits of the target value are set*/
 	unsigned* target_bits;
@@ -231,12 +243,27 @@ int main(int argc, char const *argv[])
 	mask_buffer = (struct MaskData*)malloc(N * sizeof(struct MaskData));
 	NULL_CHECK(mask_buffer, "failed to allocate buffer for all masks");
 	/*keep track total bits set for building the metadata offset table*/
+
 	for(ii = 0; ii < N; ++ii) {
-		rc = stream_from_single_line(stdin, &stream);
-		if(rc == EOF) {
-			/*no more data from stream coming*/
-			break;
+		printf("iteration %u\n", ii);
+		lineptr = NULL;
+		nbytes = 0;
+		errno = 0;
+		bytes_read = getline(&lineptr, &nbytes, stdin);
+		if(bytes_read < 0) {
+			/*this checks for when there is only EOF */
+			perror("reached end of input stream before expected");
+			exit(-1);
+		} if(bytes_read == 1) {
+			if(*lineptr == '\n'){
+				continue;
+			} else {
+				perror("unexpected input data");
+				exit(-1);
+			}
 		}
+		stream = fmemopen(lineptr, bytes_read, "r");
+
 		char colon;
 		/*make sure that each line begins with an index and then
 		* the colon character delimeter follows*/
@@ -283,6 +310,9 @@ int main(int argc, char const *argv[])
 	}
 	/*we wont use index_buffer again*/
 	free(index_buffer); index_buffer = NULL;
+	struct MetaData meta;
+	MetaData_init(&meta, N, bit_counts, mask_buffer, N);
+	print_MetaData(&meta);
 	/*======END OF READING INPUT==========*/
 	
 	/*allocate a buffer that marks masks as available*/
