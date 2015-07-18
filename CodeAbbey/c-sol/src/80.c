@@ -2,9 +2,28 @@
 #include <stdio.h>
 #include <errno.h>
 
+/*
+			  state C
+			{alan alive}
+1 - pA - pB    /
+ +-----+      / pA
+ |     |     /
+ +-> state A
+	{both alive}
+			\
+			 \ pB
+			  \
+			  state B
+			  {bob alive}
+
+	| (1-pA-pB) 0  0 |  
+M = |    pB     1  0 |
+ 	|    pA     0  1 |
+*/
+
 int main(int argc, char const *argv[])
 {
-	/*find roots of quadratic equation*/
+	/*compute state of markov process*/
 	unsigned long N;
 	int rc;
 	errno = 0;
