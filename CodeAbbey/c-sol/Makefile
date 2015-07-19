@@ -391,6 +391,11 @@ $(BIN)/74.out : $(SRC)/74.c
 $(BIN)/75.out : $(SRC)/75.c
 	$(CC) $(CFLAGS) -I $(INC) -Wno-unused-function $< -o $@
 
+80 : $(BIN)/80.out
+
+$(BIN)/80.out : $(SRC)/80.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
 81 : $(BIN)/81.out
 
 $(BIN)/81.out : $(SRC)/81.c
