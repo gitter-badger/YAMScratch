@@ -77,7 +77,6 @@ n->infinity   ---------------------------------
 where both 1-pA and 1-pB is less than one, so the expression simplifies
 
 alan survives =  -pA / (pA*pB -pA - pB)
-
 */
 
 int main(int argc, char const *argv[])
