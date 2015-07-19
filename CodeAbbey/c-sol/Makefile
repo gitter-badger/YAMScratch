@@ -223,6 +223,11 @@ $(BIN)/20.out : $(SRC)/20.c
 $(BIN)/21.out : $(SRC)/21.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
+22 : $(BIN)/22.out
+
+$(BIN)/22.out : $(SRC)/22.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
 23 : $(BIN)/23.out
 
 $(BIN)/23.out : $(SRC)/23.c $(OBJ)/code_abbey_utility.o
