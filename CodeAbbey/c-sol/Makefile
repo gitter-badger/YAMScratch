@@ -226,7 +226,7 @@ $(BIN)/21.out : $(SRC)/21.c
 22 : $(BIN)/22.out
 
 $(BIN)/22.out : $(SRC)/22.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -I $(INC) -lm $< -o $@
 
 23 : $(BIN)/23.out
 
