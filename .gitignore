@@ -13,6 +13,8 @@ motivator/Matlab/
 Data\ Structures/
 c-misc/DS\ projects/*.txt
 *bbcomp/
+*gliese1969.txt
+*words.txt
 
 #ignore test input files
 PracticeInput*
