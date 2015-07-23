@@ -12,8 +12,8 @@ extern "C" {
 #define VECTOR_INIT(TYPE) 														\
 	typedef struct { 															\
 		TYPE* items; 															\
-		unsigned _size; 														\
-		unsigned elms;															\
+		size_t _size; 														\
+		size_t elms;															\
 	} vec_##TYPE##_t; 															\
 	static inline vec_##TYPE##_t *init_vec_##TYPE() { 							\
 		return (vec_##TYPE##_t*)calloc(1, sizeof(vec_##TYPE##_t)); 				\
@@ -95,6 +95,16 @@ extern "C" {
 			perror("Null pointer exception");									\
 			exit(-1);															\
 		}																		\
+	}																			\
+	static void erase_vec_##TYPE(vec_##TYPE##_t *p) {							\
+		if(p != NULL) {															\
+			if(p->elms != 0) {													\
+				p->elms = 0;													\
+			}																	\
+		} else {																\
+			perror("Null pointer exception");									\
+			exit(-1); /*fatal crash is justified just like core dump*/			\
+		}																		\
 	}
 /*operations*/
 #define Vector_t(TYPE) vec_##TYPE##_t
@@ -104,6 +114,7 @@ extern "C" {
 #define vector_destroy(TYPE, ptr) destroy_vec_##TYPE(ptr)
 #define vector_resize(TYPE, ptr, n) resize_vec_##TYPE(n, ptr)
 #define vector_pop(TYPE, ptr) pop_##TYPE(ptr)
+#define vector_erase(TYPE, ptr) erase_vec_##TYPE(ptr)
 
 #endif
 
