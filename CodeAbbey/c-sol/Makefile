@@ -268,6 +268,11 @@ $(BIN)/29.out : $(SRC)/29.c
 $(BIN)/30.out : $(SRC)/30.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
+31 : $(BIN)/31.out
+
+$(BIN)/31.out : $(SRC)/31.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
 32 : $(BIN)/32.out
 
 $(BIN)/32.out : $(SRC)/32.c

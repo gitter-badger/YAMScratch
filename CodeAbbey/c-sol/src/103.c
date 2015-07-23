@@ -17,33 +17,32 @@ struct MaskData {
 };
 
 unsigned less_than(struct MaskData** A, struct MaskData** B) {
-	unsigned result = 0;
 	/*use the key as the */
-	if(*A->value < *B->value) {
+	if((*A)->value < (*B)->value) {
 		return 1;
-	} else if(*A->value > *B->value) {
+	} else if((*A)->value > (*B)->value) {
 		return 0;
 	} else {
 		/*if the keys are the same, check the length*/
-		if(*A->len < *B->len) {
+		if((*A)->len < (*B)->len) {
 			return 1;
-		} else if(*A->len > *B->len) {
+		} else if((*A)->len > (*B)->len) {
 			return 0;
 		} else {
 			/*check the values for the array*/
 			long checksumA, checksumB;
-			int rc;
 			unsigned ii;
-			for(ii = 0; ii < *A->len; ++ ii) {
-				checksumA += *A->bits[ii];
+			checksumA = 0; checksumB = 0;
+			for(ii = 0; ii < (*A)->len; ++ ii) {
+				checksumA += (*A)->bits[ii];
 				checksumA *= 113;
 				checksumA %= 10000007;
-				checksumB += *B->bits[ii];
+				checksumB += (*B)->bits[ii];
 				checksumB *= 113;
 				checksumB %= 10000007;
 			}
 			/*make sure A<B and B< A both are true*/
-			return (checksumA <= checksumB) ? 1 : 0;
+			return (checksumA < checksumB) ? 1 : 0;
 		}
 	}
 }
@@ -163,7 +162,7 @@ void print_MetaData(struct MetaData* md) {
 		end = MetaData_row_end(md, ii);
 		iter = MetaData_row_start(md, ii);
 		if((end - iter) == 0) {
-			printf("None\n");
+			printf("None");
 		}
 		for(; iter != end; ++iter) {
 			printf("%u ", *iter);
@@ -175,11 +174,26 @@ void print_MetaData(struct MetaData* md) {
 
 int remove_one(unsigned N, unsigned* bit_counts, unsigned* target_bit_counts,
 				unsigned lower_bound, unsigned* possible, struct MaskData* masks) {
-	unsigned ii, jj, kk;
+	unsigned ii, jj, kk, flag;
+	/*check if we have a solutions*/
+	flag = 1;
+	for(ii = 0; ii < N; ++ii) {
+		if(target_bit_counts[ii] != (bit_counts[ii] % 2) ){
+			flag = 0;
+			break;
+		}
+	}
+	if(flag == 1) {
+		printf("found solution\n%s\n", possible);
+		/*sucess*/
+		return 1;
+	}
+
 	/*check if this is a solution*/
 	unsigned n_possible;
 	n_possible = 0;
 	unsigned possible_take_away[N];
+
 	for(ii = lower_bound; ii < N; ++ii) {
 		if(possible[ii] == MASK_ACTIVE) {
 			for(jj = 0; jj < masks[ii].len; ++jj)
@@ -191,13 +205,27 @@ int remove_one(unsigned N, unsigned* bit_counts, unsigned* target_bit_counts,
 			}
 		}
 	}
+	if(n_possible == 0) {
+		/*we cannot go further*/
+		return 0;
+	}
+	/*now recurse*/
+	unsigned tmp_index;
+	for(ii = 0; ii < n_possible; ++ii) {
+		/*remove the bits from count*/
+		for(jj = 0; jj < masks[possible_take_away[ii]].len; ++jj) {
+
+		}
+		possible[possible_take_away[ii]] = MASK_INACTIVE;
+
+	}
 	return 0;
 }
 
 int main(int argc, char const *argv[])
 {
 	int rc;
-	unsigned ii, jj, kk, A, TV, E, T, total_bits_set;
+	unsigned ii, jj, kk, A, TV, E;
 	unsigned long N;
 	char *lineptr;
 	size_t nbytes;
@@ -266,6 +294,7 @@ int main(int argc, char const *argv[])
 	* this is the defined input format 
 	*/
 	struct MaskData* mask_buffer;
+	/*initialize each mask with a length of zero*/
 	mask_buffer = (struct MaskData*)calloc(N,  sizeof(struct MaskData));
 	NULL_CHECK(mask_buffer, "failed to allocate buffer for all masks");
 	/*keep track total bits set for building the metadata offset table*/
@@ -336,11 +365,11 @@ int main(int argc, char const *argv[])
 	/*we wont use index_buffer again*/
 	free(index_buffer); index_buffer = NULL;
 	/*======END OF READING INPUT==========*/
-	/*remove duplicates*/
 	struct MetaData meta;
 	MetaData_init(&meta, N, bit_counts, mask_buffer, N);
+	/*
 	print_MetaData(&meta);
-	
+	*/
 	/*allocate a buffer that marks masks as available*/
 	char* possible;
 	possible = (char*)malloc((N+1) * sizeof(char));
@@ -348,7 +377,30 @@ int main(int argc, char const *argv[])
 	memset(possible, MASK_ACTIVE, N*sizeof(char));
 	/*null terminate so we can print it directly for debugging*/
 	possible[N] = '\0';
-	
+
+	/*remove duplicates by creating a shadow pointer buffer and sorting
+	* those pointers*/
+	unsigned (*less)(struct MaskData**, struct MaskData**);
+	less = &less_than;
+	struct MaskData** shadow;
+	shadow = (struct MaskData**)malloc(N * sizeof(struct MaskData*));
+	NULL_CHECK(shadow, "failed to allocate shadow buffer");
+	for(ii = 0; ii < N; ++ii) {
+		shadow[ii] = mask_buffer+ii;
+	}
+
+	yam_quicksort(MaskData_ptr,shadow, 0, N-1, less);
+	for(ii = 1; ii < N; ii++) {
+		if((less_than(&shadow[ii-1], &shadow[ii]) == 0) && \
+					(less_than(&shadow[ii], &shadow[ii-1]) == 0)) {
+			possible[shadow[ii]->key] = MASK_INACTIVE;
+			/*remove the bit counts*/
+			for(jj = 0; jj < shadow[ii]->len; ++jj) {
+				--bit_counts[shadow[ii]->bits[jj]];
+			}
+		}
+	}
+	printf("After eliminating duplicates\n%s\n\n", possible);		
 	/*remove any masks that are the only one to set the bit
 	* only masks that are possible to be removed */
 	unsigned removed;
@@ -384,7 +436,6 @@ int main(int argc, char const *argv[])
 				}
 			}
 		}
-		printf("removed %u\n",  removed);
 	} while(removed != 0);
 	printf("After first pass filtering:\n\t%s", possible);
 
