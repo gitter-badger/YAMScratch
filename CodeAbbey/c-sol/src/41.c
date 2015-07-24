@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <unistd.h> /*for getop */
 #include <stdint.h>
 #include <errno.h> /*for errno*/
@@ -28,7 +29,7 @@ int main(int argc, char* argv[]) {
 	char* lineptr;
 	lineptr = NULL;
 	nbytes = 0;
-	Vector_t(int)* vec = newVector(int);
+	Vector(int)* vec = newVector(int);
 	bytes_read = wrap_getline(&lineptr, &nbytes, stdin);
 	/*account for the terminating null char from getline*/
 	bytes_read++;
@@ -43,8 +44,8 @@ int main(int argc, char* argv[]) {
 	N = vec->items[0];
 	vector_destroy(int, vec);
 	/*hack to get around spaces in typename*/
-	Vector_t(signed)* result = newVector(signed);
-	Vector_t(signed)* v2 = newVector(signed);
+	Vector(signed)* result = newVector(signed);
+	Vector(signed)* v2 = newVector(signed);
 
 	unsigned ii;
 	signed tmp, A, B;

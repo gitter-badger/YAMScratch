@@ -22,9 +22,16 @@ int main(int argc, char* argv[]) {
 	}
 	/*compute sum of arithmatic sequence*/
 	unsigned ii;
-	long A, B, M, tmp;
+	unsigned long A, B, M;
 	for(ii = 0; ii < N; ++ii) {
+		errno = 0;
 		rc = scanf("%lu %lu %lu", &A, &B, &M);
+		if(rc != 3 || errno != 0) {
+			free(result);
+			fprintf(stderr, "Input read error on line\n", ii+2);
+			perror("errno = ");
+			exit(-1);
+		}
 		/*perform the computation in place*/
 		result[ii] += A*M;
 		result[ii] += (((long)pow(M,2) - M) / 2) * B; 

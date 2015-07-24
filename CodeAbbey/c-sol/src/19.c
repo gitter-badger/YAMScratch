@@ -32,7 +32,7 @@ int main(int argc, char const *argv[])
 		perror("failed to allocate read buffer");
 		exit(-1);
 	}
-	Vector_t(char)* stack;
+	Vector(char)* stack;
 	stack = newVector(char);
 	unsigned ii, jj;
 	char tmp;

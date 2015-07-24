@@ -2,8 +2,8 @@
 #include "yam_big_int.h"
 #include "yam_fibonacci.h"
 
-Vector_t(BigInt_ptr)* init_fib_memo() {
-	Vector_t(BigInt_ptr)* memo = newVector(BigInt_ptr);
+Vector(BigInt_ptr)* init_fib_memo() {
+	Vector(BigInt_ptr)* memo = newVector(BigInt_ptr);
 	BigInt* fib_num;
 	/*initialize the structure with the base case*/
 	fib_num = NULL;
@@ -16,7 +16,7 @@ Vector_t(BigInt_ptr)* init_fib_memo() {
 	return memo;
 }
 
-void destroy_fib_memo(Vector_t(BigInt_ptr)* p) {
+void destroy_fib_memo(Vector(BigInt_ptr)* p) {
 	/*free each of the underlying BigInt objects*/
 	unsigned ii;
 	for(ii = 0; ii < p->elms; ++ii){
@@ -28,7 +28,7 @@ void destroy_fib_memo(Vector_t(BigInt_ptr)* p) {
 	vector_destroy(BigInt_ptr, p);
 }
 
-void fill_in_up_to_fibonacci(BigInt* fib_n, Vector_t(BigInt_ptr)* fib_memo) {
+void fill_in_up_to_fibonacci(BigInt* fib_n, Vector(BigInt_ptr)* fib_memo) {
 	char* new_rep;
 	size_t nbytes;
 	nbytes = 0;
@@ -42,7 +42,7 @@ void fill_in_up_to_fibonacci(BigInt* fib_n, Vector_t(BigInt_ptr)* fib_memo) {
 	}
 }
 
-signed find_fibonacci_index(BigInt* fib_n, Vector_t(BigInt_ptr)* fib_memo) {
+signed find_fibonacci_index(BigInt* fib_n, Vector(BigInt_ptr)* fib_memo) {
 	/*check if the input is in the memo structure already by binary search*/
 	unsigned left, right, mid;
 	left = 0;

@@ -24,10 +24,10 @@ int main(int argc, char* argv[]) {
 	/*compute sum of arithmatic sequence*/
 	unsigned ii;
 	char operation;
-	long A, tmp;
+	unsigned long A, tmp;
 	operation = '\0';
-	Vector_t(long)* num = newVector(long);
-	Vector_t(char)* op_code = newVector(char);
+	Vector(long)* num = newVector(long);
+	Vector(char)* op_code = newVector(char);
 	enum operations {PLUS, MINUS, MULTIPLY, DIVIDE, MODULO};
 
 	ii = 0;

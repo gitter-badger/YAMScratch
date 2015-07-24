@@ -24,7 +24,7 @@ int main(int argc, char const *argv[])
 		perror("failed to read input");
 		exit(-1);
 	}
-	Vector_t(char)* in_buff, * out_buff ;
+	Vector(char)* in_buff, * out_buff ;
 	in_buff = newVector(char);
 	NULL_CHECK(in_buff, "failed to allocate input buffer vector");
 	out_buff = newVector(char);

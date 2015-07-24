@@ -7,16 +7,16 @@
 VECTOR_INIT(char)
 
 int main(int argc, char* argv[]) {
-	/*use a vector to hold the indeterminant length output*/
-	Vector_t(char)* output = newVector(char);
-	/*count the number of set bits to confirm parity*/
-	unsigned tmp, ii, kk;
-	char val;
-	tmp = 0;
 	int rc;
+	/*use a vector to hold the indeterminant length output*/
+	Vector(char)* output = newVector(char);
+	/*count the number of set bits to confirm parity*/
+	char val;
+	unsigned tmp, ii, kk;
+	tmp = 0;
 	/*the terminating dot charecter does not have the parity bit set*/
 	while(tmp != '.') {
-		rc = scanf(" %d ", &tmp);
+		rc = scanf(" %u ", &tmp);
 		if(rc != 1 || rc == -1) {
 			perror("failed to parse input");
 			exit(-1);

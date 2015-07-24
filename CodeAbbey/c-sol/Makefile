@@ -131,27 +131,27 @@ $(BIN)/2.out : $(SRC)/2.c
 3 : $(BIN)/3.out
 
 $(BIN)/3.out : $(SRC)/3.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
 
 4 : $(BIN)/4.out
 
 $(BIN)/4.out : $(SRC)/4.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
 
 5 : $(BIN)/5.out
 
 $(BIN)/5.out : $(SRC)/5.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
 
 6 : $(BIN)/6.out
 
 $(BIN)/6.out : $(SRC)/6.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
 
 7 : $(BIN)/7.out
 
 $(BIN)/7.out : $(SRC)/7.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
 
 8 : $(BIN)/8.out
 
@@ -186,12 +186,12 @@ $(BIN)/13.out : $(SRC)/13.c
 14 : $(BIN)/14.out
 
 $(BIN)/14.out : $(SRC)/14.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
 
 15 : $(BIN)/15.out
 
 $(BIN)/15.out : $(SRC)/15.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
 
 16 : $(BIN)/16.out
 
@@ -216,7 +216,7 @@ $(BIN)/19.out : $(SRC)/19.c
 20 : $(BIN)/20.out
 
 $(BIN)/20.out : $(SRC)/20.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
 
 21 : $(BIN)/21.out
 
@@ -256,7 +256,7 @@ $(BIN)/27.out : $(SRC)/27.c
 28 : $(BIN)/28.out
 
 $(BIN)/28.out : $(SRC)/28.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) -lm $< -o $@
 
 29 : $(BIN)/29.out
 
@@ -271,7 +271,7 @@ $(BIN)/30.out : $(SRC)/30.c
 31 : $(BIN)/31.out
 
 $(BIN)/31.out : $(SRC)/31.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
 
 32 : $(BIN)/32.out
 
@@ -281,7 +281,7 @@ $(BIN)/32.out : $(SRC)/32.c
 33 : $(BIN)/33.out
 
 $(BIN)/33.out : $(SRC)/33.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
 
 34 : $(BIN)/34.out
 
@@ -301,7 +301,7 @@ $(BIN)/40.out : $(SRC)/40.c
 41 : $(BIN)/41.out
 
 $(BIN)/41.out : $(SRC)/41.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
 
 44 : $(BIN)/44.out
 
@@ -311,7 +311,7 @@ $(BIN)/44.out : $(SRC)/44.c
 43 : $(BIN)/43.out
 
 $(BIN)/43.out : $(SRC)/43.c
-	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
 
 47 : $(BIN)/47.out
 

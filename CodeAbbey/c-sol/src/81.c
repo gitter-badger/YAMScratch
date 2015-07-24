@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
 	mask = 1<<31;
 	for(ii = 0; ii < N; ++ii) {
 		/*load this into fixed width*/
-		scanf("%d", &tmp);
+		scanf("%u", &tmp);
 		for(kk = 0; kk < 32; ++kk){
 			if((tmp<<kk)&mask) {
 				++result[ii];

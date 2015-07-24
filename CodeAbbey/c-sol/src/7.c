@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <unistd.h> /*for getop */
 #include <stdint.h>
 #include <errno.h> /*for errno*/
@@ -26,7 +27,7 @@ int main(int argc, char* argv[]) {
 	char* lineptr;
 	lineptr = NULL;
 	nbytes = 0;
-	Vector_t(signed)* vec = newVector(signed);
+	Vector(signed)* vec = newVector(signed);
 	bytes_read = wrap_getline(&lineptr, &nbytes, stdin);
 	/*account for the terminating null char from getline*/
 	bytes_read++;
@@ -47,7 +48,7 @@ int main(int argc, char* argv[]) {
 		vector_destroy(signed, vec);
 		exit(-1);
 	}
-	Vector_t(signed)* result = newVector(signed);
+	Vector(signed)* result = newVector(signed);
 	/*convert Farenheit to Celsius*/
 	for(ii = 1; ii < vec->elms; ++ii) {
 		tmp = vec->items[ii] - 32;

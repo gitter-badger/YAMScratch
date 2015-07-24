@@ -1,3 +1,4 @@
+#define _GNU_SOURCE /*use getline*/
 #include <unistd.h> /*for getop */
 #include <stdint.h>
 #include <errno.h> /*for errno*/

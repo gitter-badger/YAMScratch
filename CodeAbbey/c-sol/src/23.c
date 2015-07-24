@@ -10,7 +10,7 @@ int main(int argc, char const *argv[])
 {
 	int rc;
 	long tmp;
-	Vector_t(long)* result;
+	Vector(long)* result;
 	result = newVector(long);
 	unsigned ii, swaps;
 	ii = 0;

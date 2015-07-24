@@ -244,7 +244,7 @@ int main(int argc, char const *argv[])
 	}
 	stream = fmemopen(lineptr, bytes_read, "r");
 
-	Vector_t(unsigned)* _target_set_bits;
+	Vector(unsigned)* _target_set_bits;
 	_target_set_bits = newVector(unsigned);
 	NULL_CHECK(_target_set_bits, "failed to allocate new vector");
 

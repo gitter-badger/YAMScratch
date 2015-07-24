@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <unistd.h> /*for getop */
 #include <stdint.h>
 #include <errno.h> /*for errno*/
@@ -26,7 +27,7 @@ int main(int argc, char* argv[]) {
 	char* lineptr;
 	lineptr = NULL;
 	nbytes = 0;
-	Vector_t(signed)* vec = newVector(signed);
+	Vector(signed)* vec = newVector(signed);
 	bytes_read = wrap_getline(&lineptr, &nbytes, stdin);
 	/*account for the terminating null char from getline*/
 	bytes_read++;

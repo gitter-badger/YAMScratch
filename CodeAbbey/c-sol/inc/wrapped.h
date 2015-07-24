@@ -1,7 +1,6 @@
 #ifndef _WRAPPERS_
 #define _WRAPPERS_
 
-#define _GNU_SOURCE
 #include <string.h>
 #include <stdio.h>
 

@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <unistd.h> /*for getop */
 #include <stdint.h>
 #include <errno.h> /*for errno*/
@@ -26,7 +27,7 @@ int main(int argc, char* argv[]) {
 	char* lineptr;
 	lineptr = NULL;
 	nbytes = 0;
-	Vector_t(signed)* vec = newVector(signed);
+	Vector(signed)* vec = newVector(signed);
 	bytes_read = wrap_getline(&lineptr, &nbytes, stdin);
 	/*account for the terminating null char from getline*/
 	bytes_read++;
@@ -41,7 +42,7 @@ int main(int argc, char* argv[]) {
 	/*constructor should guaratee there is at least one element*/
 	N = vec->items[0];
 
-	Vector_t(signed)* result = newVector(signed);
+	Vector(signed)* result = newVector(signed);
 	/*count the vowels*/
 	char* curs, current;
 	for(ii = 0; ii < N; ++ii) {

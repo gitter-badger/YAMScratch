@@ -15,7 +15,7 @@ extern "C" {
   =========================================================*/
 
 #define TOKENIZE_INIT(TYPE) \
-	void tokenize_##TYPE(Vector_t(TYPE)* out_ptr, TYPE (*fn_ptr)(char *), 		\
+	void tokenize_##TYPE(Vector(TYPE)* out_ptr, TYPE (*fn_ptr)(char *), 		\
 						 char* line_ptr, ssize_t n_bytes, char delimeter ) {	\
 		unsigned ii;															\
 		unsigned token_len;														\

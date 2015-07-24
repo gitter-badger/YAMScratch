@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <unistd.h> /*for getop */
 #include <stdint.h>
 #include <errno.h> /*for errno*/
@@ -22,7 +23,7 @@ int main(int argc, char* argv[]) {
 		exit(-1);
 	}
 
-	Vector_t(BigInt_ptr)* fib_memo = init_fib_memo();
+	Vector(BigInt_ptr)* fib_memo = init_fib_memo();
 	unsigned* result;
 	result = (unsigned*)calloc(N, sizeof(unsigned));
 	/*setup our parser template*/
