@@ -41,14 +41,14 @@ signed brainfuck_evaluate_buffer(char* src, size_t nbytes, int debug);
 
 /*private implementation of interpreter*/
 signed _eval_buffer(char* src, size_t nbytes, struct TapeNode* cursor,
-					Vector_t(long)* stack, FILE* in_stream, FILE* out_stream);
+					Vector(long)* stack, FILE* in_stream, FILE* out_stream);
 
 /*
 * debug version will check for overflows and underflows data cells and emmit warning
 * to stderr, debug version also outputs action
 */
 signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor,
-						  Vector_t(long)* stack, FILE* in_stream, FILE* out_stream);
+						  Vector(long)* stack, FILE* in_stream, FILE* out_stream);
 
 
 /*walk along the tape and free it*/

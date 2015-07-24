@@ -10,12 +10,12 @@
 
 /*use overloading in C++ to allow inferring of type and call appropriate C function*/
 signed buffer_eval(char* src, size_t nbytes, struct TapeNode* cursor, 
-				   Vector_t(long)* stack, FILE* in_st, FILE* out_st) {
+				   Vector(long)* stack, FILE* in_st, FILE* out_st) {
 	return _eval_buffer(src, nbytes, cursor, stack, in_st, out_st);
 }
 
 signed buffer_eval(char* src, size_t nbytes, struct TapeNodeDebug* cursor, 
-				   Vector_t(long)* stack, FILE* in_st, FILE* out_st) {
+				   Vector(long)* stack, FILE* in_st, FILE* out_st) {
 	return _eval_buffer_debug(src, nbytes, cursor, stack, in_st, out_st);
 }
 
@@ -32,7 +32,7 @@ template <typename T>
 class InterpreterTest : public testing::Test
 {
 protected:
-	signed (*buffer_eval)(char* , size_t, T*, Vector_t(long)*, FILE*, FILE*);
+	signed (*buffer_eval)(char* , size_t, T*, Vector(long)*, FILE*, FILE*);
 	virtual void SetUp() {}
 	virtual void TearDown() {}
 };
@@ -335,7 +335,7 @@ TYPED_TEST(InterpreterTest, MoveRightIndexIncrementingTest) {
 TYPED_TEST(InterpreterTest, StackPush) {
 	signed rc;
 	size_t buff_len;
-	Vector_t(long)* stack;
+	Vector(long)* stack;
 	stack = newVector(long);
 	TypeParam* CellZero;
 	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));
@@ -355,7 +355,7 @@ TYPED_TEST(InterpreterTest, StackPush) {
 TYPED_TEST(InterpreterTest, StackPop) {
 	signed rc;
 	size_t buff_len;
-	Vector_t(long)* stack;
+	Vector(long)* stack;
 	stack = newVector(long);
 	TypeParam* CellZero;
 	CellZero = (TypeParam*)calloc(1, sizeof(TypeParam));

@@ -9,7 +9,7 @@ extern "C" {
 
 /*we will use a vector as our big integer*/
 VECTOR_INIT(char)
-typedef Vector_t(char) BigInt;
+typedef Vector(char) BigInt;
 
 #define newBigInt newVector(char)
 #define BigInt_destroy(ptr) vector_destroy(char, ptr)

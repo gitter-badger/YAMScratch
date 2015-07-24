@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "brainfuck_interpreter.h"
-/*remember the Vector_t macro was imported in the header for this file*/
+/*remember the Vector macro was imported in the header for this file*/
 
 signed _destroy_tape_debug(struct TapeNodeDebug* cursor) {
 	struct TapeNodeDebug* left, * right, * tmp;
@@ -55,7 +55,7 @@ signed _parse_buffer(char** buff, size_t* nbytes) {
 }
 
 signed _eval_buffer(char* src, size_t nbytes, struct TapeNode* cursor,
-					Vector_t(long)* stack, FILE* in_stream, FILE* out_stream) {
+					Vector(long)* stack, FILE* in_stream, FILE* out_stream) {
 		/*keep track of where in the data buffer we are*/
 	size_t instr_offset;
 	instr_offset = 0;
@@ -234,7 +234,7 @@ signed _eval_buffer(char* src, size_t nbytes, struct TapeNode* cursor,
 }
 /*only adds to atape, will not remove any nodes*/
 signed _eval_buffer_debug(char* src, size_t nbytes, struct TapeNodeDebug* cursor,
-						  Vector_t(long)* stack, FILE* in_stream, FILE* out_stream) {
+						  Vector(long)* stack, FILE* in_stream, FILE* out_stream) {
 	/*keep track of where in the data buffer we are*/
 	size_t instr_offset;
 	instr_offset = 0;

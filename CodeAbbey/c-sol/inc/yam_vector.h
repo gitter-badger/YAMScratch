@@ -12,19 +12,19 @@ extern "C" {
 #define VECTOR_INIT(TYPE) 														\
 	typedef struct { 															\
 		TYPE* items; 															\
-		size_t _size; 														\
-		size_t elms;															\
-	} vec_##TYPE##_t; 															\
-	static inline vec_##TYPE##_t *init_vec_##TYPE() { 							\
-		return (vec_##TYPE##_t*)calloc(1, sizeof(vec_##TYPE##_t)); 				\
+		unsigned _size; 														\
+		unsigned elms;															\
+	} vec_##TYPE; 															\
+	static inline vec_##TYPE *init_vec_##TYPE() { 							\
+		return (vec_##TYPE*)calloc(1, sizeof(vec_##TYPE)); 				\
 	} 																			\
-	static inline void destroy_vec_##TYPE(vec_##TYPE##_t *p) { 					\
+	static inline void destroy_vec_##TYPE(vec_##TYPE *p) { 					\
 		if(p) {																	\
 			if(p->items){free(p->items);}										\
 			free(p); 															\
 		} 																		\
 	}																			\
-	static void push_back_##TYPE(vec_##TYPE##_t* out_ptr, const TYPE val) {		\
+	static void push_back_##TYPE(vec_##TYPE* out_ptr, const TYPE val) {		\
 		unsigned new_size;														\
 		/*resize the array to accomodate more elements*/						\
 		if(out_ptr->elms == out_ptr->_size) {									\
@@ -49,7 +49,7 @@ extern "C" {
 		out_ptr->items[out_ptr->elms] = val;									\
 		out_ptr->elms += 1;														\
 	}																			\
-	static void clear_##TYPE(vec_##TYPE##_t * p) {								\
+	static void clear_##TYPE(vec_##TYPE * p) {								\
 		if(p != NULL){															\
 			if(p->items) {														\
 				free(p->items);													\
@@ -59,7 +59,7 @@ extern "C" {
 			p->elms = 0;														\
 		}																		\
 	}																			\
-	static void resize_vec_##TYPE(size_t n, vec_##TYPE##_t *p) {				\
+	static void resize_vec_##TYPE(size_t n, vec_##TYPE *p) {				\
 		/*check for null*/														\
 		if(p != NULL){															\
 			TYPE* new_items = (TYPE*)realloc(p->items, n);						\
@@ -79,7 +79,7 @@ extern "C" {
 			p->_size = n;														\
 		}																		\
 	}																			\
-	static TYPE pop_##TYPE(vec_##TYPE##_t *p) {									\
+	static TYPE pop_##TYPE(vec_##TYPE *p) {									\
 		if(p != NULL) {															\
 			if(p->elms == 0) {													\
 				perror("cannot pop from empty vector");							\
@@ -96,7 +96,7 @@ extern "C" {
 			exit(-1);															\
 		}																		\
 	}																			\
-	static void erase_vec_##TYPE(vec_##TYPE##_t *p) {							\
+	static void erase_vec_##TYPE(vec_##TYPE *p) {							\
 		if(p != NULL) {															\
 			if(p->elms != 0) {													\
 				p->elms = 0;													\
@@ -107,7 +107,7 @@ extern "C" {
 		}																		\
 	}
 /*operations*/
-#define Vector_t(TYPE) vec_##TYPE##_t
+#define Vector(TYPE) vec_##TYPE
 #define newVector(TYPE) init_vec_##TYPE()
 #define vector_push_back(TYPE, out_ptr, val) push_back_##TYPE ( out_ptr, val)
 #define vector_clear(TYPE, ptr) clear_##TYPE(ptr)
