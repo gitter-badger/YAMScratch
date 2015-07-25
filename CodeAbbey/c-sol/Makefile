@@ -39,7 +39,8 @@ CXXFLAGS += -g -Wall -Wextra -pthread --pedantic-errors -Wno-unused-function -Wc
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
 # TESTS = $(BIN)/big_int_unittest 
-TESTS =  $(BIN)/big_int_unittest.out $(BIN)/brainfk_intrprtr_unittest.out
+TESTS =  $(BIN)/big_int_unittest.out $(BIN)/brainfk_intrprtr_unittest.out \
+		$(BIN)/yam_vector_unittest.out $(BIN)/yam_deque_unittest.out
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -83,6 +84,25 @@ $(OBJ)/yam_big_int_unittest.o : $(SRC)/yam_big_int_unittest.cc \
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I $(INC) -c $< -o $@
 
 $(BIN)/big_int_unittest.out : $(OBJ)/yam_big_int.o $(OBJ)/yam_big_int_unittest.o  \
+						$(LDIR)/gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+#========================================
+# 			CONTAINER TESTS
+#========================================
+$(OBJ)/yam_vector_unittest.o : $(SRC)/yam_vector_unittest.cc \
+					  $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I $(INC) -c $< -o $@
+
+$(BIN)/yam_vector_unittest.out : $(OBJ)/yam_vector_unittest.o  \
+						$(LDIR)/gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+$(OBJ)/yam_deque_unittest.o : $(SRC)/yam_deque_unittest.cc \
+					  $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I $(INC) -c $< -o $@
+
+$(BIN)/yam_deque_unittest.out : $(OBJ)/yam_deque_unittest.o  \
 						$(LDIR)/gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
