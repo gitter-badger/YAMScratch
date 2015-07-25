@@ -41,38 +41,44 @@ TEST(DequeTest, PageSize) {
 }
 
 TEST(DequeTest, NewDeque_uint8) {
-	/*Deque(uint8_t)* v;
-	v = newDeque(uint8_t);
-	EXPECT_TRUE(NULL != v);
-	*/
+	Deque(uint8_t)* d;
+	d = (Deque(uint8_t)*)newDeque(uint8_t);
+	EXPECT_TRUE(NULL != d);
+	
 }
-/*
+
 TEST(DequeTest, NewDeque_uint16) {
-	Deque(uint16_t)* v;
-	v = newDeque(uint16_t);
-	EXPECT_TRUE(NULL != v);
+	Deque(uint16_t)* d;
+	d = (Deque(uint16_t)*)newDeque(uint16_t);
+	EXPECT_TRUE(NULL != d);
 }
 
 TEST(DequeTest, NewDeque_uint32) {
-	Deque(uint32_t)* v;
-	v = newDeque(uint32_t);
-	EXPECT_TRUE(NULL != v);
+	Deque(uint32_t)* d;
+	d = (Deque(uint32_t)*)newDeque(uint32_t);
+	EXPECT_TRUE(NULL != d);
 }
 TEST(DequeTest, NewDeque_uint64) {
-	Deque(uint64_t)* v;
-	v = newDeque(uint64_t);
-	EXPECT_TRUE(NULL != v);
+	Deque(uint64_t)* d;
+	d = newDeque(uint64_t);
+	EXPECT_TRUE(NULL != d);
 }
 
-TEST(DequeTest, PushBack) {
-	Deque(uint8_t)* v;
-	v = newDeque(TypeParam);
-	ASSERT_NE(NULL, v);
-	EXPECT_EQ(0, v->elms);
-
-	TypeParam* a = new TypeParam;
-	vector_push_back(TypeParam, v, *a);
-	EXPECT_EQ(1, v->items);
-	EXPECT_EQ(*a, v->items[0]);
+TEST(DequeTest, NewDeque_dummy320) {
+	Deque(dummy320)* d;
+	d = (Deque(dummy320)*)newDeque(dummy320);
+	EXPECT_TRUE(NULL != d);
 }
-*/
+
+TEST(DequeTest, NewDeque_dummy512) {
+	Deque(dummy512)* d;
+	d = (Deque(dummy512)*)newDeque(dummy512);
+	EXPECT_TRUE(NULL != d);
+}
+
+TEST(DequeTest, NewDeque_dummy1024) {
+	Deque(dummy1024)* d;
+	d = (Deque(dummy1024)*)newDeque(dummy1024);
+	EXPECT_TRUE(NULL != d);
+}
+
