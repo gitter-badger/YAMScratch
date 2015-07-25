@@ -20,8 +20,8 @@ int main(int argc, char const *argv[])
 		exit(-1);
 	}
 	/*
-	** find the total sum of a 2d6 roll using large random number
-	** each line of input is two random numbers for dice rools
+	** Smooth array of temperature data by averaging each value
+	** with its two neighbors, not including the end values
 	*/
 	unsigned ii;
 	for(ii = 0; ii < N; ++ii) {
@@ -29,6 +29,7 @@ int main(int argc, char const *argv[])
 		/*read input so we can perform cal*/
 		rc = scanf(" %lf ", result+ii);
 		if(rc != 1) {
+			free(result);
 			fprintf(stderr, "input read error at line %u\n", ii +2 );
 			fflush(stderr);
 			perror("errno: ");
