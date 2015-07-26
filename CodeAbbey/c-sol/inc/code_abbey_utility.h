@@ -54,6 +54,8 @@ struct prefix_node {
 	struct prefix_node* children[NUM_CHILDREN];
 };
 
+struct prefix_node* prefix_node_init();
+
 int insert_word(struct prefix_node* root, char* buff, size_t len);
 
 void destroy_prefix_tree(struct prefix_node* root);
