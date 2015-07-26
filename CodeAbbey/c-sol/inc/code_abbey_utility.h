@@ -47,6 +47,20 @@ uint64_t modular_exponentiation(uint64_t A, uint64_t B, uint32_t M);
 unsigned long linear_congruent_gen(unsigned long A, unsigned long C,
 								unsigned long M, unsigned long Xcurr);
 
+struct prefix_node;
+#define NUM_CHILDREN 26
+struct prefix_node {
+	unsigned value;
+	struct prefix_node* children[NUM_CHILDREN];
+};
+
+int insert_word(struct prefix_node* root, char* buff, size_t len);
+
+void destroy_prefix_tree(struct prefix_node* root);
+
+void print_tree_lexographic_order(struct prefix_node* root, char* print_buff, unsigned level, size_t max_depth);
+
+
 #endif
 
 #ifdef __cplusplus
