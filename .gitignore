@@ -15,6 +15,7 @@ c-misc/DS\ projects/*.txt
 *bbcomp/
 *gliese1969.txt
 *words.txt
+*db-ip.txt
 
 #ignore test input files
 PracticeInput*
