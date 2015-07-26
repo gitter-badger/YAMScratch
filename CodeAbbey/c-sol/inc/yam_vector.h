@@ -15,7 +15,7 @@ extern "C" {
 		unsigned _size; 														\
 		unsigned elms;															\
 	} vec_##TYPE; 															\
-	static inline vec_##TYPE *init_vec_##TYPE() { 							\
+	static inline vec_##TYPE * init_vec_##TYPE() { 							\
 		return (vec_##TYPE*)calloc(1, sizeof(vec_##TYPE)); 				\
 	} 																			\
 	static inline void destroy_vec_##TYPE(vec_##TYPE *p) { 					\
@@ -49,7 +49,7 @@ extern "C" {
 		out_ptr->items[out_ptr->elms] = val;									\
 		out_ptr->elms += 1;														\
 	}																			\
-	static void clear_##TYPE(vec_##TYPE * p) {								\
+	static void clear_vec_##TYPE(vec_##TYPE * p) {								\
 		if(p != NULL){															\
 			if(p->items) {														\
 				free(p->items);													\
@@ -110,7 +110,7 @@ extern "C" {
 #define Vector(TYPE) vec_##TYPE
 #define newVector(TYPE) init_vec_##TYPE()
 #define vector_push_back(TYPE, out_ptr, val) push_back_##TYPE ( out_ptr, val)
-#define vector_clear(TYPE, ptr) clear_##TYPE(ptr)
+#define vector_clear(TYPE, ptr) clear_vec_##TYPE(ptr)
 #define vector_destroy(TYPE, ptr) destroy_vec_##TYPE(ptr)
 #define vector_resize(TYPE, ptr, n) resize_vec_##TYPE(n, ptr)
 #define vector_pop(TYPE, ptr) pop_##TYPE(ptr)
