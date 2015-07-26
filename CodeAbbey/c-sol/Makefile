@@ -90,7 +90,7 @@ $(BIN)/big_int_unittest.out : $(OBJ)/yam_big_int.o $(OBJ)/yam_big_int_unittest.o
 #========================================
 # 			CONTAINER TESTS
 #========================================
-$(OBJ)/yam_vector_unittest.o : $(SRC)/yam_vector_unittest.cc \
+$(OBJ)/yam_vector_unittest.o : $(SRC)/yam_vector_unittest.cc $(INC)/yam_vector.h\
 					  $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I $(INC) -c $< -o $@
 
@@ -98,7 +98,7 @@ $(BIN)/yam_vector_unittest.out : $(OBJ)/yam_vector_unittest.o  \
 						$(LDIR)/gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
-$(OBJ)/yam_deque_unittest.o : $(SRC)/yam_deque_unittest.cc \
+$(OBJ)/yam_deque_unittest.o : $(SRC)/yam_deque_unittest.cc $(INC)/yam_deque.h \
 					  $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I $(INC) -c $< -o $@
 
@@ -361,6 +361,11 @@ $(BIN)/52.out : $(SRC)/52.c
 53 : $(BIN)/53.out
 
 $(BIN)/53.out : $(SRC)/53.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
+55 : $(BIN)/55.out
+
+$(BIN)/55.out : $(SRC)/55.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
 57 : $(BIN)/57.out
