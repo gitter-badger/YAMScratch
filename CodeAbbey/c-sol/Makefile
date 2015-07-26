@@ -333,6 +333,11 @@ $(BIN)/44.out : $(SRC)/44.c
 $(BIN)/43.out : $(SRC)/43.c
 	$(CC) $(CFLAGS) -Wno-unused-function -I $(INC) $< -o $@
 
+46 : $(BIN)/46.out
+
+$(BIN)/46.out : $(SRC)/46.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
 47 : $(BIN)/47.out
 
 $(BIN)/47.out : $(SRC)/47.c
@@ -485,6 +490,11 @@ $(BIN)/120.out : $(SRC)/120.c $(INC)/code_abbey_utility.h
 
 $(BIN)/128.out : $(SRC)/128.c
 	$(CC) $(CFLAGS) -I $(INC) -lgmp $< -o $@
+
+134 : $(BIN)/134.out
+
+$(BIN)/134.out : $(SRC)/134.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
 140 : $(BIN)/140.out
 
