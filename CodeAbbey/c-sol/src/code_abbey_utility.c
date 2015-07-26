@@ -71,7 +71,7 @@ struct prefix_node* prefix_node_init() {
 	return node;
 }
 /*must be lower case word*/
-int insert_word(struct prefix_node* root, char* buff, size_t len) {
+int insert_word(struct prefix_node* root, char* word, size_t len) {
 	/*sanity checks*/
 	if(len == 0) return 0;
 	/*root node is direct value comparison*/
@@ -80,9 +80,9 @@ int insert_word(struct prefix_node* root, char* buff, size_t len) {
 	cursor = root;
 	for(ii = 0; ii < len; ++ii) {
 		/*skip all non lower case ascii characters*/
-		if(buff[ii] <= 'z') {
-			if(buff[ii] >= 'a'){
-				key = buff[ii] - 'a';
+		if(word[ii] <= 'z') {
+			if(word[ii] >= 'a'){
+				key = word[ii] - 'a';
 				assert(key < NUM_CHILDREN);
 				if(cursor->children[key] == NULL) {
 					cursor->children[key] = prefix_node_init();
@@ -134,5 +134,33 @@ void print_tree_lexographic_order(struct prefix_node* root, char* print_buff, un
 	if(flag == 0 && root->value > 1) {
 		print_buff[level] = '\0';
 		printf("%s ", print_buff);	
+	}
+}
+
+int find_word(struct prefix_node* root, char* word, size_t len) {
+	/*only accepts lower case characters*/
+	unsigned long ii, key;
+	struct prefix_node* cursor;
+	cursor = root;
+	for(ii = 0; ii < len; ++ii) {
+		if(word[ii] <= 'z') {
+			if(word[ii] >= 'a') {
+				key = word[ii] - 'a';
+				/*check if the word is in the tree*/
+				if(ii == len -1) {
+					if(cursor->value != 0) {
+						return 1;
+					}
+				} else {
+					/*search for node further down*/
+					if(cursor->children[key] != NULL) {
+						cursor = cursor->children[key];
+					} else {
+						return 0;
+					}
+				}
+
+			}
+		}
 	}
 }
