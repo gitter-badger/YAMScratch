@@ -21,8 +21,9 @@ def index():
 @app.route('/random-page/<int:value>')
 def build_random_page(value=0):
 	out_val = value * random.randint(10, 1000)
-	return flask.render_template('secret_number.html', secret_value = out_val)
-	#return "The secret value is ",200
+	#The check does not like the rendered template, it expects only the text
+	#return flask.render_template('secret_number.html', secret_value = out_val)
+	return "Random value is {0}".format(out_val)
 
 @app.route('/query-string')
 def parse_query():
