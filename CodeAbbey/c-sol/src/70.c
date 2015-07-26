@@ -11,6 +11,10 @@
 
 int main(int argc, char const *argv[])
 {
+	/*find the most frequen word out of 9000000 randomly 
+	* generated words using the given seed for the LCG
+	* we will use prefix string storage developed for 
+	* problem 55*/
 	unsigned long X0;
 	int rc;
 	errno = 0;
@@ -73,12 +77,10 @@ int main(int argc, char const *argv[])
 			if(count > max_count) {
 				max_count = count;
 				strncpy(max_buff, buffer, BUFF_SIZE);
-				//printf("new max %d = %s\n",max_count, max_buff);
 			}
 		}
-		/*print a space separator*/
-		//printf(" ");
 	}
+	/*print the most frequent word*/
 	printf("%s\n", max_buff);
 	destroy_prefix_tree(root);
 	free(buffer);
