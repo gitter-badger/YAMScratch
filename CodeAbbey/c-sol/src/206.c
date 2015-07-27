@@ -173,6 +173,8 @@ int main(int argc, char* argv[]) {
 		}
 
 	}
+	if(out_buffer != NULL) free(out_buffer);
+	if(lineptr != NULL) free(lineptr);
 	printf("\n");
 	return 0;
 }
