@@ -26,7 +26,7 @@ def build_random_page(value=0):
 	#return flask.render_template('secret_number.html', secret_value = out_val)
 	return "Random value is {0}".format(out_val)
 
-@app.route('/karl', methods = ['GET', 'POST'])
+@app.route('/horoscope-result', methods = ['GET', 'POST'])
 def parse_query():
 	#configure lucky number generator
 	A, B, C = (36, 48, 11)
@@ -59,11 +59,6 @@ def parse_query():
 	lucky = (len(name) *A + month * B + day*C + year) % 31 + 1
 	#return flask.render_template()
 	return "Your lucky day is {0}".format(lucky)
-
-@app.route('/sam')
-def foo():
-	print "foo"
-	return "Foo"
 
 @app.route('/horoscope')
 def gen_form():
