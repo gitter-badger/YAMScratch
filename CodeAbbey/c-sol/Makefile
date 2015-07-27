@@ -527,6 +527,12 @@ $(BIN)/175.out : $(SRC)/175.c
 $(BIN)/184.out : $(SRC)/184.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
+206 : $(BIN)/206.out
+
+$(BIN)/206.out : $(SRC)/206.c
+	$(CC) $(CFLAGS) -I $(INC) $< -o $@
+
+
 
 clean :
 	rm -vf $(TESTS) $(LDIR)/gtest.a $(LDIR)/gtest_main.a $(OBJ)/*.o $(BIN)/*
