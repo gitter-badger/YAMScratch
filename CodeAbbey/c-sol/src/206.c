@@ -96,14 +96,15 @@ size_t encode32_buffer(char* input, size_t M, char** output, size_t* N) {
 
 	if(IS_LITTLE_ENDIAN) {
 		/*copy the input buffer in reverse*/
+		/*write in padding characters for message at front of buffer*/
+		for(ii = 0; ii < padding_bytes; ++ii) {
+			conv_buff[ii] = '0' + padding_bytes;
+		}
 		char* tmp_cursor;
 		for(ii = 0; ii < M; ++ii) {
-			conv_buff[ii] = input[M-1-ii];
+			conv_buff[ii+padding_bytes] = input[M - 1 - ii];
 		}
-		/*write in padding characters for message*/
-		for(ii = 0; ii < padding_bytes; ++ii) {
-			conv_buff[M+ii] = '0' + padding_bytes;
-		}
+		
 	} else {
 		/*offset by 3 bytes*/
 		memcpy( (conv_buff+3), input, M);
@@ -118,32 +119,34 @@ size_t encode32_buffer(char* input, size_t M, char** output, size_t* N) {
 	n_chunks = (M + padding_bytes) / NUM_CHUNK_BITS;
 	char* conv_cursor, * out_cursor;
 	conv_cursor = conv_buff;
-	out_cursor = *output;
+
 	if(IS_LITTLE_ENDIAN) {
-		/* Little endian*/
+		/* Little endian writes tot buffer in reverse*/
+		/*null terminate the output buffer*/
+		out_cursor = *output + (n_chunks * 8);
+		*out_cursor = '\0';
+		out_cursor -= 8;
 		for(ii = 0; ii < n_chunks; ++ii) {
-			printf("chunk = %.5s\n", conv_cursor);
-			for(jj = 0; jj < 8; ++jj) {
-				printf("byte %d = %x \n", jj, conv_cursor[jj]);
-			}
 			/*alias the pointer and read each 5 bit chunck as one byte of output*/
 			for(jj = 0; jj < 8; ++jj) {
 				uint64_t tmp;
 				tmp = (*(uint64_t*)conv_cursor);
-				printf("tmp = %lx\n", tmp);
+				//printf("tmp = %lx\n", tmp);
 				tmp &= (uint64_t)FIVE_BIT_MASK << (NUM_CHUNK_BITS * (7 - jj));
 				tmp >>= (NUM_CHUNK_BITS * (7 - jj));
 				assert(tmp < 32);
-				printf("key = %u\n", tmp);
+				//printf("key = %u\n", tmp);
 				*out_cursor++ = base32[tmp];
 			}
 			/*advance the buffer pointer by 5 bytes for each chunk*/
 			conv_cursor+= NUM_CHUNK_BITS;
+			/*move the out_cursor back 16 bytes*/
+			out_cursor -= 16;
 		}
-		/*null terminate the output buffer*/
-		*out_cursor = '\0';
+		
 	} else {
-		/*Big endian*/
+		/*Big endian writes to ouput in sane order*/
+		out_cursor = *output;
 		for(ii = 0; ii < n_chunks; ++ii) {
 			printf("chunk = %.5s\n", conv_cursor);
 			for(jj = 0; jj < 8; ++jj) {
@@ -219,12 +222,11 @@ int main(int argc, char* argv[]) {
 		/*encode lines 1, 3, 5...*/
 		if((ii%2)) {
 			/*account for newlines*/
-			printf("DECODE_PLACEHOLDER\n");
+			printf("DECODE_PLACEHOLDER ");
 			//decode32_buffer(lineptr, bytes_read - 1, &out_buffer, &out_buff_sz);
 		} else {
-			printf("ENCODE\n");
 			encode32_buffer(lineptr, bytes_read - 1, &out_buffer, &out_buff_sz);
-			printf("[%s]\n", out_buffer);
+			printf("%s ", out_buffer);
 		}
 
 	}
