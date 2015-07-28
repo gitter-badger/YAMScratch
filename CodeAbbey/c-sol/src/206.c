@@ -4,11 +4,13 @@
 #include <stdlib.h> /*provides exit*/
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 
 #include "code_abbey_utility.h"
 /*work around until detection macro*/
 #define IS_LITTLE_ENDIAN 1
 #define FIVE_BIT_MASK 0x1f
+#define NUM_CHUNK_BITS 5
 #define BASE32_ALPHABET "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
 
 size_t encode32_buffer(char* input, size_t M, char** output, size_t* N) {
@@ -33,12 +35,13 @@ size_t encode32_buffer(char* input, size_t M, char** output, size_t* N) {
 	*/
 	/*sanity checks*/
 	if(input == NULL) return 0;
+
 	if(M == 0) return 0;
-	unsigned ii, jj;
+	unsigned long ii, jj;
 	/*compute the required size of conversion buffer*/
 	size_t conv_buff_sz, out_buff_sz, out_bytes_written;
 	unsigned padding_bytes;
-	padding_bytes = 5 - (M % 5);
+	padding_bytes = (M % 5) ? 5 - (M % 5): 0;
 	conv_buff_sz = M + padding_bytes;
 	/*output buffer is 8/5 times conv_buff_sz + 1 for terminating newline*/
 	out_buff_sz = ((conv_buff_sz / 5) * 8) + 1;
@@ -92,8 +95,11 @@ size_t encode32_buffer(char* input, size_t M, char** output, size_t* N) {
 	if(conv_buff == NULL || errno !=0) return 0;
 
 	if(IS_LITTLE_ENDIAN) {
-		/*copy the input buffer in*/
-		memcpy(conv_buff, input, M);
+		/*copy the input buffer in reverse*/
+		char* tmp_cursor;
+		for(ii = 0; ii < M; ++ii) {
+			conv_buff[ii] = input[M-1-ii];
+		}
 		/*write in padding characters for message*/
 		for(ii = 0; ii < padding_bytes; ++ii) {
 			conv_buff[M+ii] = '0' + padding_bytes;
@@ -109,11 +115,57 @@ size_t encode32_buffer(char* input, size_t M, char** output, size_t* N) {
 
 	char* base32 = BASE32_ALPHABET;
 	size_t n_chunks; /*full size chunks in input buffer*/
-
-
-
-
-
+	n_chunks = (M + padding_bytes) / NUM_CHUNK_BITS;
+	char* conv_cursor, * out_cursor;
+	conv_cursor = conv_buff;
+	out_cursor = *output;
+	if(IS_LITTLE_ENDIAN) {
+		/* Little endian*/
+		for(ii = 0; ii < n_chunks; ++ii) {
+			printf("chunk = %.5s\n", conv_cursor);
+			for(jj = 0; jj < 8; ++jj) {
+				printf("byte %d = %x \n", jj, conv_cursor[jj]);
+			}
+			/*alias the pointer and read each 5 bit chunck as one byte of output*/
+			for(jj = 0; jj < 8; ++jj) {
+				uint64_t tmp;
+				tmp = (*(uint64_t*)conv_cursor);
+				printf("tmp = %lx\n", tmp);
+				tmp &= (uint64_t)FIVE_BIT_MASK << (NUM_CHUNK_BITS * (7 - jj));
+				tmp >>= (NUM_CHUNK_BITS * (7 - jj));
+				assert(tmp < 32);
+				printf("key = %u\n", tmp);
+				*out_cursor++ = base32[tmp];
+			}
+			/*advance the buffer pointer by 5 bytes for each chunk*/
+			conv_cursor+= NUM_CHUNK_BITS;
+		}
+		/*null terminate the output buffer*/
+		*out_cursor = '\0';
+	} else {
+		/*Big endian*/
+		for(ii = 0; ii < n_chunks; ++ii) {
+			printf("chunk = %.5s\n", conv_cursor);
+			for(jj = 0; jj < 8; ++jj) {
+				printf("byte %d = %x \n", jj, conv_cursor[jj]);
+			}
+			/*alias the pointer and read each 5 bit chunck as one byte of output*/
+			for(jj = 0; jj < 8; ++jj) {
+				uint64_t tmp;
+				tmp = (*(uint64_t*)conv_cursor);
+				printf("tmp = %lx\n", tmp);
+				tmp &= ((uint64_t)FIVE_BIT_MASK << (jj*NUM_CHUNK_BITS));
+				tmp >>= (jj * NUM_CHUNK_BITS);
+				assert(tmp < 32);
+				printf("key = %u\n", tmp);
+				*out_cursor++ = base32[tmp];
+			}
+			/*advance the buffer pointer by 5 bytes for each chunk*/
+			conv_cursor+= NUM_CHUNK_BITS;
+		}
+		/*null terminate the output buffer*/
+		*out_cursor = '\0';
+	}
 	free(conv_buff);
 	return 0;
 }
@@ -167,9 +219,12 @@ int main(int argc, char* argv[]) {
 		/*encode lines 1, 3, 5...*/
 		if((ii%2)) {
 			/*account for newlines*/
+			printf("DECODE_PLACEHOLDER\n");
 			//decode32_buffer(lineptr, bytes_read - 1, &out_buffer, &out_buff_sz);
 		} else {
+			printf("ENCODE\n");
 			encode32_buffer(lineptr, bytes_read - 1, &out_buffer, &out_buff_sz);
+			printf("[%s]\n", out_buffer);
 		}
 
 	}

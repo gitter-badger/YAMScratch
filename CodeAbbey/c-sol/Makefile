@@ -532,6 +532,12 @@ $(BIN)/184.out : $(SRC)/184.c
 $(BIN)/206.out : $(SRC)/206.c
 	$(CC) $(CFLAGS) -I $(INC) $< -o $@
 
+206_big : $(BIN)/206_big.out
+
+$(BIN)/206_big.out : $(SRC)/206.c
+	$(CC) $(CFLAGS) -I $(INC) -mbig-endian $< -o $@
+	
+
 
 
 clean :
