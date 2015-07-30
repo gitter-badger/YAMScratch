@@ -118,5 +118,42 @@ if K == 10
 		compare = mod((each * comparision_vals.' + each_cons),MODULUS);
 		assert(compare == byte_functions{ii}(comparision_vals));
 	end
+	%brute force iterate over all possible combinations
+	global_count = 0
+	for ii = 1:length(POSSIBLE_VALS)
+		for jj = 1:length(POSSIBLE_VALS)
+			for kk = 1:length(POSSIBLE_VALS)
+				for ll = 1:length(POSSIBLE_VALS)
+					global_count = global_count + 1;
+					if mod(global_count,1000) == 0
+						disp(global_count./1000)
+					end
+					guess_chars = [POSSIBLE_VALS(ii), POSSIBLE_VALS(jj), POSSIBLE_VALS(kk), POSSIBLE_VALS(ll)];
+					%disp(guess_chars)
+					%evaluate each of the functions in turn
+					valid_flag = 1;
+					for ff = 1:6
+						tmp_result = byte_functions{ff}(guess_chars);
+						if tmp_result < 65
+							valid_flag = 0;
+							break;
+						elseif tmp_result > 122
+							valid_flag = 0;
+							break;
+						elseif tmp_result < 97
+							if tmp_result > 90
+								valid_flag = 0;
+								break
+							end
+						end
+					end
+					if valid_flag == 1
+						disp(guess_chars)
+					end
+				end
+			end
+		end
+	end
+	toc
 end
 
