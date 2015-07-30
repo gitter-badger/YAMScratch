@@ -44,15 +44,15 @@ augmented(:,K+1)  = b(:,1)
 
 %R2  = R2 - 5*R1
 tmp_rw = augmented(2,:) - 5*augmented(1,:);
-tmp_rw = mod(tmp_rw, MODULUS)
+tmp_rw = mod(tmp_rw, MODULUS);
 augmented(2,:) = tmp_rw(:)
 %R3 = R3 - R1
 tmp_rw = augmented(3,:) - augmented(1,:);
-tmp_rw = mod(tmp_rw, MODULUS)
+tmp_rw = mod(tmp_rw, MODULUS);
 augmented(3,:) = tmp_rw(:)
 %R4 = R4 - 5*R1
 tmp_rw = augmented(4,:) - 5*augmented(1,:);
-tmp_rw = mod(tmp_rw, MODULUS)
+tmp_rw = mod(tmp_rw, MODULUS);
 augmented(4,:) = tmp_rw
 
 %R2 = R2 * the multiplicative mod inverse of  first element in R2
@@ -66,7 +66,7 @@ if d ~= 1
 end
 
 tmp_rw = augmented(2,:) * u;
-tmp_rw = mod(tmp_rw, MODULUS)
+tmp_rw = mod(tmp_rw, MODULUS);
 augmented(2, :) = tmp_rw(:)
 
 %R3 =  R3 - R1 * first element in R3
@@ -75,7 +75,7 @@ first_index = find(augmented(3,:));
 first_elm = augmented(3, first_index(1));
 
 tmp_rw = augmented(3,:) - first_elm*augmented(2,:);
-tmp_rw = mod(tmp_rw, MODULUS)
+tmp_rw = mod(tmp_rw, MODULUS);
 augmented(3,:) = tmp_rw(:)
 
 %R4=  R4 - R2 * first element in R3
@@ -84,7 +84,7 @@ first_index = find(augmented(4,:));
 first_elm = augmented(4, first_index(1));
 
 tmp_rw = augmented(4,:) - first_elm*augmented(2,:);
-tmp_rw = mod(tmp_rw, MODULUS)
+tmp_rw = mod(tmp_rw, MODULUS);
 augmented(4,:) = tmp_rw(:)
 
 %R3 = R3 * the multiplicative mod inverse of  first element in R3
@@ -98,7 +98,7 @@ if d ~= 1
 end
 
 tmp_rw = augmented(3,:) * u;
-tmp_rw = mod(tmp_rw, MODULUS)
+tmp_rw = mod(tmp_rw, MODULUS);
 augmented(3, :) = tmp_rw(:)
 
 %R4=  R4 - R3 * first element in R3
@@ -107,7 +107,7 @@ first_index = find(augmented(4,:));
 first_elm = augmented(4, first_index(1));
 
 tmp_rw = augmented(4,:) - first_elm*augmented(3,:);
-tmp_rw = mod(tmp_rw, MODULUS)
+tmp_rw = mod(tmp_rw, MODULUS);
 augmented(4,:) = tmp_rw(:)
 
 %R6=  R6 - R5 * first element in R6
@@ -116,7 +116,7 @@ first_index = find(augmented(6,:));
 first_elm = augmented(6, first_index(1));
 
 tmp_rw = augmented(6,:) - first_elm*augmented(5,:);
-tmp_rw = mod(tmp_rw, MODULUS)
+tmp_rw = mod(tmp_rw, MODULUS);
 augmented(6,:) = tmp_rw(:)
 
 
@@ -131,5 +131,27 @@ if d ~= 1
 end
 
 tmp_rw = augmented(6,:) * u;
-tmp_rw = mod(tmp_rw, MODULUS)
+tmp_rw = mod(tmp_rw, MODULUS);
 augmented(6, :) = tmp_rw(:)
+
+%==============================================
+% Below here is experimental manipulation of K = 10
+%==============================================
+if K == 10
+	%sweep back on the lower rows
+	for jj = 6:-1:2
+		first_index = find(augmented(jj,:));
+		for ii = (jj-1): -1 : 1
+			if augmented(ii, first_index(1)) ~= 0
+				%do R_ii
+				first_elm = augmented(ii, first_index(1));
+				tmp_rw = augmented(ii,:) - first_elm*augmented(jj,:);
+				tmp_rw = mod(tmp_rw, MODULUS);
+				augmented(ii,:) = tmp_rw(:)
+
+			else
+				disp('skipping row')
+			end
+		end
+	end
+end
