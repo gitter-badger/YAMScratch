@@ -6,6 +6,8 @@ assert(mod(K, 2) == 0);
 assert(K >= 10);
 MODULUS = 255;
 
+%these are the character values possible
+POSSIBLE_VALS = [65:90, 97:122];
 
 %there are only 6 bytes determined in output
 A = zeros(6, K);
@@ -40,6 +42,8 @@ for ii = 1:(K/2)
 end
 
 disp(A) 
+
+
 
 %NOTE, now we just solve this using gauss elimination on Z_bar(255) (finite field)
 augmented = A;
@@ -85,6 +89,34 @@ for jj = 6:-1:2
 		else
 			disp('skipping row')
 		end
+	end
+end
+
+%compute with letters are determined by the others
+% the determined letters are the columns with a leading 1
+determined_letter_index = zeros(1,6);
+for ii = 1:6
+	first_index = find(augmented(ii,:));
+	determined_letter_index(ii) = first_index(1);
+end
+
+all_indices = 1:K;
+
+undetermined_indices = setdiff(all_indices, determined_letter_index);
+
+if K == 10
+	byte_functions = {};
+	for ii = 1:6
+		%get the coefficients for the function for each determined letter
+		each = augmented(ii, undetermined_indices);
+		%get constant
+		each_cons = augmented(ii, end);
+		%move to other size of equation
+		each = mod(-1*each, MODULUS);
+		byte_functions{ii} = @(X)(mod((X * each.' + each_cons), MODULUS));
+		comparision_vals = [65, 66, 67, 68];
+		compare = mod((each * comparision_vals.' + each_cons),MODULUS);
+		assert(compare == byte_functions{ii}(comparision_vals));
 	end
 end
 
