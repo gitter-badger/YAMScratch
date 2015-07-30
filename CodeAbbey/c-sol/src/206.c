@@ -122,25 +122,22 @@ size_t encode32_buffer(char* input, size_t M, char** output, size_t* N) {
 
 	if(IS_LITTLE_ENDIAN) {
 		/* Little endian writes tot buffer in reverse*/
-		/*null terminate the output buffer*/
 		out_cursor = *output + (n_chunks * 8);
-		*out_cursor = '\0';
-		out_cursor -= 8;
+		*out_cursor = '\0'; /*null terminate the output buffer*/
+		out_cursor -= 8; /*move cursor back into position*/
 		for(ii = 0; ii < n_chunks; ++ii) {
 			/*alias the pointer and read each 5 bit chunck as one byte of output*/
 			for(jj = 0; jj < 8; ++jj) {
 				uint64_t tmp;
 				tmp = (*(uint64_t*)conv_cursor);
-				//printf("tmp = %lx\n", tmp);
 				tmp &= (uint64_t)FIVE_BIT_MASK << (NUM_CHUNK_BITS * (7 - jj));
 				tmp >>= (NUM_CHUNK_BITS * (7 - jj));
 				assert(tmp < 32);
-				//printf("key = %u\n", tmp);
 				*out_cursor++ = base32[tmp];
 			}
 			/*advance the buffer pointer by 5 bytes for each chunk*/
 			conv_cursor+= NUM_CHUNK_BITS;
-			/*move the out_cursor back 16 bytes*/
+			/*move the out_cursor back 16 bytes since we made 8 steps forward*/
 			out_cursor -= 16;
 		}
 		
@@ -148,19 +145,19 @@ size_t encode32_buffer(char* input, size_t M, char** output, size_t* N) {
 		/*Big endian writes to ouput in sane order*/
 		out_cursor = *output;
 		for(ii = 0; ii < n_chunks; ++ii) {
-			printf("chunk = %.5s\n", conv_cursor);
+			// printf("chunk = %.5s\n", conv_cursor);
 			for(jj = 0; jj < 8; ++jj) {
-				printf("byte %d = %x \n", jj, conv_cursor[jj]);
+				// printf("byte %d = %x \n", jj, conv_cursor[jj]);
 			}
 			/*alias the pointer and read each 5 bit chunck as one byte of output*/
 			for(jj = 0; jj < 8; ++jj) {
 				uint64_t tmp;
 				tmp = (*(uint64_t*)conv_cursor);
-				printf("tmp = %lx\n", tmp);
+				// printf("tmp = %lx\n", tmp);
 				tmp &= ((uint64_t)FIVE_BIT_MASK << (jj*NUM_CHUNK_BITS));
 				tmp >>= (jj * NUM_CHUNK_BITS);
 				assert(tmp < 32);
-				printf("key = %u\n", tmp);
+				// printf("key = %u\n", tmp);
 				*out_cursor++ = base32[tmp];
 			}
 			/*advance the buffer pointer by 5 bytes for each chunk*/
