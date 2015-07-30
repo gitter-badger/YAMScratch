@@ -45,7 +45,8 @@ disp(A)
 augmented = A;
 augmented(:,K+1)  = b(:,1)
 
-for ii = 1:(K/2)
+for ii = 1:6
+	disp(ii)
 	first_index = find(augmented(ii,:));
 	if augmented(ii, first_index(1)) ~= 1
 		first_elm = augmented(ii,first_index(1));
@@ -58,9 +59,9 @@ for ii = 1:(K/2)
 		tmp_rw = mod(tmp_rw, MODULUS);
 		augmented(ii, :) = tmp_rw(:)
 	end
-	if ii < (K/2)
+	if ii < 6
 		%sweep down
-		for jj = (ii+1):(K/2)
+		for jj = (ii+1):6
 			first_elm = augmented(jj, first_index(1));
 			tmp_rw = augmented(jj,:) - first_elm * augmented(ii,:);
 			tmp_rw = mod(tmp_rw, MODULUS);
@@ -69,7 +70,7 @@ for ii = 1:(K/2)
 	end
 
 end
-
+disp('========================')
 %sweep back on the lower rows
 for jj = 6:-1:2
 	first_index = find(augmented(jj,:));
