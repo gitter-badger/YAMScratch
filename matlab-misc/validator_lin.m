@@ -140,8 +140,9 @@ undetermined_indices = setdiff(all_indices, determined_letter_index);
 D = augmented(:,undetermined_indices)
 Target = augmented(:, end);
 tic
+possible_solution = [];
 disp('Starting reduced matrix validation')
-for ii = 1:100000
+for ii = 1:1000000
 	% draw some random indices from the range
 	r = randi([1, length(POSSIBLE_VALS)], 1, length(undetermined_indices));
 	independent_vals  = POSSIBLE_VALS(r);
@@ -150,6 +151,19 @@ for ii = 1:100000
 	pass_1(determined_letter_index) = dependent_vals(:);
 	pass_1(undetermined_indices) = independent_vals(:);
 	%get the indices and generate the password
+	validator_outer = pass_1(pass_1>=65&pass_1<=122);
+	validator_inner = validator_outer(validator_outer>90&validator_outer<97);
+	if(length(validator_outer) == K)
+		disp('passed outside')
+		if(length(validator_inner) == 0)
+			disp('========\====|=====/==')
+			disp('======\====|=|==/=/===')
+			disp('==---You Found it---==')
+			disp('=====/===/==|===\=====')
+			disp('====/===/===|=\==\====')
+			disp(pass_1)
+		end
+	end
 	
 	guess_hash = mod(A * pass_1.', MODULUS);
 	assert( isequal(guess_hash, b));
@@ -159,6 +173,7 @@ toc
 disp('Reduced Matrix generates desired checksum')
  
 %%NOTE: right now it looks like below on yields savings for one element
+%==================================================================
 %go through each row and compute the cycle lengths for each elements
 % for ii = 1:6
 % 	%filter all the zero elements
@@ -166,72 +181,70 @@ disp('Reduced Matrix generates desired checksum')
 % 	%least common multiple divided by the ring value
 % 	all_cycle_lens = lcm(D(ii,pos_indices), MODULUS) ./ D(ii,pos_indices)
 % end
+%==================================================================
 
 
-error('Description');
-
-
-if K == 10
-	byte_functions = {};
-	for ii = 1:6
-		%get the coefficients for the function for each determined letter
-		each = augmented(ii, undetermined_indices);
-		%get constant
-		each_cons = augmented(ii, end);
-		%move to other size of equation
-		each = mod(-1*each, MODULUS);
-		byte_functions{ii} = @(X)(mod((X * each.' + each_cons), MODULUS));
-		comparision_vals = [65, 66, 67, 68];
-		compare = mod((each * comparision_vals.' + each_cons),MODULUS);
-		assert(compare == byte_functions{ii}(comparision_vals));
-	end
-	%brute force iterate over all possible combinations
-	global_count = 0
-	valid_solutions = [];
-	num_solutions = 0;
-	most_valid = 0;
-	for ii = 1:length(POSSIBLE_VALS)
-		for jj = 1:length(POSSIBLE_VALS)
-			for kk = 1:length(POSSIBLE_VALS)
-				for ll = 1:length(POSSIBLE_VALS)
-					global_count = global_count + 1;
-					if mod(global_count,10000) == 0
-						disp(global_count./10000)
-					end
-					guess_chars = [POSSIBLE_VALS(ii), POSSIBLE_VALS(jj), POSSIBLE_VALS(kk), POSSIBLE_VALS(ll)];
-					%disp(guess_chars)
-					%evaluate each of the functions in turn
-					valid_flag = 1;
-					for ff = 1:6
-						tmp_result = byte_functions{ff}(guess_chars);
-						if tmp_result < 65
-							valid_flag = 0;
-							break;
-						end
-						if tmp_result > 122
-						 	valid_flag = 0;
-						 	break;
-						end
-						if tmp_result < 97
-						 	if tmp_result > 90
-						 		valid_flag = 0;
-						 		break;
-						 	end
-						end
-					end
-					if ff >= most_valid
-						fprintf('Most valid %d\n', ff);
-						disp(guess_chars)
-						most_valid = ff;
-					end
-					if valid_flag == 1
-						valid_solutions(end+1, :) = guess_chars;
-						num_solutions = num_solutions + 1;
-					end
-				end
-			end
-		end
-	end
-	toc
-end
+% if K == 10
+% 	byte_functions = {};
+% 	for ii = 1:6
+% 		%get the coefficients for the function for each determined letter
+% 		each = augmented(ii, undetermined_indices);
+% 		%get constant
+% 		each_cons = augmented(ii, end);
+% 		%move to other size of equation
+% 		each = mod(-1*each, MODULUS);
+% 		byte_functions{ii} = @(X)(mod((X * each.' + each_cons), MODULUS));
+% 		comparision_vals = [65, 66, 67, 68];
+% 		compare = mod((each * comparision_vals.' + each_cons),MODULUS);
+% 		assert(compare == byte_functions{ii}(comparision_vals));
+% 	end
+% 	%brute force iterate over all possible combinations
+% 	global_count = 0
+% 	valid_solutions = [];
+% 	num_solutions = 0;
+% 	most_valid = 0;
+% 	for ii = 1:length(POSSIBLE_VALS)
+% 		for jj = 1:length(POSSIBLE_VALS)
+% 			for kk = 1:length(POSSIBLE_VALS)
+% 				for ll = 1:length(POSSIBLE_VALS)
+% 					global_count = global_count + 1;
+% 					if mod(global_count,10000) == 0
+% 						disp(global_count./10000)
+% 					end
+% 					guess_chars = [POSSIBLE_VALS(ii), POSSIBLE_VALS(jj), POSSIBLE_VALS(kk), POSSIBLE_VALS(ll)];
+% 					%disp(guess_chars)
+% 					%evaluate each of the functions in turn
+% 					valid_flag = 1;
+% 					for ff = 1:6
+% 						tmp_result = byte_functions{ff}(guess_chars);
+% 						if tmp_result < 65
+% 							valid_flag = 0;
+% 							break;
+% 						end
+% 						if tmp_result > 122
+% 						 	valid_flag = 0;
+% 						 	break;
+% 						end
+% 						if tmp_result < 97
+% 						 	if tmp_result > 90
+% 						 		valid_flag = 0;
+% 						 		break;
+% 						 	end
+% 						end
+% 					end
+% 					if ff >= most_valid
+% 						fprintf('Most valid %d\n', ff);
+% 						disp(guess_chars)
+% 						most_valid = ff;
+% 					end
+% 					if valid_flag == 1
+% 						valid_solutions(end+1, :) = guess_chars;
+% 						num_solutions = num_solutions + 1;
+% 					end
+% 				end
+% 			end
+% 		end
+% 	end
+% 	toc
+% end
 
