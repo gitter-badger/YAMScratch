@@ -140,6 +140,7 @@ undetermined_indices = setdiff(all_indices, determined_letter_index);
 D = augmented(:,undetermined_indices)
 Target = augmented(:, end);
 tic
+disp('Starting reduced matrix validation')
 for ii = 1:100000
 	% draw some random indices from the range
 	r = randi([1, length(POSSIBLE_VALS)], 1, length(undetermined_indices));
@@ -157,6 +158,15 @@ end
 toc
 disp('Reduced Matrix generates desired checksum')
  
+%%NOTE: right now it looks like below on yields savings for one element
+%go through each row and compute the cycle lengths for each elements
+% for ii = 1:6
+% 	%filter all the zero elements
+% 	pos_indices = find(D(ii,:));
+% 	%least common multiple divided by the ring value
+% 	all_cycle_lens = lcm(D(ii,pos_indices), MODULUS) ./ D(ii,pos_indices)
+% end
+
 
 error('Description');
 
