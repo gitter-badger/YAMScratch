@@ -1,7 +1,7 @@
 clear
 clc
 %K is the length of the password, must by divisible by 2
-K = 10;
+K = 16;
 assert(mod(K, 2) == 0);
 assert(K >= 10);
 MODULUS = 255;
@@ -12,7 +12,7 @@ POSSIBLE_VALS = [65:90, 97:122];
 %there are only 6 bytes determined in output
 A = zeros(6, K);
 %reduced rank solution vector
-b = zeros(6, K);
+b = zeros(6, 1);
 
 %two are left half checksum
 b(1,1) = 110; %byte a == 0x6e
@@ -61,7 +61,6 @@ for ii = 1:10000
 	[even_A_1, even_B_1] = challenge_checksum(even_1, MODULUS);
 	%assemble into the same form as the matrix rows are arranged
 	cksum_B = [left_A_1, left_B_1, even_A_1, even_B_1, right_A_1, right_B_1].';
-
 
 	guess_B = mod(A * pass_1.', MODULUS);
 	assert( isequal(guess_B, cksum_B ))
@@ -132,6 +131,35 @@ end
 all_indices = 1:K;
 
 undetermined_indices = setdiff(all_indices, determined_letter_index);
+
+
+%collect all of the undetermined indices into one matrix 
+% then we generate several thousand random guesses and check
+% that the system is equivalent to the checksum
+
+D = augmented(:,undetermined_indices)
+Target = augmented(:, end);
+tic
+for ii = 1:100000
+	% draw some random indices from the range
+	r = randi([1, length(POSSIBLE_VALS)], 1, length(undetermined_indices));
+	independent_vals  = POSSIBLE_VALS(r);
+	dependent_vals = mod(Target - (D * independent_vals.'), MODULUS);
+	pass_1 = zeros(1, K);
+	pass_1(determined_letter_index) = dependent_vals(:);
+	pass_1(undetermined_indices) = independent_vals(:);
+	%get the indices and generate the password
+	
+	guess_hash = mod(A * pass_1.', MODULUS);
+	assert( isequal(guess_hash, b));
+
+end
+toc
+disp('Reduced Matrix generates desired checksum')
+ 
+
+error('Description');
+
 
 if K == 10
 	byte_functions = {};
