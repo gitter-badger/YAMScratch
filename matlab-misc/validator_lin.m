@@ -42,7 +42,32 @@ for ii = 1:(K/2)
 end
 
 disp(A) 
+%% some tests that the matrix is of same form as checksum
 
+%test for 100 random passwords
+tic
+for ii = 1:10000
+	% draw some random indices from the range
+	r = randi([1, length(POSSIBLE_VALS)], 1, K);
+	%get the indices and generate the password
+	pass_1 = POSSIBLE_VALS(r);
+
+	even_1 = pass_1([1:2:length(pass_1)]);
+	left_1 = pass_1(1:(K/2));
+	right_1 = pass_1((K/2)+1:K);
+
+	[left_A_1, left_B_1] = challenge_checksum(left_1, MODULUS);
+	[right_A_1, right_B_1] = challenge_checksum(right_1, MODULUS);
+	[even_A_1, even_B_1] = challenge_checksum(even_1, MODULUS);
+	%assemble into the same form as the matrix rows are arranged
+	cksum_B = [left_A_1, left_B_1, even_A_1, even_B_1, right_A_1, right_B_1].';
+
+
+	guess_B = mod(A * pass_1.', MODULUS);
+	assert( isequal(guess_B, cksum_B ))
+end
+toc
+disp('Matrix is equivalent to checksums')
 
 
 %NOTE, now we just solve this using gauss elimination on Z_bar(255) (finite field)
@@ -92,6 +117,10 @@ for jj = 6:-1:2
 	end
 end
 
+%%extract the reduced matrix and test that it is equivalent to the check sum
+
+
+
 %compute with letters are determined by the others
 % the determined letters are the columns with a leading 1
 determined_letter_index = zeros(1,6);
@@ -120,13 +149,16 @@ if K == 10
 	end
 	%brute force iterate over all possible combinations
 	global_count = 0
+	valid_solutions = [];
+	num_solutions = 0;
+	most_valid = 0;
 	for ii = 1:length(POSSIBLE_VALS)
 		for jj = 1:length(POSSIBLE_VALS)
 			for kk = 1:length(POSSIBLE_VALS)
 				for ll = 1:length(POSSIBLE_VALS)
 					global_count = global_count + 1;
-					if mod(global_count,1000) == 0
-						disp(global_count./1000)
+					if mod(global_count,10000) == 0
+						disp(global_count./10000)
 					end
 					guess_chars = [POSSIBLE_VALS(ii), POSSIBLE_VALS(jj), POSSIBLE_VALS(kk), POSSIBLE_VALS(ll)];
 					%disp(guess_chars)
@@ -137,18 +169,26 @@ if K == 10
 						if tmp_result < 65
 							valid_flag = 0;
 							break;
-						elseif tmp_result > 122
-							valid_flag = 0;
-							break;
-						elseif tmp_result < 97
-							if tmp_result > 90
-								valid_flag = 0;
-								break
-							end
+						end
+						if tmp_result > 122
+						 	valid_flag = 0;
+						 	break;
+						end
+						if tmp_result < 97
+						 	if tmp_result > 90
+						 		valid_flag = 0;
+						 		break;
+						 	end
 						end
 					end
-					if valid_flag == 1
+					if ff >= most_valid
+						fprintf('Most valid %d\n', ff);
 						disp(guess_chars)
+						most_valid = ff;
+					end
+					if valid_flag == 1
+						valid_solutions(end+1, :) = guess_chars;
+						num_solutions = num_solutions + 1;
 					end
 				end
 			end
