@@ -1,7 +1,7 @@
 clear
 clc
 %K is the length of the password, must by divisible by 2
-K = 16;
+K = 50;
 assert(mod(K, 2) == 0);
 assert(K >= 10);
 MODULUS = 255;
@@ -142,7 +142,7 @@ Target = augmented(:, end);
 tic
 possible_solution = [];
 disp('Starting reduced matrix validation')
-for ii = 1:10000000
+for ii = 1:100000
 	% draw some random indices from the range
 	r = randi([1, length(POSSIBLE_VALS)], 1, length(undetermined_indices));
 	independent_vals  = POSSIBLE_VALS(r);
