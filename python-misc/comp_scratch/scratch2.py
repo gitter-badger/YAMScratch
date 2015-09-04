@@ -41,11 +41,12 @@ with open(filename, "r") as f:
 		tmp_thing = line.split(',')
 		#print tmp_thing
 		
-			in_base = int(tmp_thing[1])
-			out_base = int(tmp_thing[2])
+		in_base = int(tmp_thing[1])
+		out_base = int(tmp_thing[2])
 		try:
 			a = int(tmp_thing[0],in_base)
+		except Exception:
+			print "Invalid Input"
+		else:
 			b = int2base(a, out_base)
 			print b
-		except Exception:
-			print "Input Invalid"
