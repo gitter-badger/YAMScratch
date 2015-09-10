@@ -1,4 +1,4 @@
-function [f,f_prime] = mdoDragCoefficient(A)
+function [f,f_prime] = DragCoefficient(A)
 	%%create the drag equation
 	rho = 1.23;	%density of air kg/m^3
 	mu = 17.8 * 1e-6; % viscosity of air kg/(m sec)
