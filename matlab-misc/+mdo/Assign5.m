@@ -3,8 +3,8 @@ close all
 import mdo.*
 
 DEBUG = false;
-PLOT_OBJECTIVE = true;
-COLLECT_STATS = false;
+PLOT_OBJECTIVE = false;
+COLLECT_STATS = true;
 
 d = datestr(clock);
 filename = regexprep(d, '\s|-|:', '_');
@@ -30,6 +30,7 @@ plane = mdo.ComputeAirPlane2(N_ult, t_over_c, W_0, rho, mu, k, e, S_wet_ratio, V
 fig_1 = figure;
 
 if PLOT_OBJECTIVE
+    disp('processing grid, please wait...')
     a = [5:1e-1:35]; % A
     s = [5:1e-1:40]; % S
     [AA,SS] = meshgrid(a,s);
@@ -47,7 +48,6 @@ if PLOT_OBJECTIVE
     disconline(disconline < 5) = NaN;
     plot(a,disconline,'r--')
 end
-
 
 %===========================================================
 obj = @(X)(plane.m_DragForce(X(1), X(2)));
@@ -73,8 +73,9 @@ if COLLECT_STATS
                 if fval < fval_best
                     fval_best = fval;
                     xk_best(:,:) = x_star;
-            else
-                fvals_accum(nnn, ndata) = NaN;
+                else
+                    fvals_accum(nnn, ndata) = NaN;
+                end
             end
         end
         disp('===============================')
@@ -82,6 +83,7 @@ if COLLECT_STATS
     save(filename, 'fvals_accum', 'S_devs', 'f_means', 'run_times', 'stop_criteria', 'fval_best', 'xk_best')
 else
     while true
+        disp('')
         filename = input('Enter filename with pso statistics to load: ', 's')
         response = input(strcat('Do you want to load: ', filename, ' [N/y]? '), 's');
         if response == 'y'
