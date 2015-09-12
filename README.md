@@ -1,6 +1,8 @@
 YAMScratch
 ==========
 
+[![Join the chat at https://gitter.im/YetAnotherMinion/YAMScratch](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/YetAnotherMinion/YAMScratch?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Code scratch pad using GitHub as upstream git server for free. Nothing important. These aren't the droids you're looking for.
 
 
